@@ -1,13 +1,11 @@
 import { useMemo, useState } from "react";
 import {
   ChevronDown,
-  ChevronUp,
   Download,
   FileSpreadsheet,
   Pencil,
   Plus,
   Search,
-  SlidersHorizontal,
   RefreshCw,
   Trash2,
   AlertTriangle,
@@ -79,18 +77,21 @@ const tone = (value: string) => {
 export default function RiskRegistry() {
   const h = useRiskyTeams();
   const [game, setGame] = useState<Game>("all");
-  const [status, setStatus] = useState("all");
+  const [status, setStatus] = useState<string>("all");
   const [sort, setSort] = useState("risk");
-  const [filtersOpen, setFiltersOpen] = useState(true);
   const [guideOpen, setGuideOpen] = useState(true);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const counts = useMemo(() => {
-    const output: Record<string, number> = { all: h.riskyTeams.length };
+    const scoped =
+      game === "all"
+        ? h.riskyTeams
+        : h.riskyTeams.filter((team) => team.game === game);
+    const output: Record<string, number> = { all: scoped.length };
     ALL_STATUSES.forEach((item) => {
-      output[item] = h.riskyTeams.filter((team) => team.status === item).length;
+      output[item] = scoped.filter((team) => team.status === item).length;
     });
     return output;
-  }, [h.riskyTeams]);
+  }, [h.riskyTeams, game]);
   const rows = useMemo(
     () =>
       h.riskyTeams
@@ -98,7 +99,10 @@ export default function RiskRegistry() {
           const query = h.searchQuery.toLowerCase().trim();
           return (
             (game === "all" || team.game === game) &&
-            (status === "all" || team.status === status) &&
+            (status === "all" ||
+              (status === "Неоцінена"
+                ? (team.status || "Неоцінена") === "Неоцінена"
+                : team.status === status)) &&
             (!query ||
               [team.name, team.game, team.status, team.notes].some((item) =>
                 item.toLowerCase().includes(query),
@@ -131,16 +135,6 @@ export default function RiskRegistry() {
         }),
     [game, h.riskyTeams, h.searchQuery, sort, status],
   );
-  const chips = [
-    "БАН",
-    "Ризиковані",
-    "Нестабільні",
-    "Обережно",
-    "Під питанням",
-    "Стабільні",
-    "Надійна",
-    "Неоцінена",
-  ];
 
   return (
     <div className="risk-registry risk-screen-v2">
@@ -148,9 +142,7 @@ export default function RiskRegistry() {
         <div className="risk-hero-top">
           <div>
             <p className="risk-eyebrow">RISK REGISTRY</p>
-            <h1 id="risk-title">
-              Ризиковані <span>команди</span>
-            </h1>
+            <h1 id="risk-title">Ризиковані команди</h1>
             <p>Правила, які допомагають не пропустити ризик перед ставкою.</p>
           </div>
           <div className="risk-actions">
@@ -174,53 +166,72 @@ export default function RiskRegistry() {
           {[
             {
               name: "Усі команди",
-              value: h.teamStats.total,
+              value: counts.all,
               Icon: Users,
               tone: "total",
+              filter: "all",
             },
-            { name: "БАН", value: counts.БАН, Icon: Ban, tone: "ban" },
+            {
+              name: "БАН",
+              value: counts.БАН,
+              Icon: Ban,
+              tone: "ban",
+              filter: "БАН",
+            },
             {
               name: "Ризиковані",
               value: counts.Ризиковані,
               Icon: AlertTriangle,
               tone: "warning",
+              filter: "Ризиковані",
             },
             {
               name: "Нестабільні",
               value: counts.Нестабільні,
               Icon: Activity,
               tone: "unstable",
+              filter: "Нестабільні",
             },
             {
               name: "Обережно",
               value: counts.Обережно,
               Icon: Eye,
               tone: "caution",
+              filter: "Обережно",
             },
             {
               name: "Стабільні",
               value: counts.Стабільні,
               Icon: ShieldCheck,
               tone: "safe",
+              filter: "Стабільні",
             },
             {
               name: "Надійна",
               value: counts.Надійна,
               Icon: CircleCheck,
               tone: "reliable",
+              filter: "Надійна",
             },
             {
               name: "Неоцінені",
-              value: h.teamStats.noStatusCount,
+              value: counts.Неоцінена,
               Icon: File,
               tone: "neutral",
+              filter: "Неоцінена",
             },
-          ].map(({ name, value, Icon, tone: color }) => (
-            <div key={name} className={color}>
+          ].map(({ name, value, Icon, tone: color, filter }) => (
+            <button
+              key={name}
+              type="button"
+              className={`risk-summary-card ${color}${status === filter ? " is-active" : ""}`}
+              aria-pressed={status === filter}
+              onClick={() => setStatus(status === filter ? "all" : filter)}
+            >
               <Icon aria-hidden="true" />
               <dt>{name}</dt>
               <dd>{value ?? 0}</dd>
-            </div>
+            </button>
           ))}
         </dl>
         <div className="risk-toolbar">
@@ -250,44 +261,7 @@ export default function RiskRegistry() {
               </button>
             ))}
           </div>
-          <button
-            type="button"
-            className={`risk-filter${status !== "all" ? " risk-filter-active" : ""}`}
-            aria-expanded={filtersOpen}
-            onClick={() => setFiltersOpen((value) => !value)}
-          >
-            <SlidersHorizontal size={17} /> Фільтри{" "}
-            {status !== "all" && <span className="risk-filter-count">1</span>}
-            {filtersOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
-          </button>
         </div>
-        {filtersOpen && (
-          <div
-            className="risk-chips"
-            role="group"
-            aria-label="Фільтр за статусом"
-          >
-            <button
-              type="button"
-              aria-pressed={status === "all"}
-              onClick={() => setStatus("all")}
-            >
-              Усі <span>{counts.all}</span>
-            </button>
-            {chips.map((item) => (
-              <button
-                type="button"
-                key={item}
-                className={tone(item)}
-                aria-pressed={status === item}
-                onClick={() => setStatus(status === item ? "all" : item)}
-              >
-                {item === "Неоцінена" ? "Неоцінені" : item}{" "}
-                <span>{counts[item] ?? 0}</span>
-              </button>
-            ))}
-          </div>
-        )}
         <div className="risk-grid">
           <section
             className="risk-table-panel"
@@ -324,12 +298,11 @@ export default function RiskRegistry() {
                   </caption>
                   <thead>
                     <tr>
-                      <th>Команда</th>
-                      <th>Гра</th>
-                      <th>Статус</th>
-                      <th>Впевненість</th>
-                      <th>Коментар</th>
-                      <th>Дії</th>
+                      <th className="risk-th-team">Команда</th>
+                      <th className="risk-th-center">Гра</th>
+                      <th className="risk-th-center">Статус</th>
+                      <th className="risk-th-center">Коментар</th>
+                      <th className="risk-th-center">Дії</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -363,30 +336,28 @@ export default function RiskRegistry() {
                               <strong>{team.name}</strong>
                             </div>
                           </td>
-                          <td>
-                            <span className="risk-game-badge">
-                              {team.game === "Дота" ? "Dota 2" : "CS"}
+                          <td className="risk-td-center">
+                            <span
+                              className={`risk-game-badge risk-game-badge--${team.game === "Дота" ? "dota2" : "cs2"}`}
+                            >
+                              <span
+                                className="risk-game-mark"
+                                aria-hidden="true"
+                              />
+                              {team.game === "Дота" ? "Dota 2" : "CS2"}
                             </span>
                           </td>
-                          <td>
+                          <td className="risk-td-center">
                             <span
                               className={`risk-status ${tone(team.status)}`}
                             >
                               {team.status || "Неоцінена"}
                             </span>
                           </td>
-                          <td>
-                            <span
-                              className="risk-confidence"
-                              title="Оцінку впевненості ще не задано"
-                            >
-                              —
-                            </span>
-                          </td>
-                          <td className="risk-rule">
+                          <td className="risk-rule risk-td-comment">
                             <span>{team.notes || "Нотатку ще не додано"}</span>
                           </td>
-                          <td>
+                          <td className="risk-td-center">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <button
@@ -396,7 +367,10 @@ export default function RiskRegistry() {
                                   <MoreHorizontal size={22} />
                                 </button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
+                              <DropdownMenuContent
+                                align="end"
+                                className="risk-menu-content"
+                              >
                                 <DropdownMenuItem
                                   onSelect={() => h.startEditing(index, team)}
                                 >

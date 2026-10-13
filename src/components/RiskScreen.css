@@ -15,7 +15,6 @@
   min-height: 278px;
   padding: 54px 48px 84px;
   background: #0d1011;
-  border-radius: 12px;
 }
 .risk-screen-v2 .risk-hero::before {
   content: "";
@@ -43,28 +42,27 @@
   gap: 28px;
 }
 .risk-screen-v2 .risk-eyebrow {
-  color: #ff6a2b;
-  font-size: 13px;
-  letter-spacing: 1.4px;
-  font-weight: 700;
-  margin: 0 0 12px;
+  color: #b8bec0;
+  font-size: 11px;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  font-weight: 400;
+  margin: 0 0 16px;
 }
 .risk-screen-v2 .risk-hero h1 {
   font:
-    750 clamp(32px, 3.65vw, 58px)/1.14 RiskModalInter,
+    750 clamp(32px, 3.2vw, 52px)/1.07 RiskModalInter,
     Inter,
     Arial,
     sans-serif;
   text-transform: none;
-  letter-spacing: -1.5px;
-}
-.risk-screen-v2 .risk-hero h1 span {
-  color: #ff631e;
+  letter-spacing: -0.035em;
+  color: #fff;
 }
 .risk-screen-v2 .risk-hero p:not(.risk-eyebrow) {
-  font-size: 18px;
-  line-height: 1.55;
-  color: #bcc3cd;
+  font-size: clamp(14px, 1.2vw, 18px);
+  line-height: 1.4;
+  color: #c4c8ca;
   max-width: 660px;
 }
 .risk-screen-v2 .risk-actions {
@@ -93,7 +91,7 @@
   gap: 12px;
   margin: -48px 0 30px;
 }
-.risk-summary-cards > div {
+.risk-summary-cards > button.risk-summary-card {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr);
   column-gap: 10px;
@@ -104,6 +102,23 @@
   border: 1px solid #e9ecf1;
   border-radius: 12px;
   box-shadow: 0 8px 22px #16202d06;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition:
+    border-color 160ms,
+    box-shadow 160ms,
+    transform 160ms;
+}
+.risk-summary-cards > button.risk-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px #16202d12;
+}
+.risk-summary-cards > button.risk-summary-card.is-active {
+  border-color: currentColor;
+  box-shadow:
+    0 0 0 1px currentColor,
+    0 10px 26px #16202d14;
 }
 .risk-summary-cards svg {
   grid-row: 1/3;
@@ -272,25 +287,25 @@
   color: #758094;
   font-weight: 500;
   padding: 12px;
-  text-align: left;
+  text-align: center;
   width: auto;
+}
+.risk-screen-v2 .risk-table-panel th.risk-th-team {
+  text-align: left;
 }
 .risk-screen-v2 .risk-table-panel th:nth-child(1) {
   width: 25%;
 }
 .risk-screen-v2 .risk-table-panel th:nth-child(2) {
-  width: 9%;
+  width: 12%;
 }
 .risk-screen-v2 .risk-table-panel th:nth-child(3) {
   width: 13%;
 }
 .risk-screen-v2 .risk-table-panel th:nth-child(4) {
-  width: 13%;
+  width: 44%;
 }
 .risk-screen-v2 .risk-table-panel th:nth-child(5) {
-  width: 34%;
-}
-.risk-screen-v2 .risk-table-panel th:nth-child(6) {
   width: 6%;
 }
 .risk-screen-v2 .risk-table-panel td {
@@ -299,6 +314,18 @@
   text-align: left;
   font-size: 13px;
   line-height: 1.5;
+}
+.risk-screen-v2 .risk-table-panel td.risk-td-center {
+  text-align: center;
+}
+.risk-screen-v2 .risk-table-panel td.risk-td-center .risk-status {
+  margin: 0 auto;
+}
+.risk-screen-v2 .risk-table-panel td.risk-td-center .risk-game-badge {
+  margin: 0 auto;
+}
+.risk-screen-v2 .risk-table-panel td.risk-td-center .risk-more {
+  margin: 0 auto;
 }
 .risk-screen-v2 .risk-team strong {
   font-size: 14px;
@@ -310,7 +337,9 @@
   flex-basis: 42px;
   border-radius: 50%;
   background: #fff;
-  box-shadow: 0 2px 6px #10152015;
+  box-shadow:
+    0 0 0 1px #e6e9ef,
+    0 5px 18px rgba(16, 21, 32, 0.23);
   overflow: hidden;
 }
 .risk-screen-v2 .risk-team-logo img {
@@ -334,26 +363,65 @@
   background: #f22540;
 }
 .risk-game-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   background: #eff3f9;
   color: #58677c;
   border-radius: 20px;
-  padding: 5px 12px;
+  padding: 5px 10px;
   white-space: nowrap;
 }
-.risk-confidence {
-  color: #95a0b0;
+.risk-game-mark {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  background: currentColor;
+  mask: url("/assets/public-profile/mark-cs2.svg") center/contain no-repeat;
+}
+.risk-game-badge--dota2 .risk-game-mark {
+  mask-image: url("/assets/public-profile/mark-dota2.svg");
+  color: #d44632;
 }
 .risk-more {
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   background: none;
   border: 0;
-  border-radius: 6px;
+  border-radius: 7px;
+  color: #4a5568;
 }
 .risk-more:hover {
-  background: #eff2f6;
+  background: #eef0f3;
+}
+.risk-menu-content {
+  min-width: 208px;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid #e6e8ec;
+  box-shadow: 0 10px 30px rgba(20, 25, 34, 0.14);
+}
+.risk-menu-content [role="menuitem"] {
+  gap: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: 7px;
+  color: #2a3340;
+}
+.risk-menu-content [role="menuitem"][data-highlighted],
+.risk-menu-content [role="menuitem"]:focus {
+  background: #f3f4f6;
+}
+.risk-menu-content [role="menuitem"]:last-child {
+  color: #c13b3b;
+}
+.risk-menu-content [role="menuitem"]:last-child[data-highlighted],
+.risk-menu-content [role="menuitem"]:last-child:focus {
+  background: #fdecec;
 }
 .risk-screen-v2 .risk-guide {
   display: block;
