@@ -79,7 +79,7 @@ export default function RiskRegistry() {
   const [game, setGame] = useState<Game>("all");
   const [status, setStatus] = useState<string>("all");
   const [sort, setSort] = useState("risk");
-  const [guideOpen, setGuideOpen] = useState(true);
+  const [guideOpen, setGuideOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
   const counts = useMemo(() => {
     const scoped =

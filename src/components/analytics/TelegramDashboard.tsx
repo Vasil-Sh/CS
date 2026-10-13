@@ -299,9 +299,7 @@ export default function TelegramDashboard({
               noteTone,
             }) => (
               <article className="tg2-metric" key={label}>
-                <span className="tg2-metric-icon">
-                  <Icon size={25} strokeWidth={1.8} />
-                </span>
+                <Icon size={30} strokeWidth={1.8} aria-hidden="true" />
                 <div>
                   <p>{label}</p>
                   <strong className={tone}>{loaded ? value : "…"}</strong>
@@ -523,14 +521,13 @@ export default function TelegramDashboard({
               </div>
               {!visible.length && (
                 <div className="tg2-empty">
-                  <Users size={30} />
-                  <h3>
+                  <strong>
                     {!loaded
                       ? "Завантажуємо групи…"
                       : groups.length
                         ? "Груп не знайдено"
                         : "Додайте вашу першу групу"}
-                  </h3>
+                  </strong>
                   <p>
                     {groups.length
                       ? "Спробуйте інший запит або оберіть усі ігри."
