@@ -101,7 +101,9 @@ function GoalProgress({ goal }: { goal: Goal }) {
   const value = Number.isFinite(raw) ? Math.min(100, Math.max(0, raw)) : 0;
   const complete = goal.status === "completed";
   return (
-    <div className={`gmd-progress${complete ? " is-complete" : ""}`}>
+    <div
+      className={`gmd-progress${complete ? " is-complete" : ""}${value === 0 ? " is-zero" : ""}`}
+    >
       <progress max={100} value={value} aria-label={`Прогрес: ${goal.name}`} />
       <span>{fmt(value)}%</span>
     </div>
@@ -142,13 +144,13 @@ export default function GoalsFocus({ h }: { h: Controller }) {
       </header>
       <div className="goals-summary" aria-label="Підсумки цілей">
         <button onClick={() => h.setActiveTab("active")}>
-          <GoalIcon size={28} />
+          <GoalIcon size={30} strokeWidth={1.8} />
           <span>
             Активні цілі<strong>{h.activeGoals.length}</strong>
           </span>
         </button>
         <button onClick={() => h.setActiveTab("completed")}>
-          <CheckCircle2 size={28} />
+          <CheckCircle2 size={30} strokeWidth={1.8} />
           <span>
             Завершені<strong>{history.length}</strong>
           </span>
@@ -205,13 +207,7 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                       aria-controls="goal-detail-panel"
                       onClick={() => setSelectedId(goal.id)}
                     >
-                      {goal.isPrimary && goal.status === "active" ? (
-                        <Star
-                          className="gmd-star"
-                          size={20}
-                          fill="currentColor"
-                        />
-                      ) : goal.status === "completed" ? (
+                      {goal.status === "completed" ? (
                         <CheckCircle2 className="gmd-check" size={20} />
                       ) : (
                         (() => {
@@ -284,7 +280,7 @@ export default function GoalsFocus({ h }: { h: Controller }) {
               </p>
             </section>
           </div>
-          {selected && (
+          {selected ? (
             <section
               id="goal-detail-panel"
               className="gmd-detail"
@@ -455,6 +451,34 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                 </div>
               )}
             </section>
+          ) : (
+            <aside className="gmd-guide" aria-label="Як це працює">
+              <h2>Як це працює?</h2>
+              <ol>
+                {[
+                  [
+                    "Створіть ціль",
+                    "Оберіть тип: сума банку, ROI або відсоток перемог. Задайте цільове значення та правила, щоб відстежувати прогрес.",
+                  ],
+                  [
+                    "Прив'язуйте ставки",
+                    "Під час додавання ставки обирайте ціль, до якої вона належить. Прогрес може оновлюватись автоматично, або натисніть «Оновити прогрес».",
+                  ],
+                  [
+                    "Відстежуйте прогрес",
+                    "Слідкуйте за рухом до мети: поточні значення, залишок і відсоток виконання — усе на одному екрані.",
+                  ],
+                ].map(([title, text], i) => (
+                  <li key={title}>
+                    <span>{i + 1}</span>
+                    <div>
+                      <h3>{title}</h3>
+                      <p>{text}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </aside>
           )}
         </div>
       </div>

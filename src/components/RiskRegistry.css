@@ -82,6 +82,10 @@
   font-size: 14px;
   font-weight: 700;
   line-height: 1;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.18s;
 }
 .risk-secondary {
   border-color: #ff693b;
@@ -91,6 +95,7 @@
 .risk-secondary:hover {
   border-color: #ff825d;
   background: #ff693b2e;
+  transform: translateY(-1px);
 }
 .risk-primary {
   border-color: #ff693b;
@@ -100,6 +105,7 @@
 .risk-primary:hover {
   border-color: #ff825d;
   background: #ff825d;
+  transform: translateY(-1px);
 }
 .risk-primary:disabled {
   cursor: not-allowed;
@@ -731,11 +737,16 @@
   color: #fff;
   font-size: 13px;
   font-weight: 700;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.18s;
 }
 .risk-guide-toggle:hover {
   background: #ff825d;
   border-color: #ff825d;
   color: #fff;
+  transform: translateY(-1px);
 }
 .risk-guide-toggle svg {
   transition: transform 0.18s;

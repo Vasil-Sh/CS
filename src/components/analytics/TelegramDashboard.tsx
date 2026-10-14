@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { Fragment, useMemo, useState, type ReactNode } from "react";
 import {
   Users,
   File,
@@ -11,6 +11,7 @@ import {
   Trash2,
   ExternalLink,
   BarChart3,
+  Lock,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -18,6 +19,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import "./TelegramDashboard.css";
 
 export interface TelegramChannel {
@@ -89,26 +96,25 @@ function GameBadge({ game }: { game: Exclude<Game, "all"> }) {
     </span>
   );
 }
-function Comment({ text }: { text: string }) {
-  const [expanded, setExpanded] = useState(false);
-  const long = text.length > 90;
+function CommentButton({
+  open,
+  onClick,
+}: {
+  open: boolean;
+  onClick: () => void;
+}) {
   return (
-    <div className="tg2-comment">
-      <p className={expanded ? "is-expanded" : undefined}>
-        {expanded || !long ? text : `${text.slice(0, 90)}…`}
-      </p>
-      {long && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setExpanded((value) => !value);
-          }}
-        >
-          {expanded ? "Приховати" : "Показати більше"}
-        </button>
-      )}
-    </div>
+    <button
+      type="button"
+      className="tg2-comment-toggle"
+      aria-expanded={open}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+    >
+      Коментар
+    </button>
   );
 }
 function ChannelAvatar({ group }: { group: TelegramChannel }) {
@@ -194,6 +200,9 @@ export default function TelegramDashboard({
   const [search, setSearch] = useState("");
   const [game, setGame] = useState<Game>("all");
   const [sort, setSort] = useState<"default" | "win" | "profit">("default");
+  const [expandedCommentId, setExpandedCommentId] = useState<string | null>(
+    null,
+  );
   const visible = useMemo(
     () =>
       groups
@@ -392,128 +401,180 @@ export default function TelegramDashboard({
                         .map((b) => +new Date(b.date))
                         .filter(Number.isFinite)
                         .sort((a, b) => b - a)[0];
+                      const commentOpen = expandedCommentId === group.id;
                       return (
-                        <tr key={group.id} onClick={() => onDetails(group.id)}>
-                          <td>
-                            <div className="tg2-channel">
-                              <ChannelAvatar group={group} />
-                              <div>
-                                <button
-                                  className="tg2-channel-name"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onDetails(group.id);
-                                  }}
-                                >
-                                  {group.name}
-                                </button>
-                                <small>
-                                  {handle ? `@${handle}` : "Без посилання"}
-                                </small>
-                                {group.hasChannel && (
-                                  <span className="tg2-channel-badge">
-                                    Має приватний канал
-                                  </span>
-                                )}
-                                {group.comment && (
-                                  <Comment text={group.comment} />
+                        <Fragment key={group.id}>
+                          <tr onClick={() => onDetails(group.id)}>
+                            <td>
+                              <div className="tg2-channel">
+                                <ChannelAvatar group={group} />
+                                <div>
+                                  <div className="tg2-channel-name-row">
+                                    <button
+                                      className="tg2-channel-name"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDetails(group.id);
+                                      }}
+                                    >
+                                      {group.name}
+                                    </button>
+                                    {group.hasChannel && (
+                                      <TooltipProvider delayDuration={200}>
+                                        <Tooltip>
+                                          <TooltipTrigger asChild>
+                                            <span
+                                              className="tg2-channel-lock"
+                                              aria-label="Має приватний канал"
+                                            >
+                                              <Lock
+                                                size={14}
+                                                strokeWidth={2}
+                                                aria-hidden="true"
+                                              />
+                                            </span>
+                                          </TooltipTrigger>
+                                          <TooltipContent className="tg2-lock-tooltip">
+                                            <span className="tg2-lock-tooltip-title">
+                                              Приватний канал
+                                            </span>
+                                            Крім відкритої групи є платний
+                                            закритий канал.
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      </TooltipProvider>
+                                    )}
+                                  </div>
+                                  <small>
+                                    {handle ? `@${handle}` : "Без посилання"}
+                                  </small>
+                                  {group.comment && (
+                                    <CommentButton
+                                      open={commentOpen}
+                                      onClick={() =>
+                                        setExpandedCommentId(
+                                          commentOpen ? null : group.id,
+                                        )
+                                      }
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="tg2-game-list">
+                                {games.length ? (
+                                  games.map((g) => (
+                                    <GameBadge key={g} game={g} />
+                                  ))
+                                ) : (
+                                  <span title="Гру ще не вказано">—</span>
                                 )}
                               </div>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="tg2-game-list">
-                              {games.length ? (
-                                games.map((g) => <GameBadge key={g} game={g} />)
-                              ) : (
-                                <span title="Гру ще не вказано">—</span>
-                              )}
-                            </div>
-                          </td>
-                          <td>
-                            <Activity bets={picks} />
-                          </td>
-                          <td>
-                            <strong>
-                              {completedCount
-                                ? `${Math.round(((s?.wins || 0) / completedCount) * 100)}%`
-                                : "—"}
-                            </strong>
-                            <small>
-                              {completedCount
-                                ? `${s?.wins || 0} із ${completedCount}`
-                                : "—"}
-                            </small>
-                          </td>
-                          <td>
-                            <strong
-                              className={
-                                (s?.totalProfit || 0) > 0
-                                  ? "positive"
-                                  : (s?.totalProfit || 0) < 0
-                                    ? "negative"
-                                    : ""
-                              }
-                            >
-                              {money(s?.totalProfit || 0)}
-                            </strong>
-                          </td>
-                          <td>
-                            <span className="tg2-status">
-                              <i />
-                              Додано
-                            </span>
-                            <small>
-                              {last
-                                ? `Запис ${new Date(last).toLocaleDateString("uk-UA", { day: "numeric", month: "short" })}`
-                                : "Ще немає записів"}
-                            </small>
-                          </td>
-                          <td onClick={(e) => e.stopPropagation()}>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <button
-                                  className="tg2-menu-trigger"
-                                  aria-label={`Дії групи ${group.name}`}
-                                >
-                                  <MoreVertical size={21} />
-                                </button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                align="end"
-                                className="tg2-menu-content"
+                            </td>
+                            <td>
+                              <Activity bets={picks} />
+                            </td>
+                            <td>
+                              <strong>
+                                {completedCount
+                                  ? `${Math.round(((s?.wins || 0) / completedCount) * 100)}%`
+                                  : "—"}
+                              </strong>
+                              <small>
+                                {completedCount
+                                  ? `${s?.wins || 0} із ${completedCount}`
+                                  : "—"}
+                              </small>
+                            </td>
+                            <td>
+                              <strong
+                                className={
+                                  (s?.totalProfit || 0) > 0
+                                    ? "positive"
+                                    : (s?.totalProfit || 0) < 0
+                                      ? "negative"
+                                      : ""
+                                }
                               >
-                                <DropdownMenuItem
-                                  onSelect={() => onDetails(group.id)}
+                                {money(s?.totalProfit || 0)}
+                              </strong>
+                            </td>
+                            <td>
+                              <span className="tg2-status">
+                                <i />
+                                Додано
+                              </span>
+                              <small>
+                                {last
+                                  ? `Запис ${new Date(last).toLocaleDateString("uk-UA", { day: "numeric", month: "short" })}`
+                                  : "Ще немає записів"}
+                              </small>
+                            </td>
+                            <td onClick={(e) => e.stopPropagation()}>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button
+                                    className="tg2-menu-trigger"
+                                    aria-label={`Дії групи ${group.name}`}
+                                  >
+                                    <MoreVertical size={21} />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="tg2-menu-content"
                                 >
-                                  <BarChart3 size={16} /> Статистика групи
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onSelect={() => onEdit(group)}
-                                >
-                                  <Pencil size={16} /> Редагувати групу
-                                </DropdownMenuItem>
-                                {/^https:\/\/t\.me\//i.test(group.link) && (
-                                  <DropdownMenuItem asChild>
-                                    <a
-                                      href={group.link}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <ExternalLink size={16} /> Відкрити
-                                      Telegram
-                                    </a>
+                                  <DropdownMenuItem
+                                    onSelect={() => onDetails(group.id)}
+                                  >
+                                    <BarChart3 size={16} /> Статистика групи
                                   </DropdownMenuItem>
-                                )}
-                                <DropdownMenuItem
-                                  onSelect={() => onDelete(group.id)}
-                                >
-                                  <Trash2 size={16} /> Видалити групу
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </td>
-                        </tr>
+                                  <DropdownMenuItem
+                                    onSelect={() => onEdit(group)}
+                                  >
+                                    <Pencil size={16} /> Редагувати групу
+                                  </DropdownMenuItem>
+                                  {/^https:\/\/t\.me\//i.test(group.link) && (
+                                    <DropdownMenuItem asChild>
+                                      <a
+                                        href={group.link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <ExternalLink size={16} /> Відкрити
+                                        Telegram
+                                      </a>
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem
+                                    onSelect={() => onDelete(group.id)}
+                                  >
+                                    <Trash2 size={16} /> Видалити групу
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </td>
+                          </tr>
+                          {commentOpen && group.comment && (
+                            <tr className="tg2-comment-row">
+                              <td colSpan={7}>
+                                <div className="tg2-comment-note">
+                                  <strong className="tg2-comment-note-title">
+                                    Примітка до {group.name}
+                                  </strong>
+                                  <p>{group.comment}</p>
+                                  {group.hasChannel && (
+                                    <span className="tg2-comment-note-channel">
+                                      Має також приватний канал · доступ за
+                                      запрошенням
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </Fragment>
                       );
                     })}
                   </tbody>

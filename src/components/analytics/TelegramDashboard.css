@@ -48,8 +48,8 @@
   gap: 24px;
   min-height: 315px;
   padding: 36px 36px 96px 48px;
-  background: #151a1b url("/assets/telegram/hero-dota-grip-v2.png") center 43% /
-    cover no-repeat;
+  background: #151a1b url("/assets/telegram/hero-dota-low-guard.png") center
+    43% / cover no-repeat;
   color: white;
   overflow: hidden;
 }
@@ -440,6 +440,7 @@
   line-height: 1.35;
   padding: 0;
   overflow-wrap: anywhere;
+  min-width: 0;
 }
 .tg2-ledger td small {
   display: block;
@@ -449,41 +450,53 @@
   margin-top: 3px;
   overflow-wrap: anywhere;
 }
-.tg2-comment {
+.tg2-comment-toggle {
   margin: 4px 0 0;
-  color: #737b87;
-  font-size: 13px;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
-}
-.tg2-comment p {
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.tg2-comment p.is-expanded {
-  display: block;
-  white-space: pre-wrap;
-  -webkit-line-clamp: unset;
-  overflow: visible;
-  text-overflow: clip;
-}
-.tg2-comment button {
-  margin: 4px 0 0;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: #ff571f;
+  padding: 2px 8px;
+  border: 1px solid #ff571f;
+  border-radius: 5px;
+  background: #ff571f;
+  color: #fff;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.4;
   cursor: pointer;
 }
-.tg2-comment button:hover {
-  text-decoration: underline;
+.tg2-comment-toggle:hover {
+  background: #e94a12;
+  border-color: #e94a12;
+}
+.tg2-comment-row > td {
+  padding: 0 0 12px;
+  border: 0;
+}
+.tg2-comment-note {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 420px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #f6f7f9;
+  border: 1px solid #e8eaee;
+}
+.tg2-comment-note-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #151a23;
+}
+.tg2-comment-note p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #39404c;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.tg2-comment-note-channel {
+  font-size: 11px;
+  color: #c2410c;
+  font-weight: 600;
 }
 .tg2-channel-badge {
   display: inline-flex;
@@ -498,6 +511,41 @@
   font-size: 12px;
   font-weight: 600;
   line-height: 1.4;
+}
+.tg2-channel-name-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: nowrap;
+}
+.tg2-channel-lock {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: #e4f6eb;
+  border: 1px solid #bfe6cf;
+  color: #238253;
+  cursor: default;
+}
+.tg2-lock-tooltip {
+  max-width: 240px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #39404c;
+  background: #fff;
+  border-color: #e6e8ec;
+}
+.tg2-lock-tooltip .tg2-lock-tooltip-title {
+  display: block;
+  font-weight: 700;
+  color: #151a23;
+  margin-bottom: 2px;
 }
 .tg2-game-list {
   display: flex;

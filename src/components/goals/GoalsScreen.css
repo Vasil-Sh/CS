@@ -28,7 +28,10 @@
   background: #f5f6f8;
   color: #121820;
   min-width: 0;
+  min-height: 100vh;
   padding-bottom: 24px;
+  display: flex;
+  flex-direction: column;
 }
 .goals-screen *,
 .goals-screen *::before,
@@ -114,9 +117,13 @@
   font-weight: 600;
   flex-shrink: 0;
   margin-top: 36px;
+  transition:
+    background 0.18s,
+    transform 0.18s;
 }
 .goals-create:hover {
   background: #ed4f25;
+  transform: translateY(-1px);
 }
 .goals-screen button:disabled {
   opacity: 0.5;
@@ -157,8 +164,8 @@
 }
 .goals-summary svg {
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   color: #121820;
   margin-top: 2px;
 }
@@ -178,14 +185,20 @@
 }
 .goals-screen .gmd-content {
   padding: 14px 38px 24px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 .goals-screen .gmd-layout {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
 }
 .goals-screen .gmd-layout.is-empty {
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 24%);
 }
 .goals-screen .gmd-list,
 .goals-screen .gmd-detail {
@@ -193,6 +206,77 @@
   border-radius: 12px;
   min-height: 310px;
   box-shadow: 0 4px 18px #17233003;
+}
+.goals-screen .gmd-guide {
+  border: 1px solid #e3e7ee;
+  border-radius: 12px;
+  min-height: 310px;
+  box-shadow: 0 4px 18px #17233003;
+  background: #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+}
+.goals-screen .gmd-guide h2 {
+  font-family: "Goals Inter", Arial, sans-serif;
+  text-transform: none;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #141a22;
+  margin: 0;
+}
+.goals-screen .gmd-guide ol {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0 0;
+  display: grid;
+  gap: 18px;
+}
+.goals-screen .gmd-guide li {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+}
+.goals-screen .gmd-guide li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 40px;
+  bottom: -17px;
+  width: 1px;
+  background: #e9edf3;
+}
+.goals-screen .gmd-guide li > span {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f2f4;
+  font-size: 14px;
+  font-weight: 650;
+  color: #68748a;
+  flex-shrink: 0;
+}
+.goals-screen .gmd-guide li:first-child > span {
+  color: #fff;
+  background: #ff6035;
+}
+.goals-screen .gmd-guide li h3 {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 2px 0 5px;
+  color: #141a22;
+}
+.goals-screen .gmd-guide li p {
+  font-size: 15px;
+  color: #797f89;
+  line-height: 1.4;
+  margin: 0;
 }
 .goals-screen .gmd-list h2,
 .goals-screen .gmd-detail h2,
@@ -267,8 +351,9 @@
   align-items: center;
 }
 .goals-screen .gmd-row[aria-pressed="true"] {
-  background: #f4f7fa;
-  border-color: #a7b8ca;
+  background: #eef0f3;
+  border-color: #c6ccd2;
+  color: #121820;
 }
 .goals-screen .gmd-row:hover {
   background: #f7f9fc;
@@ -281,6 +366,14 @@
   border-radius: 9px;
   background: #edf1f5;
   margin: 0;
+}
+.goals-screen .gmd-row > svg:first-child.gmd-check {
+  color: #2e9e63;
+  background: #e4f6eb;
+}
+.goals-screen .gmd-row > svg:first-child.gmd-star {
+  color: #ff6035;
+  background: #ffece5;
 }
 .goals-screen .gmd-row > svg:last-child {
   color: #8794a6;
@@ -295,8 +388,8 @@
   color: #758197;
 }
 .goals-screen .gmd-badge {
-  background: #e9eef4;
-  color: #526a82;
+  background: #ff6035;
+  color: #fff;
   font:
     600 11px/1.4 Inter,
     Arial,
@@ -311,6 +404,15 @@
 .goals-screen .gmd-progress progress,
 .goals-screen .gmd-progress progress::-webkit-progress-bar {
   background: #e5e8ee;
+}
+.goals-screen .gmd-progress progress {
+  height: 5px;
+  border-radius: 5px;
+}
+.goals-screen .gmd-progress.is-zero progress,
+.goals-screen .gmd-progress.is-zero progress::-webkit-progress-bar {
+  background: #e5e8ee;
+  border: 0;
 }
 .goals-screen .gmd-progress progress::-webkit-progress-value {
   background: #69859d;
@@ -391,8 +493,8 @@
 .goals-status {
   font-size: 12px;
   font-weight: 600;
-  color: #567087;
-  background: #edf2f7;
+  color: #228951;
+  background: #e5f6ea;
   border-radius: 20px;
   padding: 4px 10px;
 }
@@ -441,9 +543,30 @@
   color: #78869a;
 }
 .goals-screen .gmd-detail-top [data-state] {
-  color: #68798f;
-  background: white;
-  border: 1px solid #e3e8ef;
+  width: 34px;
+  height: 34px;
+  color: #4a5568;
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  transition: background 0.18s;
+}
+.goals-screen .gmd-detail-top [data-state]:hover {
+  background: #eef0f3;
+}
+.goals-screen .gmd-detail-top [data-state] button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a5568;
+  background: transparent;
+}
+.goals-screen .gmd-detail-top [data-state] button:hover {
+  color: #4a5568;
+  background: transparent;
 }
 .goals-screen .gmd-detail h3 {
   font-size: 16px;
@@ -466,15 +589,39 @@
   gap: 10px;
   margin-top: 16px;
 }
-.goals-screen .gmd-detail-actions .gmd-update,
 .goals-screen .gmd-detail-actions .gmd-outline {
-  background: white;
-  color: #576b81;
-  border-color: #dce3ec;
+  background: #ff6035;
+  color: #fff;
+  border-color: #ff6035;
   padding: 10px 14px;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.18s;
 }
-.goals-screen .gmd-detail-actions button:hover {
-  background: #f2f5f9;
+.goals-screen .gmd-detail-actions .gmd-outline:hover {
+  background: #ed4f25;
+  border-color: #ed4f25;
+  transform: translateY(-1px);
+}
+.goals-screen .gmd-detail-actions .gmd-update {
+  background: #fff;
+  color: #ff6035;
+  border: 1px solid #ff6035;
+  padding: 10px 14px;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.18s;
+}
+.goals-screen .gmd-detail-actions .gmd-update:hover {
+  background: #fff2ee;
+  border-color: #ff6035;
+  transform: translateY(-1px);
+}
+.goals-screen .gmd-detail-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 @media (max-width: 1000px) {
   .goals-hero {

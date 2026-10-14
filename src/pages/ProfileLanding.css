@@ -879,6 +879,7 @@
 .profile-studio-dialog .profile-button:hover {
   background: var(--profile-bg);
   border-color: #adb4ac;
+  transform: translateY(-1px);
 }
 .profile-landing .profile-primary,
 .profile-studio-dialog .profile-primary {
@@ -893,6 +894,7 @@
   background: #df461b;
   border-color: #df461b;
   color: #fff;
+  transform: translateY(-1px);
 }
 .profile-landing :is(button, a):active {
   transform: translateY(1px);

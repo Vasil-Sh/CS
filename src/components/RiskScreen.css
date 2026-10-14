@@ -111,6 +111,7 @@
 }
 .risk-summary-cards > button.risk-summary-card:hover {
   transform: translateY(-3px);
+  border-color: #b7bcb7;
   box-shadow: 0 8px 20px #171b1c0c;
 }
 .risk-summary-cards > button.risk-summary-card.is-active {
@@ -139,6 +140,12 @@
   font-weight: 750;
   line-height: 1.2;
   color: var(--stat, #10151d);
+}
+.risk-summary-cards .neutral {
+  --stat: #637083;
+}
+.risk-summary-cards > button.risk-summary-card.total.is-active {
+  border-color: #b7bcb7;
 }
 .risk-summary-cards .ban {
   --stat: #ff2347;
