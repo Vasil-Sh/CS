@@ -175,6 +175,15 @@
   padding: 20px;
   min-width: 0;
   min-height: 140px;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+.tg2-metric:hover {
+  transform: translateY(-3px);
+  border-color: #b7bcb7;
+  box-shadow: 0 8px 20px #161d170c;
 }
 .tg2-metric > svg {
   color: #141922;

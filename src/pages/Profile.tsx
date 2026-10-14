@@ -458,7 +458,8 @@ export default function Profile() {
   const profileHeader = (
     <>
       <header className="profile-heading">
-        <h1>Особистий простір</h1>
+        <p className="profile-heading-eyebrow">ОСОБИСТИЙ ПРОСТІР</p>
+        <h1>Ваш профіль</h1>
       </header>
       <nav className="profile-tabs" aria-label="Розділи профілю">
         <button

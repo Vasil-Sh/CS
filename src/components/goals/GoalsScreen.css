@@ -45,7 +45,6 @@
   gap: 24px;
   min-height: 246px;
   padding: 58px 50px 64px;
-  border-radius: 12px 12px 0 0;
   color: #fff;
   background: #101619;
 }
@@ -114,6 +113,7 @@
   font-size: 14px;
   font-weight: 600;
   flex-shrink: 0;
+  margin-top: 36px;
 }
 .goals-create:hover {
   background: #ed4f25;
@@ -124,46 +124,57 @@
 }
 .goals-hero > .goals-create {
   position: absolute;
-  top: 14px;
-  right: 16px;
+  top: 58px;
+  right: 50px;
 }
 .goals-summary {
   position: relative;
   display: flex;
-  gap: 12px;
+  gap: 14px;
   margin: -47px 50px 0;
 }
 .goals-summary button {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   text-align: left;
   min-width: 198px;
-  padding: 14px 18px;
-  border: 1px solid #e6e9ef;
+  min-height: 110px;
+  padding: 16px 18px 12px;
+  border: 1px solid #eeeff1;
   background: #fff;
-  border-radius: 7px;
-  box-shadow: 0 6px 18px #17233008;
+  border-radius: 10px;
+  box-shadow: 0 5px 14px #171b1c06;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+.goals-summary button:hover {
+  transform: translateY(-3px);
+  border-color: #b7bcb7;
+  box-shadow: 0 8px 20px #161d170c;
 }
 .goals-summary svg {
-  box-sizing: content-box;
+  flex-shrink: 0;
   width: 24px;
   height: 24px;
-  padding: 10px;
-  background: #f5f6f8;
-  border-radius: 50%;
-  color: #68788d;
+  color: #121820;
+  margin-top: 2px;
 }
 .goals-summary span {
   font-size: 14px;
   color: #657086;
+  line-height: 1.35;
 }
 .goals-summary strong {
   display: block;
-  font-size: 26px;
-  line-height: 1.2;
+  font:
+    750 36px/1.05 Arial,
+    sans-serif;
+  letter-spacing: -1px;
   color: #121820;
-  margin-top: 2px;
+  margin-top: 7px;
 }
 .goals-screen .gmd-content {
   padding: 14px 38px 24px;

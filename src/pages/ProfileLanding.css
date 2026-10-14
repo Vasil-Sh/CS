@@ -103,10 +103,19 @@
   background: transparent;
   color: #f8f9f7;
 }
+.profile-landing .profile-heading-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: #b8bec0;
+  margin: 0 0 12px;
+}
 .profile-landing .profile-heading h1 {
-  font: 600 16px/1.5 var(--profile-font);
+  font: 750 clamp(30px, 3vw, 46px)/1.1 var(--profile-font);
   margin: 0;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.035em;
+  max-width: 640px;
+  color: #fff;
 }
 .profile-landing .profile-tabs {
   position: relative;
