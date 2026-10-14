@@ -98,9 +98,9 @@
   min-height: 92px;
   padding: 16px 12px;
   background: #fff;
-  border: 1px solid #e9ecf1;
-  border-radius: 12px;
-  box-shadow: 0 8px 22px #16202d06;
+  border: 1px solid #eeeff1;
+  border-radius: 10px;
+  box-shadow: 0 5px 14px #171b1c06;
   cursor: pointer;
   text-align: left;
   font: inherit;
@@ -110,14 +110,12 @@
     transform 160ms;
 }
 .risk-summary-cards > button.risk-summary-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 26px #16202d12;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px #171b1c0c;
 }
 .risk-summary-cards > button.risk-summary-card.is-active {
-  border-color: currentColor;
-  box-shadow:
-    0 0 0 1px currentColor,
-    0 10px 26px #16202d14;
+  border-color: var(--stat, #10151d);
+  box-shadow: 0 5px 14px #171b1c06;
 }
 .risk-summary-cards svg {
   grid-row: 1/3;

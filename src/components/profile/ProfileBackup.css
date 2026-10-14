@@ -1,15 +1,12 @@
 /* Backup shares the profile's type, surfaces and masthead, without reskinning other routes. */
-.backup-masthead {
-  background-image:
-    linear-gradient(#22232540, #22232540),
-    url("/assets/profile/contours-backup.svg");
-  background-position:
-    center,
-    left center;
-  background-size:
-    auto,
-    auto 100%;
-  background-repeat: no-repeat;
+.profile-masthead.backup-masthead {
+  background: #0d1011;
+}
+.profile-masthead.backup-masthead::before {
+  background:
+    linear-gradient(90deg, #0d101150, transparent 70%),
+    url("/assets/profile/backup-storage-hero.png") right center / auto 100%
+      no-repeat;
 }
 .backup-hero {
   padding: 18px calc(var(--profile-gutter) + 12px) 17px;
@@ -32,11 +29,14 @@
   padding: 0 var(--profile-gutter);
   gap: 18px;
   min-width: 0;
-  background: linear-gradient(#222325 30px, transparent 30px);
+  background: transparent;
   animation: none;
 }
 .backup-data-overview {
   min-width: 0;
+  margin-top: -44px;
+  position: relative;
+  z-index: 1;
 }
 .backup-data-summary {
   display: grid;

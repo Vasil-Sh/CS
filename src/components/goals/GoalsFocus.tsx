@@ -7,7 +7,6 @@ import {
   Trash2,
   MoreVertical,
   Search,
-  ChevronRight,
   Info,
   Banknote,
   TrendingUp,
@@ -22,7 +21,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import PlanningHeader from "@/components/planning/PlanningHeader";
 import {
   getGoalProgress,
   getGoalTypeLabel,
@@ -30,7 +28,34 @@ import {
   type useGoals,
 } from "@/hooks/useGoals";
 import "./GoalsMasterDetail.css";
+import "./GoalsScreen.css";
 type Controller = ReturnType<typeof useGoals>;
+function GoalIcon({
+  size = 28,
+  strokeWidth = 1.5,
+}: {
+  size?: number;
+  strokeWidth?: number;
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="14" cy="18" r="12" />
+      <circle cx="14" cy="18" r="8" />
+      <circle cx="14" cy="18" r="3" />
+      <path d="M14 18 27 5m-5 0 1 4 4 1 4-4-4-1-1-4-4 4M5 28l-2 3" />
+    </svg>
+  );
+}
 const fmt = (n: number) =>
   new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 1 }).format(n);
 const goalTypeIcon = {
@@ -98,20 +123,39 @@ export default function GoalsFocus({ h }: { h: Controller }) {
     visible[0];
   const values = selected ? metric(selected) : null;
   return (
-    <div className="gmd-page">
-      <PlanningHeader
-        title="Цілі"
-        description="Керуйте цілями та відстежуйте результат."
-        action="Створити ціль"
-        onCreate={() => h.setShowCreateDialog(true)}
-        disabled={h.activeGoals.length >= 25}
-        metrics={[
-          { label: "Активні", value: h.activeGoals.length, onClick: () => h.setActiveTab("active") },
-          { label: "Виконані", value: h.completedGoals.length, tone: "green", onClick: () => h.setActiveTab("completed") },
-        ]}
-      />
+    <div className="gmd-page goals-screen">
+      <header className="goals-hero">
+        <div className="goals-hero-copy">
+          <p className="goals-eyebrow">
+            GOALS <span aria-hidden="true" />
+          </p>
+          <h1>Цілі</h1>
+          <p>Керуйте цілями та відстежуйте прогрес.</p>
+        </div>
+        <button
+          className="goals-create"
+          disabled={h.activeGoals.length >= 25}
+          onClick={() => h.setShowCreateDialog(true)}
+        >
+          <Plus size={20} /> Створити ціль
+        </button>
+      </header>
+      <div className="goals-summary" aria-label="Підсумки цілей">
+        <button onClick={() => h.setActiveTab("active")}>
+          <GoalIcon size={28} />
+          <span>
+            Активні цілі<strong>{h.activeGoals.length}</strong>
+          </span>
+        </button>
+        <button onClick={() => h.setActiveTab("completed")}>
+          <CheckCircle2 size={28} />
+          <span>
+            Завершені<strong>{history.length}</strong>
+          </span>
+        </button>
+      </div>
       <div className="gmd-content">
-        <div className="gmd-layout">
+        <div className={`gmd-layout${!selected ? " is-empty" : ""}`}>
           <div className="gmd-left">
             <section className="gmd-list" aria-label="Мої цілі">
               <div className="gmd-list-head">
@@ -134,7 +178,10 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                     h.setActiveTab("active");
                   }}
                 >
-                  Активні · {h.activeGoals.length}
+                  Активні{" "}
+                  <span className="goals-tab-count">
+                    {h.activeGoals.length}
+                  </span>
                 </button>
                 <button
                   aria-pressed={!active}
@@ -143,7 +190,8 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                     h.setActiveTab("completed");
                   }}
                 >
-                  Завершені · {history.length}
+                  Завершені{" "}
+                  <span className="goals-tab-count">{history.length}</span>
                 </button>
               </div>
               <div className="gmd-rows">
@@ -158,7 +206,11 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                       onClick={() => setSelectedId(goal.id)}
                     >
                       {goal.isPrimary && goal.status === "active" ? (
-                        <Star className="gmd-star" size={20} fill="currentColor" />
+                        <Star
+                          className="gmd-star"
+                          size={20}
+                          fill="currentColor"
+                        />
                       ) : goal.status === "completed" ? (
                         <CheckCircle2 className="gmd-check" size={20} />
                       ) : (
@@ -174,31 +226,36 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                             <span className="gmd-badge">Основна</span>
                           )}
                         </span>
+                        <span className="goals-row-type">
+                          {getGoalTypeLabel(goal.type)}
+                        </span>
+                      </span>
+                      <span className="goals-row-stats">
+                        {m.unit !== "%" && <GoalProgress goal={goal} />}
                         <span className="gmd-row-metric">
                           {m.unit === "%"
                             ? `${m.label} ${fmt(m.current)}% · Ціль ${fmt(m.target)}%`
                             : `${fmt(m.current)}${m.unit} із ${fmt(m.target)}${m.unit}`}
                         </span>
-                        {m.unit !== "%" && <GoalProgress goal={goal} />}
                       </span>
-                      <ChevronRight size={18} />
                     </button>
                   );
                 })}
                 {!visible.length && (
                   <div className="gmd-empty">
+                    <GoalIcon size={48} strokeWidth={1.3} aria-hidden="true" />
                     <h3>
                       {query
                         ? "Нічого не знайдено"
                         : active
-                          ? "Немає активних цілей"
+                          ? "Наступна ціль починається тут"
                           : "Немає завершених цілей"}
                     </h3>
                     <p>
                       {query
                         ? "Спробуйте іншу назву або очистіть пошук."
                         : active
-                          ? "Створіть першу ціль, щоб почати відстеження."
+                          ? "Створіть ціль, щоб бачити свій прогрес."
                           : "Тут з’являться завершені цілі та їх результати."}
                     </p>
                     {!query && active && (
@@ -210,6 +267,14 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                         Створити ціль
                       </button>
                     )}
+                    {!query && active && history.length > 0 && (
+                      <button
+                        className="goals-history-link"
+                        onClick={() => h.setActiveTab("completed")}
+                      >
+                        Переглянути завершені цілі <ArrowRight size={16} />
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
@@ -219,155 +284,178 @@ export default function GoalsFocus({ h }: { h: Controller }) {
               </p>
             </section>
           </div>
-          <section
-            id="goal-detail-panel"
-            className="gmd-detail"
-            aria-label="Деталі цілі"
-          >
-            {selected && values ? (
-              <>
-                <div className="gmd-detail-top">
-                  <span>Деталі цілі</span>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button aria-label="Дії вибраної цілі">
-                        <MoreVertical size={20} />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {selected.status === "active" && (
+          {selected && (
+            <section
+              id="goal-detail-panel"
+              className="gmd-detail"
+              aria-label="Деталі цілі"
+            >
+              {selected && values ? (
+                <>
+                  <div className="gmd-detail-top">
+                    <span
+                      className={`goals-status ${selected.status === "completed" ? "is-complete" : ""}`}
+                    >
+                      {selected.status === "active"
+                        ? "Активна"
+                        : selected.status === "completed"
+                          ? "Завершена"
+                          : "Не виконано"}
+                    </span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button aria-label="Дії вибраної цілі">
+                          <MoreVertical size={20} />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {selected.status === "active" && (
+                          <DropdownMenuItem
+                            onSelect={() => h.setPrimaryGoal(selected.id)}
+                          >
+                            <Star size={16} />
+                            {selected.isPrimary
+                              ? "Зняти позначку основної"
+                              : "Зробити основною"}
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem
-                          onSelect={() => h.setPrimaryGoal(selected.id)}
+                          className="text-red-600"
+                          onSelect={() => h.confirmDeleteGoal(selected.id)}
                         >
-                          <Star size={16} />
-                          {selected.isPrimary
-                            ? "Зняти позначку основної"
-                            : "Зробити основною"}
+                          <Trash2 size={16} />
+                          Видалити ціль
                         </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <h2>
+                    {selected.name}{" "}
+                    {selected.isPrimary && selected.status === "active" && (
+                      <span className="gmd-badge">Основна</span>
+                    )}
+                    {selected.status === "completed" && (
+                      <span className="gmd-badge gmd-badge-complete">
+                        Завершена
+                      </span>
+                    )}
+                  </h2>
+                  <dl className="gmd-values">
+                    <div>
+                      <dt>{values.label}</dt>
+                      <dd>
+                        {fmt(values.current)}
+                        {values.unit}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Ціль</dt>
+                      <dd>
+                        {fmt(values.target)}
+                        {values.unit}
+                      </dd>
+                    </div>
+                  </dl>
+                  {values.unit !== "%" && (
+                    <>
+                      <GoalProgress goal={selected} />
+                      {selected.type === "ladder" && (
+                        <p className="gmd-muted">
+                          Прогрес за кроками: {selected.currentStep ?? 0} /{" "}
+                          {selected.totalSteps ?? 0}
+                        </p>
                       )}
-                      <DropdownMenuItem
-                        className="text-red-600"
-                        onSelect={() => h.confirmDeleteGoal(selected.id)}
-                      >
-                        <Trash2 size={16} />
-                        Видалити ціль
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                <h2>
-                  {selected.name}{" "}
-                  {selected.isPrimary && selected.status === "active" && (
-                    <span className="gmd-badge">Основна</span>
+                    </>
                   )}
-                  {selected.status === "completed" && (
-                    <span className="gmd-badge gmd-badge-complete">Завершена</span>
-                  )}
-                </h2>
-                <dl className="gmd-values">
-                  <div>
-                    <dt>{values.label}</dt>
-                    <dd>
-                      {fmt(values.current)}
-                      {values.unit}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Ціль</dt>
-                    <dd>
-                      {fmt(values.target)}
-                      {values.unit}
-                    </dd>
-                  </div>
-                </dl>
-                {values.unit !== "%" && (
-                  <>
-                    <GoalProgress goal={selected} />
+                  <dl className="gmd-facts">
+                    <div>
+                      <dt>Залишилось</dt>
+                      <dd>
+                        {fmt(Math.max(0, values.target - values.current))}
+                        {values.unit === "%" ? " в.п." : values.unit}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Тип цілі</dt>
+                      <dd>{getGoalTypeLabel(selected.type)}</dd>
+                    </div>
+                    <div>
+                      <dt>{selected.deadline ? "Дедлайн" : "Прогрес"}</dt>
+                      <dd>
+                        {selected.deadline
+                          ? new Date(selected.deadline).toLocaleDateString(
+                              "uk-UA",
+                              { day: "numeric", month: "long" },
+                            )
+                          : `${fmt(Math.max(0, getGoalProgress(selected)))}%`}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div className="gmd-detail-section">
+                    <h3>Правила</h3>
+                    <p>Ставок на день</p>
+                    <strong>{selected.betsPerDay || "Без обмежень"}</strong>
                     {selected.type === "ladder" && (
-                      <p className="gmd-muted">
-                        Прогрес за кроками: {selected.currentStep ?? 0} /{" "}
-                        {selected.totalSteps ?? 0}
+                      <p>
+                        Коефіцієнти: {selected.minOdds ?? "—"} –{" "}
+                        {selected.maxOdds ?? "—"}
                       </p>
                     )}
-                  </>
-                )}
-                <dl className="gmd-facts">
-                  <div>
-                    <dt>Залишилось</dt>
-                    <dd>
-                      {fmt(Math.max(0, values.target - values.current))}
-                      {values.unit === "%" ? " в.п." : values.unit}
-                    </dd>
                   </div>
-                  <div>
-                    <dt>Тип цілі</dt>
-                    <dd>{getGoalTypeLabel(selected.type)}</dd>
+                  <div className="gmd-detail-section">
+                    <h3>Джерело прогресу</h3>
+                    <p>Ставки, прив’язані до цієї цілі.</p>
+                    {selected.status !== "active" && (
+                      <p>
+                        Статус:{" "}
+                        {selected.status === "completed"
+                          ? "Виконано"
+                          : "Не виконано"}
+                      </p>
+                    )}
                   </div>
-                </dl>
-                <div className="gmd-detail-section">
-                  <h3>Правила</h3>
-                  <p>Ставок на день</p>
-                  <strong>{selected.betsPerDay || "Без обмежень"}</strong>
-                  {selected.type === "ladder" && (
-                    <p>
-                      Коефіцієнти: {selected.minOdds ?? "—"} –{" "}
-                      {selected.maxOdds ?? "—"}
-                    </p>
-                  )}
-                </div>
-                <div className="gmd-detail-section">
-                  <h3>Джерело прогресу</h3>
-                  <p>Ставки, прив’язані до цієї цілі.</p>
-                  {selected.status !== "active" && (
-                    <p>
-                      Статус:{" "}
-                      {selected.status === "completed"
-                        ? "Виконано"
-                        : "Не виконано"}
-                    </p>
-                  )}
-                </div>
-                <div className="gmd-detail-actions">
-                  <button
-                    className="gmd-update"
-                    disabled={h.isUpdating || selected.status !== "active"}
-                    onClick={h.handleManualUpdate}
-                  >
-                    <RefreshCw
-                      size={16}
-                      className={h.isUpdating ? "animate-spin" : ""}
-                    />
-                    {h.isUpdating ? "Оновлення…" : "Оновити прогрес"}
-                  </button>
-                  {selected.type === "ladder" && (
+                  <div className="gmd-detail-actions">
                     <button
-                      className="gmd-outline"
-                      onClick={() => h.openDetailsDialog(selected)}
+                      className="gmd-update"
+                      disabled={h.isUpdating || selected.status !== "active"}
+                      onClick={h.handleManualUpdate}
                     >
-                      Кроки цілі <ArrowRight size={16} />
+                      <RefreshCw
+                        size={16}
+                        className={h.isUpdating ? "animate-spin" : ""}
+                      />
+                      {h.isUpdating ? "Оновлення…" : "Оновити прогрес"}
                     </button>
-                  )}
-                  {selected.status === "completed" && (
-                    <button
-                      className="gmd-outline"
-                      onClick={() => h.openCompletedGoalResult(selected)}
-                    >
-                      Результат <ArrowRight size={16} />
-                    </button>
-                  )}
+                    {selected.type === "ladder" && (
+                      <button
+                        className="gmd-outline"
+                        onClick={() => h.openDetailsDialog(selected)}
+                      >
+                        Кроки цілі <ArrowRight size={16} />
+                      </button>
+                    )}
+                    {selected.status === "completed" && (
+                      <button
+                        className="gmd-outline"
+                        onClick={() => h.openCompletedGoalResult(selected)}
+                      >
+                        Результат <ArrowRight size={16} />
+                      </button>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="gmd-empty">
+                  <h2>Деталі цілі</h2>
+                  <p>
+                    {query
+                      ? "Змініть пошук, щоб обрати ціль."
+                      : "Оберіть ціль зі списку або створіть нову."}
+                  </p>
                 </div>
-              </>
-            ) : (
-              <div className="gmd-empty">
-                <h2>Деталі цілі</h2>
-                <p>
-                  {query
-                    ? "Змініть пошук, щоб обрати ціль."
-                    : "Оберіть ціль зі списку або створіть нову."}
-                </p>
-              </div>
-            )}
-          </section>
+              )}
+            </section>
+          )}
         </div>
       </div>
     </div>

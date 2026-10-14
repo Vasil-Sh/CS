@@ -163,7 +163,7 @@
 .profile-landing .profile-identity {
   position: relative;
   isolation: isolate;
-  padding: 22px calc(var(--profile-gutter) + 18px) 16px;
+  padding: 22px calc(var(--profile-gutter) + 18px) 60px;
   background: transparent;
   color: #f8f9f7;
   gap: 34px;
@@ -234,9 +234,10 @@
 }
 .profile-landing .profile-metrics {
   position: relative;
+  margin-top: -44px;
+  z-index: 1;
   padding: 0 var(--profile-gutter);
   gap: 14px;
-  background: linear-gradient(#222325 34px, transparent 34px);
 }
 .profile-landing .profile-metric {
   position: relative;
