@@ -460,9 +460,11 @@
   margin-bottom: 14px;
 }
 .goals-screen .gmd-empty h3 {
-  font-size: 21px;
+  font-family: Oswald, "Arial Narrow", sans-serif;
+  font-size: 25px;
   line-height: 1.25;
-  font-weight: 700;
+  font-weight: 600;
+  text-transform: uppercase;
   color: #141a22;
 }
 .goals-screen .gmd-empty .gmd-empty-create {

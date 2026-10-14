@@ -12,20 +12,6 @@ type Props = {
   onCreate: () => void;
   children: ReactNode;
 };
-const steps = [
-  [
-    "Запишіть правила",
-    "Вкажіть умови, за якими ви робите ставки. Це можуть бути коефіцієнти, ринки та формати матчів.",
-  ],
-  [
-    "Прив’язуйте ставки",
-    "Додавайте зроблені ставки до відповідної стратегії, щоб відстежувати результати.",
-  ],
-  [
-    "Порівнюйте результати",
-    "Аналізуйте прибуток, відсоток перемог та інші показники, щоб покращувати свої стратегії.",
-  ],
-];
 export default function StrategyScreen(p: Props) {
   return (
     <div
@@ -62,38 +48,8 @@ export default function StrategyScreen(p: Props) {
           </span>
         </div>
       </div>
-      <div
-        className={`strategies-layout${p.total === 0 ? "" : " strategies-layout--full"}`}
-      >
-        {p.total === 0 && p.activeTab === "overview" ? (
-          <div className="strategies-empty">
-            <Layers size={54} strokeWidth={1.6} />
-            <h3>Ще немає стратегій</h3>
-            <p>Створіть першу стратегію для аналізу результатів.</p>
-            <button className="strategies-create" onClick={p.onCreate}>
-              <Plus size={19} />
-              Створити стратегію
-            </button>
-          </div>
-        ) : (
-          p.children
-        )}
-        {p.total === 0 && (
-          <aside className="strategies-help">
-            <h2>Як це працює?</h2>
-            <ol>
-              {steps.map(([title, description], i) => (
-                <li key={title}>
-                  <span className="strategies-step">{i + 1}</span>
-                  <div>
-                    <h3>{title}</h3>
-                    <p>{description}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </aside>
-        )}
+      <div className="strategies-layout strategies-layout--full">
+        {p.children}
       </div>
     </div>
   );

@@ -386,10 +386,11 @@
   color: #697078;
 }
 .smd-empty h3 {
+  font-family: Oswald, "Arial Narrow", sans-serif;
   font-weight: 600;
-  font-family: Oswald, sans-serif;
   font-size: 25px;
   text-transform: uppercase;
+  color: #141a22;
 }
 .smd-empty p {
   font-size: 13px;

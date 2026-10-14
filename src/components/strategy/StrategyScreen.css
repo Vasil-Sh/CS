@@ -300,19 +300,30 @@
   margin: 10px 0 26px;
 }
 .strategies-help {
-  padding: 23px 28px;
+  padding: 20px;
+}
+.strategies-help h2 {
+  font-family: "Strategies Inter", Arial, sans-serif;
+  text-transform: none;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: #141a22;
+  margin: 0;
 }
 .strategies-help ol {
-  margin-top: 28px;
+  margin: 18px 0 0;
   list-style: none;
   padding: 0;
+  display: grid;
+  gap: 18px;
 }
 .strategies-help li {
   position: relative;
   display: flex;
   align-items: flex-start;
-  gap: 17px;
-  padding-bottom: 30px;
+  gap: 13px;
+  padding-bottom: 0;
 }
 .strategies-help li:last-child {
   padding-bottom: 0;
@@ -320,38 +331,40 @@
 .strategies-help li:not(:last-child)::after {
   content: "";
   position: absolute;
-  left: 17px;
-  top: 43px;
-  bottom: 6px;
+  left: 15px;
+  top: 40px;
+  bottom: -17px;
   width: 1px;
-  background: #e1e5ed;
+  background: #e9edf3;
 }
 .strategies-step {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: #f0f2f5;
-  font-size: 16px;
-  font-weight: 600;
+  background: #f1f2f4;
+  font-size: 14px;
+  font-weight: 650;
+  color: #68748a;
 }
 .strategies-help li:first-child .strategies-step {
-  background: #ff5b2a;
+  background: #ff6035;
   color: white;
 }
 .strategies-help h3 {
   font-size: 16px;
   font-weight: 700;
-  line-height: 1.4;
-  margin: 4px 0 8px;
+  line-height: 1.35;
+  margin: 2px 0 5px;
+  color: #141a22;
 }
 .strategies-help p {
   font-size: 15px;
-  line-height: 1.5;
-  color: var(--strategy-muted);
+  line-height: 1.4;
+  color: #797f89;
 }
 .strategies-screen .smd-list > header {
   display: flex;
@@ -382,6 +395,9 @@
   grid-template-columns: minmax(0, 13fr) minmax(0, 7fr);
   gap: 20px;
 }
+.strategies-screen .smd-grid--empty {
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 24%);
+}
 .strategies-screen .smd-list {
   min-height: 310px;
   border: 1px solid #e3e7ee;
@@ -401,10 +417,16 @@
   border-radius: 12px;
   box-shadow: 0 4px 18px #17233003;
 }
+.strategies-screen .smd-detail:has(.strategies-help) {
+  padding-top: 16px;
+}
 .strategies-screen .smd-detail .strategies-help {
   border: 0;
   padding: 0;
   background: transparent;
+}
+.strategies-screen .smd-detail .strategies-help h2 {
+  margin: 0;
 }
 .strategies-screen .smd-row {
   border: 1px solid #e5e9f0;

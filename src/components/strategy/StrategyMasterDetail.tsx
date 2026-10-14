@@ -92,7 +92,7 @@ export default function StrategyMasterDetail(p: Props) {
   const percent = (value: number) =>
     `${new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 1 }).format(value)}%`;
   return (
-    <div className="smd-grid">
+    <div className={`smd-grid${p.strategies.length ? "" : " smd-grid--empty"}`}>
       <div className="smd-left">
         <section className="smd-list" aria-label="Мої стратегії">
           <header>
@@ -164,7 +164,7 @@ export default function StrategyMasterDetail(p: Props) {
               <p>
                 {p.total
                   ? "Змініть пошук або фільтри."
-                  : "Збережіть правила для відстеження результатів."}
+                  : "Створіть першу стратегію для аналізу результатів."}
               </p>
               {!p.total && (
                 <button onClick={p.onCreate}>
