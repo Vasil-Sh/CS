@@ -43,6 +43,63 @@ function controller(data = goals) {
   } as unknown as ReturnType<typeof useGoals>;
 }
 describe("Goals master detail", () => {
+  it("shows a circular active-card progress and remaining amount", () => {
+    render(<GoalsFocus h={controller()} />);
+    const card = screen.getByRole("button", { name: /Накопичити/ });
+    expect(card).toHaveClass("goals-active-card");
+    expect(within(card).getByRole("progressbar")).toHaveAttribute(
+      "aria-valuenow",
+      "64",
+    );
+    expect(within(card).getByText(/Залишилось/)).toHaveTextContent(
+      "Залишилось 3 600 ₴",
+    );
+  });
+  it("keeps ladder progress based on steps while displaying the bank balance", () => {
+    render(
+      <GoalsFocus
+        h={controller([
+          {
+            ...goals[0],
+            type: "ladder",
+            currentBank: 100,
+            targetLadderAmount: 100000,
+            currentStep: 0,
+            totalSteps: 27,
+          },
+        ])}
+      />,
+    );
+    const card = screen.getByRole("button", { name: /Накопичити/ });
+    expect(within(card).getByRole("progressbar")).toHaveAttribute(
+      "aria-valuenow",
+      "0",
+    );
+    expect(within(card).getByText(/Залишилось/)).toHaveTextContent(
+      "Залишилось 99 900 ₴",
+    );
+  });
+  it("caps the ring at 100 and never shows a negative remainder", () => {
+    render(
+      <GoalsFocus h={controller([{ ...goals[0], currentAmount: 12000 }])} />,
+    );
+    const card = screen.getByRole("button", { name: /Накопичити/ });
+    expect(within(card).getByRole("progressbar")).toHaveAttribute(
+      "aria-valuenow",
+      "100",
+    );
+    expect(within(card).getByText(/Залишилось/)).toHaveTextContent(
+      "Залишилось 0 ₴",
+    );
+  });
+  it("leaves the completed-goal rows in their existing layout", () => {
+    const h = controller([{ ...goals[0], status: "completed" }]);
+    h.activeTab = "completed";
+    render(<GoalsFocus h={h} />);
+    expect(screen.getByRole("button", { name: /Накопичити/ })).not.toHaveClass(
+      "goals-active-card",
+    );
+  });
   it("searches legacy numeric names without crashing", () => {
     render(
       <GoalsFocus

@@ -109,6 +109,81 @@ function GoalProgress({ goal }: { goal: Goal }) {
     </div>
   );
 }
+function ActiveGoalCard({
+  goal,
+  selected,
+  onSelect,
+}: {
+  goal: Goal;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const m = metric(goal);
+  const raw = getGoalProgress(goal);
+  const progress = Number.isFinite(raw) ? Math.min(100, Math.max(0, raw)) : 0;
+  const Icon = goalTypeIcon[goal.type] ?? Target;
+  const complete = goal.status === "completed";
+  return (
+    <button
+      className={`gmd-row goals-active-card${complete ? " is-complete" : ""}`}
+      aria-pressed={selected}
+      aria-controls="goal-detail-panel"
+      onClick={onSelect}
+    >
+      <span
+        className="goals-card-ring"
+        role="progressbar"
+        aria-label={`Прогрес: ${goal.name}`}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={progress}
+      >
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <circle className="goals-card-ring-track" cx="60" cy="60" r="53" />
+          <circle
+            className="goals-card-ring-value"
+            cx="60"
+            cy="60"
+            r="53"
+            pathLength="100"
+            strokeDasharray={`${progress} 100`}
+            opacity={progress === 0 ? 0 : 1}
+            transform="rotate(-90 60 60)"
+          />
+        </svg>
+        <span>{fmt(progress)}%</span>
+      </span>
+      <span className="goals-card-copy">
+        <span className="gmd-row-title">
+          {goal.name}
+          {goal.isPrimary && goal.status === "active" && (
+            <span className="gmd-badge">Основна</span>
+          )}
+          {complete && (
+            <span className="gmd-badge gmd-badge-complete">Завершена</span>
+          )}
+        </span>
+        <span className="goals-card-type">
+          <Icon size={20} aria-hidden="true" /> {getGoalTypeLabel(goal.type)}
+        </span>
+        <span className="goals-card-amount">
+          <strong>
+            {fmt(m.current)}
+            {m.unit}
+          </strong>
+          <span>
+            із {fmt(m.target)}
+            {m.unit}
+          </span>
+        </span>
+        <span className="goals-card-remaining">
+          Залишилось {fmt(Math.max(0, m.target - m.current))}
+          {m.unit === "%" ? " в.п." : m.unit}
+        </span>
+      </span>
+    </button>
+  );
+}
 export default function GoalsFocus({ h }: { h: Controller }) {
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -196,50 +271,19 @@ export default function GoalsFocus({ h }: { h: Controller }) {
                   <span className="goals-tab-count">{history.length}</span>
                 </button>
               </div>
-              <div className="gmd-rows">
-                {visible.map((goal) => {
-                  const m = metric(goal);
-                  return (
-                    <button
-                      key={goal.id}
-                      className={`gmd-row${goal.status === "completed" ? " is-complete" : ""}`}
-                      aria-pressed={selected?.id === goal.id}
-                      aria-controls="goal-detail-panel"
-                      onClick={() => setSelectedId(goal.id)}
-                    >
-                      {goal.status === "completed" ? (
-                        <CheckCircle2 className="gmd-check" size={20} />
-                      ) : (
-                        (() => {
-                          const Icon = goalTypeIcon[goal.type] ?? Target;
-                          return <Icon size={20} />;
-                        })()
-                      )}
-                      <span className="gmd-row-copy">
-                        <span className="gmd-row-title">
-                          {goal.name}
-                          {goal.isPrimary && goal.status === "active" && (
-                            <span className="gmd-badge">Основна</span>
-                          )}
-                        </span>
-                        <span className="goals-row-type">
-                          {getGoalTypeLabel(goal.type)}
-                        </span>
-                      </span>
-                      <span className="goals-row-stats">
-                        {m.unit !== "%" && <GoalProgress goal={goal} />}
-                        <span className="gmd-row-metric">
-                          {m.unit === "%"
-                            ? `${m.label} ${fmt(m.current)}% · Ціль ${fmt(m.target)}%`
-                            : `${fmt(m.current)}${m.unit} із ${fmt(m.target)}${m.unit}`}
-                        </span>
-                      </span>
-                    </button>
-                  );
-                })}
+              <div
+                className={`gmd-rows${visible.length ? " goals-active-cards" : ""}`}
+              >
+                {visible.map((goal) => (
+                  <ActiveGoalCard
+                    key={goal.id}
+                    goal={goal}
+                    selected={selected?.id === goal.id}
+                    onSelect={() => setSelectedId(goal.id)}
+                  />
+                ))}
                 {!visible.length && (
                   <div className="gmd-empty">
-                    <GoalIcon size={48} strokeWidth={1.3} aria-hidden="true" />
                     <h3>
                       {query
                         ? "Нічого не знайдено"
