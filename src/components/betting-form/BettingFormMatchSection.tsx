@@ -40,6 +40,8 @@ interface BettingFormMatchSectionProps {
   data: FormMatchData;
   mode?: "all" | "match" | "prediction";
   hideOdds?: boolean;
+  hideHeading?: boolean;
+  extraPredictionSlot?: ReactNode;
   teamNotes?: ReactNode;
   isParsing: boolean;
   isExpressFromMatches: boolean;
@@ -64,6 +66,8 @@ export default function BettingFormMatchSection({
   data,
   mode = "all",
   hideOdds = false,
+  hideHeading = false,
+  extraPredictionSlot,
   teamNotes,
   isParsing,
   isExpressFromMatches,
@@ -306,10 +310,12 @@ export default function BettingFormMatchSection({
       <div className="space-y-4">
         {mode !== "prediction" && (
           <>
-            <h3 className={classes.sectionTitle}>
-              <Users className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
-              Матч і прогноз
-            </h3>
+            {!hideHeading && (
+              <h3 className={classes.sectionTitle}>
+                <Users className="h-4 w-4 text-gray-500" strokeWidth={1.5} />
+                Матч і прогноз
+              </h3>
+            )}
 
             {/* Match URL */}
             <div className="space-y-1.5">
@@ -529,6 +535,9 @@ export default function BettingFormMatchSection({
                   className={`${classes.input} ${err("odds")}`}
                 />
               </div>
+            )}
+            {extraPredictionSlot && (
+              <div className="flex-1">{extraPredictionSlot}</div>
             )}
           </div>
         )}

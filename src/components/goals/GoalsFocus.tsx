@@ -14,6 +14,7 @@ import {
   Layers,
   Plus,
   CheckCircle2,
+  ChevronRight,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -181,6 +182,7 @@ function ActiveGoalCard({
           {m.unit === "%" ? " в.п." : m.unit}
         </span>
       </span>
+      <ChevronRight className="goals-card-arrow" size={20} aria-hidden="true" />
     </button>
   );
 }

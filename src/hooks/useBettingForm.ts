@@ -154,7 +154,7 @@ export const getDefaultFormData = (
 });
 
 // ── Pure utilities (outside hook — stable references) ──
-function loadRiskyTeamsFromStorage(): RiskyTeam[] {
+export function loadRiskyTeamsFromStorage(): RiskyTeam[] {
   try {
     const saved = localStorage.getItem("admin_risky_teams");
     if (saved) {
@@ -164,6 +164,7 @@ function loadRiskyTeamsFromStorage(): RiskyTeam[] {
         game: team.game || "CS",
         status: team.status || "Під питанням",
         notes: team.notes || "",
+        logo: team.logo || null,
       }));
     }
   } catch (error) {
@@ -1136,6 +1137,7 @@ export function useBettingForm({
 
   return {
     // State
+    availableTeams: loadRiskyTeamsFromStorage(),
     formData,
     setFormData,
     expressEvents,

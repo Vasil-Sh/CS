@@ -1,10 +1,16 @@
-import { useRef, useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent, type ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Trash2,
   ChevronDown,
   Target,
   ArrowUpRight,
+  BookOpen,
+  Circle,
+  CircleDot,
+  Plus,
+  FileText,
 } from "lucide-react";
 import StrategyViolationDialog from "./StrategyViolationDialog";
 import SidebarCalculations from "./betting-form/SidebarCalculations";
@@ -18,7 +24,9 @@ import BettingFormAlerts from "./betting-form/BettingFormAlerts";
 import BettingFormSettings from "./betting-form/BettingFormSettings";
 import BettingFormMatchSection from "./betting-form/BettingFormMatchSection";
 import BettingFormFinances from "./betting-form/BettingFormFinances";
-import BetTypePicker from "./betting-form/BetTypePicker";
+import { getBetTypeLabel } from "@/lib/displayHelpers";
+import { proxyLogoUrl } from "@/lib/logoProxy";
+
 import { useBettingForm, type MatchPrefillData } from "@/hooks/useBettingForm";
 export type { MatchPrefillData } from "@/hooks/useBettingForm";
 interface Props {
@@ -42,6 +50,15 @@ export default function CS2BettingForm(props: Props) {
   const isExpress = d.betCategory === "Експрес";
   const odds = isExpress ? h.totalExpressOdds : Number(d.odds);
   const stake = Number(d.stake);
+  const fieldHasValue = (v: unknown) =>
+    typeof v === "string" ? v.trim().length > 0 : v !== "" && v != null;
+  const isFormEmpty =
+    !fieldHasValue(d.team1) &&
+    !fieldHasValue(d.team2) &&
+    !fieldHasValue(d.odds) &&
+    !fieldHasValue(d.stake) &&
+    !fieldHasValue(d.selection) &&
+    h.expressEvents.length === 0;
   const validAmounts =
     Number.isFinite(odds) &&
     odds > 1 &&
@@ -134,10 +151,15 @@ export default function CS2BettingForm(props: Props) {
     />
   );
 
-  const match = (mode: "match" | "prediction" | "all") => (
+  const match = (
+    mode: "match" | "prediction" | "all",
+    extraPredictionSlot?: ReactNode,
+  ) => (
     <BettingFormMatchSection
       mode={mode}
       hideOdds={mode === "prediction"}
+      hideHeading
+      extraPredictionSlot={extraPredictionSlot}
       data={{
         game: h.formData.game,
         format: h.formData.format,
@@ -219,6 +241,52 @@ export default function CS2BettingForm(props: Props) {
           other.game === team.game,
       ) === index,
   );
+  const displayLogo = (logo?: string | null, game: string = d.game) =>
+    logo
+      ? (logo.startsWith("/") ? logo : proxyLogoUrl(logo, game)) ||
+        "/assets/team-placeholder.svg"
+      : "/assets/team-placeholder.svg";
+  const teamLogo = (name: string, index: number) =>
+    displayLogo(
+      (index === 0
+        ? h.prefillLogosRef.current.logoTeam1
+        : h.prefillLogosRef.current.logoTeam2) ||
+        findRiskyTeams(name, "", getGameFilterValue(d.game), d.riskyTeams)[0]
+          ?.logo ||
+        null,
+    );
+  const stakeField = (
+    <div className="record-stake-field">
+      <label htmlFor="entry-stake" className="entry-field-label">
+        Сума ставки
+      </label>
+      <div className="single-stake">
+        <input
+          id="entry-stake"
+          type="number"
+          min="0.01"
+          step="0.01"
+          value={d.stake}
+          placeholder="0"
+          onChange={(e) =>
+            h.setFormData((prev) => ({ ...prev, stake: e.target.value }))
+          }
+        />
+        <select
+          className="record-stake-currency"
+          aria-label="Валюта запису"
+          value={d.currency}
+          onChange={(event) => {
+            const currency = event.target.value;
+            h.setFormData((prev) => ({ ...prev, currency }));
+          }}
+        >
+          <option value="UAH">₴</option>
+          <option value="USD">$</option>
+        </select>
+      </div>
+    </div>
+  );
   return (
     <div className="record-entry entry-single">
       <StrategyViolationDialog
@@ -240,102 +308,10 @@ export default function CS2BettingForm(props: Props) {
           className="single-grid"
           disabled={h.tiltBlock.blocked || h.isSubmitting}
         >
-          <section
-            className="single-card single-match"
-            aria-labelledby="single-match-title"
-          >
-            <header className="single-heading">
-              <h2 id="single-match-title">Матч</h2>
-              <button
-                type="button"
-                className="entry-clear"
-                onClick={() => {
-                  h.clearForm();
-                  setError("");
-                }}
-              >
-                <Trash2 size={15} /> Очистити
-              </button>
-            </header>
-            {settings("match")}
-            {isExpress ? (
-              <p className="entry-muted single-express-hint">
-                Додайте матчі та прогнози нижче. Сума буде спільною для всього
-                експресу.
-              </p>
-            ) : (
-              <>
-                <div className="single-fields single-teams">
-                  {[1, 2].map((number) => {
-                    const field = number === 1 ? "team1" : "team2";
-                    const logo =
-                      number === 1
-                        ? h.prefillLogosRef.current.logoTeam1
-                        : h.prefillLogosRef.current.logoTeam2;
-                    return (
-                      <label key={field}>
-                        Команда {number}
-                        <div className="single-team-input">
-                          <img
-                            src={
-                              logo ||
-                              `/assets/team-placeholder-${d.game === "Dota2" ? "dota" : "cs2"}.svg`
-                            }
-                            alt=""
-                            onError={(e) => {
-                              e.currentTarget.style.visibility = "hidden";
-                            }}
-                          />
-                          <input
-                            id={field}
-                            value={d[field]}
-                            placeholder={
-                              number === 1 ? "Команда 1" : "Команда 2"
-                            }
-                            onChange={(e) =>
-                              h.setFormData((prev) => ({
-                                ...prev,
-                                [field]: e.target.value,
-                                selection: "",
-                              }))
-                            }
-                          />
-                        </div>
-                      </label>
-                    );
-                  })}
-                </div>
-                <div className="single-import">
-                  <label htmlFor="matchUrl">Посилання на матч</label>
-                  <div>
-                    <input
-                      id="matchUrl"
-                      value={d.matchUrl}
-                      onChange={(e) => h.handleUrlChange(e.target.value)}
-                      placeholder="https://…"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => h.parseMatchFromUrl(d.matchUrl)}
-                      disabled={h.isParsingMatch || !d.matchUrl}
-                    >
-                      {h.isParsingMatch ? "Оновлення…" : "Заповнити"}
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </section>
           <aside className="single-risks" aria-labelledby="single-risk-title">
             <header className="single-heading">
               <h2 id="single-risk-title">Ризиковані команди</h2>
-              <a href="/app/risky-teams">
-                Довідник команд <ArrowUpRight size={13} />
-              </a>
             </header>
-            <p className="single-risk-subtitle">
-              Примітки до {isExpress ? "матчів експресу" : "цього матчу"}
-            </p>
             {!teams.length && (
               <p className="single-risk-empty">
                 Оберіть команди — тут з’являться їхні статуси та збережені
@@ -363,14 +339,11 @@ export default function CS2BettingForm(props: Props) {
                 >
                   <div className="single-team-heading">
                     <img
-                      src={
-                        team.logo ||
-                        note?.logo ||
-                        `/assets/team-placeholder-${team.game === "Dota2" ? "dota" : "cs2"}.svg`
-                      }
+                      src={displayLogo(team.logo || note?.logo, team.game)}
                       alt=""
                       onError={(e) => {
-                        e.currentTarget.style.visibility = "hidden";
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = "/assets/team-placeholder.svg";
                       }}
                     />
                     <div>
@@ -381,12 +354,6 @@ export default function CS2BettingForm(props: Props) {
                       <span className="single-status">{note.status}</span>
                     )}
                   </div>
-                  <span className="single-note-label">
-                    Примітка
-                    {isExpress
-                      ? ` · ${team.game === "Dota2" ? "Dota 2" : "CS2"}`
-                      : ""}
-                  </span>
                   <p>
                     {note
                       ? note.notes || "Додаткового коментаря немає."
@@ -395,13 +362,16 @@ export default function CS2BettingForm(props: Props) {
                 </article>
               );
             })}
+            <Link className="record-risk-link" to="/app/risky-teams">
+              <BookOpen size={20} /> Довідник команд <ArrowUpRight size={15} />
+            </Link>
           </aside>
           <section
             className="single-card single-prediction"
             aria-labelledby="single-prediction-title"
           >
             <header className="single-heading">
-              <h2 id="single-prediction-title">Прогноз</h2>
+              <h2 id="single-prediction-title">Матч і прогноз</h2>
               <div className="entry-category" aria-label="Категорія запису">
                 {["Ординар", "Експрес"].map((value) => (
                   <button
@@ -410,121 +380,96 @@ export default function CS2BettingForm(props: Props) {
                     aria-pressed={d.betCategory === value}
                     onClick={() => changeCategory(value)}
                   >
+                    {d.betCategory === value ? (
+                      <CircleDot size={19} />
+                    ) : (
+                      <Circle size={19} />
+                    )}
                     {value}
                   </button>
                 ))}
               </div>
             </header>
+            <div className="record-match-settings record-match-settings-inline">
+              <label className="record-game-label">
+                Гра
+                <select
+                  aria-label="Гра"
+                  value={d.game}
+                  onChange={(e) =>
+                    h.setFormData((prev) => ({
+                      ...prev,
+                      game: e.target.value as "CS2" | "Dota2",
+                      selection: "",
+                      betType: "",
+                    }))
+                  }
+                >
+                  <option value="CS2">CS2</option>
+                  <option value="Dota2">Dota 2</option>
+                </select>
+              </label>
+              <label>
+                Дата матчу
+                <input
+                  id="date"
+                  type="date"
+                  required
+                  value={d.date}
+                  onChange={(e) =>
+                    h.setFormData((prev) => ({
+                      ...prev,
+                      date: e.target.value,
+                    }))
+                  }
+                />
+              </label>
+              <label>
+                Формат
+                <select
+                  id="format"
+                  value={d.format}
+                  onChange={(e) =>
+                    h.setFormData((prev) => ({
+                      ...prev,
+                      format: e.target.value,
+                      betType: "",
+                    }))
+                  }
+                >
+                  {["BO1", "BO2", "BO3", "BO5"].map((format) => (
+                    <option key={format}>{format}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
             {isExpress ? (
               <div className="single-express">
                 {!(h.isExpressFromMatches && h.expressEvents.length > 0) &&
-                  match("all")}
+                  match("all", stakeField)}
                 {events}
               </div>
             ) : (
-              <div className="single-fields">
+              <div className="record-prediction-fields">
+                {match("all", stakeField)}
+              </div>
+            )}
+            {isExpress && (
+              <div className="single-fields single-money">
                 <label>
-                  Вибір команди
-                  <select
-                    id="entry-selection"
-                    value={d.selection}
-                    disabled={!d.team1 || !d.team2}
-                    onChange={(e) =>
-                      h.setFormData((prev) => ({
-                        ...prev,
-                        selection: e.target.value,
-                      }))
-                    }
-                  >
-                    <option value="">Оберіть команду</option>
-                    {[...new Set([d.team1, d.team2])]
-                      .filter(Boolean)
-                      .map((team) => (
-                        <option key={team}>{team}</option>
-                      ))}
-                  </select>
-                </label>
-                <label>
-                  Тип прогнозу
-                  <BetTypePicker
-                    value={d.betType}
-                    format={d.format}
-                    onChange={(value) =>
-                      h.setFormData((prev) => ({
-                        ...prev,
-                        betType: value,
-                      }))
-                    }
+                  Загальний коефіцієнт
+                  <input
+                    id="entry-odds"
+                    type="number"
+                    min="1.01"
+                    step="0.01"
+                    value={odds > 1 ? odds.toFixed(2) : ""}
+                    readOnly
+                    placeholder="1.65"
                   />
                 </label>
               </div>
             )}
-            <div className="single-fields single-money">
-              <label>
-                {isExpress ? "Загальний коефіцієнт" : "Коефіцієнт"}
-                <input
-                  id="entry-odds"
-                  type="number"
-                  min="1.01"
-                  step="0.01"
-                  value={isExpress ? (odds > 1 ? odds.toFixed(2) : "") : d.odds}
-                  readOnly={isExpress}
-                  placeholder="1.65"
-                  onChange={(e) =>
-                    h.setFormData((prev) => ({ ...prev, odds: e.target.value }))
-                  }
-                />
-              </label>
-              <div>
-                <label htmlFor="entry-stake">Сума ставки</label>
-                <div className="single-stake">
-                  <input
-                    id="entry-stake"
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    value={d.stake}
-                    placeholder="0"
-                    onChange={(e) =>
-                      h.setFormData((prev) => ({
-                        ...prev,
-                        stake: e.target.value,
-                      }))
-                    }
-                  />
-                  <div className="single-currency" aria-label="Валюта запису">
-                    {["UAH", "USD"].map((currency) => (
-                      <button
-                        type="button"
-                        key={currency}
-                        aria-label={currency}
-                        aria-pressed={d.currency === currency}
-                        onClick={() =>
-                          h.setFormData((prev) => ({ ...prev, currency }))
-                        }
-                      >
-                        {currency === "UAH" ? "₴" : "$"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <section className="single-returns" aria-label="У разі виграшу">
-              <span>У разі виграшу</span>
-              <div>
-                <p>
-                  <strong>{validAmounts ? money(stake * odds) : "—"}</strong>{" "}
-                  виплата
-                </p>
-                <p>
-                  <strong>
-                    {validAmounts ? "+" + money(stake * (odds - 1)) : "—"}
-                  </strong>{" "}
-                  прибуток
-                </p>
-              </div>
-            </section>
             <details className="single-options">
               <summary>
                 <Target size={16} /> Ціль і стратегія{" "}
@@ -544,6 +489,25 @@ export default function CS2BettingForm(props: Props) {
                   введену суму.
                 </small>
               </div>
+            </details>
+            <details className="single-options record-own-analysis">
+              <summary>
+                <FileText size={17} /> Власний аналіз <span>необов’язково</span>
+                <ChevronDown size={14} />
+              </summary>
+              <label htmlFor="record-notes">Ваші аргументи та примітки</label>
+              <textarea
+                id="record-notes"
+                value={d.notes || ""}
+                rows={4}
+                placeholder="Що вплинуло на ваш прогноз?"
+                onChange={(event) =>
+                  h.setFormData((prev) => ({
+                    ...prev,
+                    notes: event.target.value,
+                  }))
+                }
+              />
             </details>
             <BettingFormFinances
               analysisOnly
@@ -587,6 +551,123 @@ export default function CS2BettingForm(props: Props) {
                 />
               }
             />
+          </section>
+          <aside
+            className="single-card record-summary"
+            aria-labelledby="record-summary-title"
+          >
+            {isFormEmpty ? (
+              <>
+                <h2 id="record-summary-title">Як це працює?</h2>
+                <ol className="record-summary-guide">
+                  {[
+                    [
+                      "Оберіть матч",
+                      "Вкажіть команди, дату та формат матчу, на який робите запис.",
+                    ],
+                    [
+                      "Додайте прогноз",
+                      "Оберіть ринок, команду та коефіцієнт для ставки.",
+                    ],
+                    [
+                      "Вкажіть суму",
+                      "Введіть суму ставки, щоб побачити розрахунки та EV.",
+                    ],
+                    [
+                      "Збережіть запис",
+                      "Запис з'явиться у вашому журналі та вплине на аналітику.",
+                    ],
+                  ].map(([title, text], i) => (
+                    <li key={title}>
+                      <span>{i + 1}</span>
+                      <div>
+                        <h3>{title}</h3>
+                        <p>{text}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </>
+            ) : (
+              <>
+                <h2 id="record-summary-title">Підсумок запису</h2>
+                <div className="record-summary-body">
+                  {isExpress ? (
+                    <div className="record-summary-events">
+                      <strong>Експрес · {h.expressEvents.length} подій</strong>
+                      {h.expressEvents.map((event, index) => (
+                        <div key={index}>
+                          <strong>{event.match}</strong>
+                          <small>
+                            {event.selection} · {event.odds || "—"}
+                          </small>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="record-summary-teams">
+                      {[d.team1, d.team2].map((team, index) => (
+                        <div key={index}>
+                          <img src={teamLogo(team, index)} alt="" />
+                          <strong>{team || `Команда ${index + 1}`}</strong>
+                          {index === 0 && <span>vs</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <p className="record-summary-meta">
+                    {d.game === "Dota2" ? "Dota 2" : "CS2"} ·{" "}
+                    {d.date
+                      ? d.date.split("-").reverse().join(".")
+                      : "Дата не вказана"}{" "}
+                    · {d.format}
+                  </p>
+                  <dl className="record-summary-values">
+                    <div>
+                      <dt>Прогноз</dt>
+                      <dd>
+                        {isExpress
+                          ? "Експрес"
+                          : d.selection && d.betType
+                            ? `${d.selection} — ${getBetTypeLabel(d.betType, d.format)}`
+                            : "Не обрано"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Коефіцієнт</dt>
+                      <dd>
+                        {Number.isFinite(odds) && odds > 1
+                          ? odds.toFixed(2)
+                          : "—"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Сума ставки</dt>
+                      <dd>{stake > 0 ? money(stake) : "—"}</dd>
+                    </div>
+                  </dl>
+                  <section
+                    className="single-returns"
+                    aria-label="У разі виграшу"
+                  >
+                    <div>
+                      <p>
+                        <strong>
+                          {validAmounts ? money(stake * odds) : "—"}
+                        </strong>{" "}
+                        У разі виграшу
+                      </p>
+                      <p>
+                        <strong>
+                          {validAmounts ? "+" + money(stake * (odds - 1)) : "—"}
+                        </strong>{" "}
+                        Чистий прибуток
+                      </p>
+                    </div>
+                  </section>
+                </div>
+              </>
+            )}
             {error && (
               <p
                 className="wizard-error"
@@ -597,13 +678,28 @@ export default function CS2BettingForm(props: Props) {
                 {error}
               </p>
             )}
+
             <footer className="single-save">
               <Button id="submit-btn" type="submit">
+                <Plus size={18} />
                 {h.isSubmitting ? "Збереження…" : "Зберегти запис"}
               </Button>
-              <p>Буде збережено лише запис у журналі</p>
+              <button
+                type="button"
+                className="record-reset"
+                onClick={() => {
+                  h.clearForm();
+                  setError("");
+                }}
+              >
+                <Trash2 size={16} /> Очистити
+              </button>
+              <p>
+                Запис збережеться в журналі та враховуватиметься в аналітиці,
+                стратегіях і цілях.
+              </p>
             </footer>
-          </section>
+          </aside>
         </fieldset>
       </form>
     </div>

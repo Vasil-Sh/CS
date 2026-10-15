@@ -390,7 +390,7 @@
   background: #ffece5;
 }
 .goals-screen .gmd-row > svg:last-child {
-  color: #8794a6;
+  color: #101722;
 }
 .goals-screen .gmd-row-title {
   font-size: 16px;
@@ -512,7 +512,7 @@
 }
 .goals-screen .gmd-row.goals-active-card {
   display: grid;
-  grid-template-columns: 98px minmax(0, 1fr);
+  grid-template-columns: 98px minmax(0, 1fr) auto;
   gap: 18px;
   padding: 18px;
   min-height: 124px;
@@ -609,9 +609,14 @@
   font-size: 14px;
   overflow-wrap: anywhere;
 }
+.goals-card-arrow {
+  align-self: center;
+  color: #101722;
+  flex-shrink: 0;
+}
 @media (max-width: 1200px) and (min-width: 1001px), (max-width: 600px) {
   .goals-screen .gmd-row.goals-active-card {
-    grid-template-columns: 88px minmax(0, 1fr);
+    grid-template-columns: 88px minmax(0, 1fr) auto;
     gap: 16px;
     padding: 20px 14px;
     min-height: 168px;

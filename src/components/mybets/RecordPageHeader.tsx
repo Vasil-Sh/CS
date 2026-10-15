@@ -1,5 +1,13 @@
 import { type ReactNode } from "react";
-import { Pencil } from "lucide-react";
+import {
+  Pencil,
+  Wallet,
+  BarChart3,
+  FileText,
+  Trophy,
+  ThumbsDown,
+  Clock,
+} from "lucide-react";
 import type { Bet } from "@/types/betting";
 
 export function recordHeaderStats(bets: Bet[], currency: "UAH" | "USD") {
@@ -59,6 +67,7 @@ interface Props {
   extraAction?: ReactNode;
   hideCurrency?: boolean;
   hideEditBank?: boolean;
+  variant?: "entry" | "default";
 }
 export default function RecordPageHeader({
   bets,
@@ -71,11 +80,116 @@ export default function RecordPageHeader({
   extraAction,
   hideCurrency = false,
   hideEditBank = false,
+  variant = "default",
 }: Props) {
   const stats = recordHeaderStats(bets, currency);
   const money = (value: number) =>
     new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 2 }).format(value) +
     (currency === "USD" ? " $" : " ₴");
+  if (variant === "entry") {
+    const metrics = [
+      {
+        label: "Поточний банк",
+        value: money(bank),
+        hint: "Баланс у вибраній валюті",
+        Icon: Wallet,
+        color: "bank",
+      },
+      {
+        label: "Чистий результат",
+        value: (stats.profit > 0 ? "+" : "") + money(stats.profit),
+        hint: "За весь час",
+        Icon: BarChart3,
+        color:
+          stats.profit < 0 ? "negative" : stats.profit > 0 ? "positive" : "",
+      },
+      {
+        label: "Всього записів",
+        value: stats.total,
+        hint: stats.activeCount
+          ? `Активних: ${stats.activeCount}`
+          : "Немає активних",
+        Icon: FileText,
+        color: "total",
+      },
+      {
+        label: "Виграші",
+        value: stats.wins,
+        hint: "Успішні записи",
+        Icon: Trophy,
+        color: "positive",
+      },
+      {
+        label: "Програші",
+        value: stats.losses,
+        hint: "Невдалі записи",
+        Icon: ThumbsDown,
+        color: "negative",
+      },
+      {
+        label: "В активних записах",
+        value: money(stats.activeAmount),
+        hint: `Очікують: ${stats.activeCount}`,
+        Icon: Clock,
+        color: "pending",
+      },
+    ];
+    return (
+      <header className="record-entry-header">
+        <div className="record-entry-hero">
+          <div className="record-entry-intro">
+            <span className="record-entry-eyebrow">
+              RECORD ENTRY <i />
+            </span>
+            <h1>Додати запис</h1>
+            <p>Збережіть матч, прогноз і власні аргументи.</p>
+          </div>
+          <div className="record-currency" aria-label="Валюта статистики">
+            {(["UAH", "USD"] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={currency === value}
+                onClick={() => onCurrencyChange(value)}
+              >
+                {value === "UAH" ? "₴ UAH" : "$ USD"}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="record-entry-stats">
+          {metrics.map(({ label, value, hint, Icon, color }, index) => (
+            <div className="record-metric" key={label}>
+              <Icon size={24} aria-hidden="true" />
+              <div>
+                <span>{label}</span>
+                <strong className={color ? `entry-${color}` : ""}>
+                  {value}
+                </strong>
+                <small>{hint}</small>
+              </div>
+              {index === 0 && !hideEditBank && (
+                <button
+                  className="record-bank-edit"
+                  type="button"
+                  onClick={onEditBank}
+                  aria-label="Редагувати банк"
+                >
+                  <Pencil size={14} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+        {stats.missingRates && (
+          <p className="record-header-warning">
+            Частину USD-записів не враховано в сумах: немає збереженого курсу
+            або суми в доларах.
+          </p>
+        )}
+      </header>
+    );
+  }
   return (
     <header className="record-header">
       <div className="record-header-top">

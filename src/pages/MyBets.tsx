@@ -23,6 +23,7 @@ import {
 import { logRender } from "@/lib/devLogger";
 import RecordPageHeader from "@/components/mybets/RecordPageHeader";
 import "@/components/mybets/RecordEntry.css";
+import "@/components/mybets/RecordScreen.css";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import type { Bet } from "@/types/betting";
@@ -465,7 +466,7 @@ export default function MyBets() {
 
   return (
     <div
-      className={`record-page min-h-screen relative ${activeTab === "records" ? "journal-page" : ""}`}
+      className={`record-page min-h-screen relative ${activeTab === "records" ? "journal-page" : "record-add-page"}`}
     >
       {activeTab === "records" ? (
         <RecordPageHeader
@@ -492,6 +493,7 @@ export default function MyBets() {
         />
       ) : (
         <RecordPageHeader
+          variant="entry"
           bets={recentBets}
           bank={
             (currencyMode === "USD" ? dualBank.usd : dualBank.uah).currentBank
