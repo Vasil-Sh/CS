@@ -1,47 +1,570 @@
-import {useRef,useState} from 'react';
-import {ArrowRight,Plus,Shield,X} from 'lucide-react';
-import {Dialog,DialogContent,DialogTitle,DialogDescription} from '@/components/ui/dialog';
-import {AlertDialog,AlertDialogContent,AlertDialogTitle,AlertDialogDescription,AlertDialogFooter,AlertDialogAction,AlertDialogCancel} from '@/components/ui/alert-dialog';
-import {getRiskLabel} from '@/lib/strategyHelpers';
-import type {CS2Strategy} from '@/types/strategy';
-import {newDraft,wizardTemplates,validateDraft,draftToStrategy,type StrategyDraft} from './strategyWizard';
-import './CreateStrategyDialog.css';
-interface Props{open:boolean;onOpenChange:(open:boolean)=>void;strategies:CS2Strategy[];onSave:(strategy:CS2Strategy)=>void|Promise<void>}
-export default function CreateStrategyDialog({open,onOpenChange,strategies,onSave}:Props){
- const [draft,setDraft]=useState(newDraft),[step,setStep]=useState(0),[errors,setErrors]=useState<Record<string,string>>({});
- const [saving,setSaving]=useState(false),[failure,setFailure]=useState('');
- const [confirm,setConfirm]=useState(false),[replacement,setReplacement]=useState<StrategyDraft|null>(null);
- const busy=useRef(false),body=useRef<HTMLDivElement>(null);
- const dirty=JSON.stringify(draft)!==JSON.stringify(newDraft());
- const reset=()=>{setDraft(newDraft());setStep(0);setErrors({});setFailure('');setConfirm(false);setReplacement(null);};
- const close=()=>{if(busy.current)return;if(dirty){setReplacement(null);setConfirm(true);}else{reset();onOpenChange(false);}};
- const change=<K extends keyof StrategyDraft>(key:K,value:StrategyDraft[K])=>{setDraft(d=>({...d,[key]:value}));setErrors(e=>({...e,[key]:''}));setFailure('');};
- const go=(next:number)=>{if(busy.current)return;if(next>step){for(let i=0;i<next;i++){const e=validateDraft(draft,i,strategies);if(Object.keys(e).length){setStep(i);setErrors(e);requestAnimationFrame(()=>body.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus());return;}}}setStep(next);setErrors({});setFailure('');if(body.current)body.current.scrollTop=0;};
- const save=async()=>{if(busy.current)return;for(let i=0;i<2;i++){const e=validateDraft(draft,i,strategies);if(Object.keys(e).length){setStep(i);setErrors(e);return;}}busy.current=true;setSaving(true);setFailure('');try{await onSave(draftToStrategy(draft));reset();onOpenChange(false);}catch{setFailure('Не вдалося зберегти стратегію. Ваші поля збережено — спробуйте ще раз.');}finally{busy.current=false;setSaving(false);}};
- const apply=(t:StrategyDraft)=>{setDraft({...t,formats:[...t.formats],types:[...t.types],criteria:[...t.criteria]});setErrors({});setFailure('');};
- const error=(key:string)=>errors[key]?<span className="sc-error" id={`sc-${key}-error`} role="alert">{errors[key]}</span>:null;
- const field=(key:'name'|'roi'|'min'|'max'|'losses'|'minutes',label:string)=> <label className="sc-field" htmlFor={`sc-${key}`}><span>{label}</span><input id={`sc-${key}`} value={draft[key]} inputMode={key==='name'?'text':'decimal'} maxLength={key==='name'?120:16} aria-invalid={!!errors[key]} aria-describedby={errors[key]?`sc-${key}-error`:undefined} onChange={e=>change(key,e.target.value)}/>{error(key)}</label>;
- const options=(key:'formats'|'types',label:string,values:string[]) => <fieldset className="sc-options"><legend>{label}</legend><div className="sc-options-wrap">{values.map(value=><label key={value}><input type="checkbox" checked={draft[key].includes(value)} onChange={e=>change(key,e.target.checked?[...draft[key],value]:draft[key].filter(v=>v!==value))}/>{value}</label>)}</div></fieldset>;
- const protection=<div className="sc-notice"><Shield size={20}/><span>{draft.tilt?`${draft.losses} програші поспіль → пауза ${draft.minutes} хв. Додавання ставок блокується на час паузи.`:'Тільт-захист вимкнено.'}</span></div>;
- return <><Dialog open={open} onOpenChange={v=>{if(!v)close();}}><DialogContent className="sc-dialog" hideCloseButton onEscapeKeyDown={e=>{if(saving||confirm)e.preventDefault();}} onPointerDownOutside={e=>{if(saving||confirm)e.preventDefault();}}>
- <header className="sc-header"><DialogTitle>Створити стратегію</DialogTitle><DialogDescription>Задайте правила для своїх рішень.</DialogDescription><button disabled={saving} className="sc-close" aria-label="Закрити форму" onClick={close}><X size={22}/></button></header>
- <nav className="sc-steps" aria-label="Кроки створення стратегії">{['Основне','Правила','Перевірка'].map((label,i)=><button key={label} disabled={saving} aria-current={step===i?'step':undefined} onClick={()=>go(i)}>{label}</button>)}</nav>
- <div className="sc-body" ref={body}><fieldset className="sc-fields" disabled={saving}>
- {step===0&&<>
- <div className="sc-template-section">
-  <h4 className="sc-template-heading">Шаблон</h4>
-  <div className="sc-template-grid" aria-label="Шаблони стратегій">{wizardTemplates.map(t=><button type="button" className="sc-template-card" key={t.name} onClick={()=>{if(dirty){setReplacement(t);setConfirm(true);}else apply(t);}}><strong>{t.name}</strong><span>{getRiskLabel(t.riskLevel)} ризик</span><small>Коефіцієнти {t.min}–{t.max||'без максимуму'}</small></button>)}</div>
- </div>
- {field('name','Назва стратегії *')}<label className="sc-field" htmlFor="sc-description"><span>Опис</span><textarea id="sc-description" rows={3} maxLength={2000} value={draft.description} onChange={e=>change('description',e.target.value)}/></label>
- <fieldset className="sc-risk"><legend>Рівень ризику</legend><div>{(['Low','Medium','High'] as const).map(value=><label key={value}><input type="radio" name="sc-risk" value={value} checked={draft.riskLevel===value} onChange={()=>change('riskLevel',value)}/><span>{getRiskLabel(value)}</span></label>)}</div></fieldset><p className="sc-help">Ваша оцінка ризику, не прогноз.</p>
- {field('roi','Очікуваний ROI, %')}<p className="sc-help">Орієнтир, а не гарантований прибуток.</p><p className="sc-help">* Обов’язкові поля</p>{error('limit')}</>}
- {step===1&&<><h3>Контроль ставок</h3><div className="sc-pair">{field('min','Коефіцієнт від')}{field('max','Коефіцієнт до')}</div><p className="sc-help">Порожнє поле — без обмеження.</p>{options('formats','Формати матчів',['BO1','BO3','BO5'])}{options('types','Типи ставок',['Ординар','Експрес'])}<p className="sc-help">Якщо нічого не обрано — дозволені всі варіанти.</p>
- <section className="sc-section"><h3>Додаткові критерії *</h3>{draft.criteria.map((criterion,i)=><div className="sc-criterion" key={i}><input aria-label={`Критерій ${i+1}`} value={criterion} maxLength={500} aria-invalid={!!errors.criteria&&i===0} aria-describedby={errors.criteria?'sc-criteria-error':undefined} onChange={e=>change('criteria',draft.criteria.map((c,n)=>n===i?e.target.value:c))}/><button type="button" aria-label={`Видалити критерій ${i+1}`} onClick={()=>change('criteria',draft.criteria.length===1?['']:draft.criteria.filter((_,n)=>n!==i))}><X size={16}/></button></div>)}{error('criteria')}<button type="button" className="sc-text-action" onClick={()=>change('criteria',[...draft.criteria,''])}><Plus size={16}/>Додати критерій</button></section>
- <section className="sc-section"><label className="sc-switch"><span>Тільт-захист</span><input type="checkbox" role="switch" checked={draft.tilt} onChange={e=>change('tilt',e.target.checked)}/></label>{draft.tilt&&<><div className="sc-pair">{field('losses','Після програшів поспіль')}{field('minutes','Пауза, хв')}</div>{protection}</>}</section></>}
- {step===2&&<><h3 className="sc-name">{draft.name}</h3><p className="sc-help">{getRiskLabel(draft.riskLevel)} ризик</p><div className="sc-summary-block"><div className="sc-summary-title"><h3>Основне</h3><button type="button" onClick={()=>go(0)}>Змінити</button></div><dl className="sc-summary"><div><dt>Опис</dt><dd>{draft.description}</dd></div><div><dt>Очікуваний ROI</dt><dd>{draft.roi}%</dd></div></dl></div><section className="sc-summary-block"><div className="sc-summary-title"><h3>Правила</h3><button type="button" onClick={()=>go(1)}>Змінити</button></div><dl className="sc-summary"><div><dt>Коефіцієнти</dt><dd>{draft.min||'Без мінімуму'} — {draft.max||'без максимуму'}</dd></div><div><dt>Формати матчів</dt><dd>{draft.formats.join(', ')||'Усі'}</dd></div><div><dt>Типи ставок</dt><dd>{draft.types.join(', ')||'Усі'}</dd></div><div><dt>Додаткові критерії</dt><dd><ul>{draft.criteria.filter(c=>c.trim()).map((c,i)=><li key={i}>{c}</li>)}</ul></dd></div></dl>{protection}</section><p className="sc-info">Стратегія не створює ставки автоматично.</p></>}
- </fieldset>{failure&&<p className="sc-error" role="alert">{failure}</p>}</div>
- <footer className="sc-footer"><button disabled={saving} onClick={()=>step?go(step-1):close()}>{step?'Назад':'Скасувати'}</button><button disabled={saving} className="sc-primary" onClick={()=>step===2?void save():go(step+1)}>{saving?'Збереження…':step===2?'Створити стратегію':step===1?'Перевірити':'Далі'}{step<2&&<ArrowRight size={16}/>}</button></footer>
- </DialogContent></Dialog>
- <AlertDialog open={confirm} onOpenChange={setConfirm}><AlertDialogContent><AlertDialogTitle>{replacement?'Застосувати шаблон?':'Скасувати створення?'}</AlertDialogTitle><AlertDialogDescription>{replacement?'Шаблон замінить заповнені поля.':'Введені дані буде втрачено.'}</AlertDialogDescription><AlertDialogFooter><AlertDialogCancel>Продовжити редагування</AlertDialogCancel><AlertDialogAction className="bg-[#ff693b] text-black hover:bg-[#ee5a2e]" onClick={()=>{if(replacement){apply(replacement);setReplacement(null);setConfirm(false);}else{reset();onOpenChange(false);}}}>{replacement?'Застосувати':'Скасувати створення'}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
- </>;
+import { useRef, useState } from "react";
+import {
+  ArrowRight,
+  Plus,
+  Shield,
+  X,
+  Scale,
+  Rocket,
+  Check,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+import { getRiskLabel } from "@/lib/strategyHelpers";
+import type { CS2Strategy } from "@/types/strategy";
+import {
+  newDraft,
+  wizardTemplates,
+  validateDraft,
+  draftToStrategy,
+  type StrategyDraft,
+} from "./strategyWizard";
+import "./CreateStrategyDialog.css";
+import "./CreateStrategyDesign.css";
+interface Props {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  strategies: CS2Strategy[];
+  onSave: (strategy: CS2Strategy) => void | Promise<void>;
+}
+export default function CreateStrategyDialog({
+  open,
+  onOpenChange,
+  strategies,
+  onSave,
+}: Props) {
+  const [draft, setDraft] = useState(newDraft),
+    [step, setStep] = useState(0),
+    [errors, setErrors] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false),
+    [failure, setFailure] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [confirm, setConfirm] = useState(false),
+    [replacement, setReplacement] = useState<StrategyDraft | null>(null);
+  const busy = useRef(false),
+    body = useRef<HTMLDivElement>(null);
+  const dirty = JSON.stringify(draft) !== JSON.stringify(newDraft());
+  const reset = () => {
+    setDraft(newDraft());
+    setSelectedTemplate(null);
+    setStep(0);
+    setErrors({});
+    setFailure("");
+    setConfirm(false);
+    setReplacement(null);
+  };
+  const close = () => {
+    if (busy.current) return;
+    if (dirty) {
+      setReplacement(null);
+      setConfirm(true);
+    } else {
+      reset();
+      onOpenChange(false);
+    }
+  };
+  const change = <K extends keyof StrategyDraft>(
+    key: K,
+    value: StrategyDraft[K],
+  ) => {
+    setDraft((d) => ({ ...d, [key]: value }));
+    setErrors((e) => ({ ...e, [key]: "" }));
+    setFailure("");
+  };
+  const go = (next: number) => {
+    if (busy.current) return;
+    if (next > step) {
+      for (let i = 0; i < next; i++) {
+        const e = validateDraft(draft, i, strategies);
+        if (Object.keys(e).length) {
+          setStep(i);
+          setErrors(e);
+          requestAnimationFrame(() =>
+            body.current
+              ?.querySelector<HTMLElement>('[aria-invalid="true"]')
+              ?.focus(),
+          );
+          return;
+        }
+      }
+    }
+    setStep(next);
+    setErrors({});
+    setFailure("");
+    if (body.current) body.current.scrollTop = 0;
+  };
+  const save = async () => {
+    if (busy.current) return;
+    for (let i = 0; i < 2; i++) {
+      const e = validateDraft(draft, i, strategies);
+      if (Object.keys(e).length) {
+        setStep(i);
+        setErrors(e);
+        return;
+      }
+    }
+    busy.current = true;
+    setSaving(true);
+    setFailure("");
+    try {
+      await onSave(draftToStrategy(draft));
+      reset();
+      onOpenChange(false);
+    } catch {
+      setFailure(
+        "Не вдалося зберегти стратегію. Ваші поля збережено — спробуйте ще раз.",
+      );
+    } finally {
+      busy.current = false;
+      setSaving(false);
+    }
+  };
+  const apply = (t: StrategyDraft) => {
+    setSelectedTemplate(t.name);
+    setDraft({
+      ...t,
+      formats: [...t.formats],
+      types: [...t.types],
+      criteria: [...t.criteria],
+    });
+    setErrors({});
+    setFailure("");
+  };
+  const error = (key: string) =>
+    errors[key] ? (
+      <span className="sc-error" id={`sc-${key}-error`} role="alert">
+        {errors[key]}
+      </span>
+    ) : null;
+  const field = (
+    key: "name" | "roi" | "min" | "max" | "losses" | "minutes",
+    label: string,
+  ) => (
+    <label className="sc-field" htmlFor={`sc-${key}`}>
+      <span>{label}</span>
+      <input
+        id={`sc-${key}`}
+        value={draft[key]}
+        inputMode={key === "name" ? "text" : "decimal"}
+        maxLength={key === "name" ? 120 : 16}
+        aria-invalid={!!errors[key]}
+        aria-describedby={errors[key] ? `sc-${key}-error` : undefined}
+        onChange={(e) => change(key, e.target.value)}
+      />
+      {error(key)}
+    </label>
+  );
+  const options = (
+    key: "formats" | "types",
+    label: string,
+    values: string[],
+  ) => (
+    <fieldset className="sc-options">
+      <legend>{label}</legend>
+      <div className="sc-options-wrap">
+        {values.map((value) => (
+          <label key={value}>
+            <input
+              type="checkbox"
+              checked={draft[key].includes(value)}
+              onChange={(e) =>
+                change(
+                  key,
+                  e.target.checked
+                    ? [...draft[key], value]
+                    : draft[key].filter((v) => v !== value),
+                )
+              }
+            />
+            {value}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+  const protection = (
+    <div className="sc-notice">
+      <Shield size={20} />
+      <span>
+        {draft.tilt
+          ? `${draft.losses} програші поспіль → пауза ${draft.minutes} хв. Додавання ставок блокується на час паузи.`
+          : "Тільт-захист вимкнено."}
+      </span>
+    </div>
+  );
+  return (
+    <>
+      <Dialog
+        open={open}
+        onOpenChange={(v) => {
+          if (!v) close();
+        }}
+      >
+        <DialogContent
+          className="sc-dialog"
+          hideCloseButton
+          onEscapeKeyDown={(e) => {
+            if (saving || confirm) e.preventDefault();
+          }}
+          onPointerDownOutside={(e) => {
+            if (saving || confirm) e.preventDefault();
+          }}
+        >
+          <header className="sc-header">
+            <DialogTitle>Створити стратегію</DialogTitle>
+            <DialogDescription>
+              Задайте правила для своїх рішень.
+            </DialogDescription>
+            <button
+              disabled={saving}
+              className="sc-close"
+              aria-label="Закрити форму"
+              onClick={close}
+            >
+              <X size={22} />
+            </button>
+          </header>
+          <nav className="sc-steps" aria-label="Кроки створення стратегії">
+            {["Основне", "Правила", "Перевірка"].map((label, i) => (
+              <button
+                key={label}
+                disabled={saving}
+                aria-current={step === i ? "step" : undefined}
+                onClick={() => go(i)}
+              >
+                <span className="sc-step-number" aria-hidden="true">
+                  {i + 1}
+                </span>
+                {label}
+              </button>
+            ))}
+          </nav>
+          <div className="sc-body" ref={body}>
+            <fieldset className="sc-fields" disabled={saving}>
+              {step === 0 && (
+                <>
+                  <div className="sc-template-section">
+                    <h4 className="sc-template-heading">Оберіть шаблон</h4>
+                    <div
+                      className="sc-template-grid"
+                      aria-label="Шаблони стратегій"
+                    >
+                      {wizardTemplates.map((t, i) => {
+                        const Icon = [Shield, Scale, Rocket][i];
+                        return (
+                          <button
+                            type="button"
+                            className="sc-template-card"
+                            key={t.name}
+                            aria-label={t.name}
+                            aria-pressed={selectedTemplate === t.name}
+                            onClick={() => {
+                              if (selectedTemplate === t.name) return;
+                              if (dirty) {
+                                setReplacement(t);
+                                setConfirm(true);
+                              } else apply(t);
+                            }}
+                          >
+                            <Icon className="sc-template-icon" size={30} />
+                            {selectedTemplate === t.name && (
+                              <span className="sc-template-check">
+                                <Check size={15} />
+                              </span>
+                            )}
+                            <strong>{t.name.replace(" стратегія", "")}</strong>
+                            <span>{getRiskLabel(t.riskLevel)} ризик</span>
+                            <small>
+                              Коефіцієнти{" "}
+                              {t.max ? `${t.min}–${t.max}` : `від ${t.min}`}
+                            </small>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <label className="sc-field" htmlFor="sc-name">
+                    <span>Назва стратегії *</span>
+                    <input
+                      id="sc-name"
+                      placeholder="Назва вашої стратегії"
+                      value={draft.name}
+                      maxLength={120}
+                      aria-invalid={!!errors.name}
+                      aria-describedby={
+                        errors.name ? "sc-name-error" : undefined
+                      }
+                      onChange={(e) => change("name", e.target.value)}
+                    />
+                    {error("name")}
+                  </label>
+                  <label className="sc-field" htmlFor="sc-description">
+                    <span>Опис</span>
+                    <textarea
+                      id="sc-description"
+                      placeholder="Коротко опишіть підхід та умови"
+                      rows={3}
+                      maxLength={2000}
+                      value={draft.description}
+                      onChange={(e) => change("description", e.target.value)}
+                    />
+                  </label>
+                  <fieldset className="sc-risk">
+                    <legend>Рівень ризику</legend>
+                    <div>
+                      {(["Low", "Medium", "High"] as const).map((value) => (
+                        <label key={value}>
+                          <input
+                            type="radio"
+                            name="sc-risk"
+                            value={value}
+                            checked={draft.riskLevel === value}
+                            onChange={() => change("riskLevel", value)}
+                          />
+                          <span>{getRiskLabel(value)}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <p className="sc-help">Ваша оцінка ризику, не прогноз.</p>
+                  <details
+                    className="sc-advanced"
+                    open={errors.roi ? true : undefined}
+                  >
+                    <summary>Додаткові налаштування</summary>
+                    {field("roi", "Очікуваний ROI, %")}
+                    <p className="sc-help">
+                      Орієнтир, а не гарантований прибуток.
+                    </p>
+                  </details>
+                  {error("limit")}
+                </>
+              )}
+              {step === 1 && (
+                <>
+                  <h3>Контроль ставок</h3>
+                  <div className="sc-pair">
+                    {field("min", "Коефіцієнт від")}
+                    {field("max", "Коефіцієнт до")}
+                  </div>
+                  <p className="sc-help">Порожнє поле — без обмеження.</p>
+                  {options("formats", "Формати матчів", ["BO1", "BO3", "BO5"])}
+                  {options("types", "Типи ставок", ["Ординар", "Експрес"])}
+                  <p className="sc-help">
+                    Якщо нічого не обрано — дозволені всі варіанти.
+                  </p>
+                  <section className="sc-section">
+                    <h3>Додаткові критерії *</h3>
+                    {draft.criteria.map((criterion, i) => (
+                      <div className="sc-criterion" key={i}>
+                        <input
+                          aria-label={`Критерій ${i + 1}`}
+                          value={criterion}
+                          maxLength={500}
+                          aria-invalid={!!errors.criteria && i === 0}
+                          aria-describedby={
+                            errors.criteria ? "sc-criteria-error" : undefined
+                          }
+                          onChange={(e) =>
+                            change(
+                              "criteria",
+                              draft.criteria.map((c, n) =>
+                                n === i ? e.target.value : c,
+                              ),
+                            )
+                          }
+                        />
+                        <button
+                          type="button"
+                          aria-label={`Видалити критерій ${i + 1}`}
+                          onClick={() =>
+                            change(
+                              "criteria",
+                              draft.criteria.length === 1
+                                ? [""]
+                                : draft.criteria.filter((_, n) => n !== i),
+                            )
+                          }
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                    {error("criteria")}
+                    <button
+                      type="button"
+                      className="sc-text-action"
+                      onClick={() =>
+                        change("criteria", [...draft.criteria, ""])
+                      }
+                    >
+                      <Plus size={16} />
+                      Додати критерій
+                    </button>
+                  </section>
+                  <section className="sc-section">
+                    <label className="sc-switch">
+                      <span>Тільт-захист</span>
+                      <input
+                        type="checkbox"
+                        role="switch"
+                        checked={draft.tilt}
+                        onChange={(e) => change("tilt", e.target.checked)}
+                      />
+                    </label>
+                    {draft.tilt && (
+                      <>
+                        <div className="sc-pair">
+                          {field("losses", "Після програшів поспіль")}
+                          {field("minutes", "Пауза, хв")}
+                        </div>
+                        {protection}
+                      </>
+                    )}
+                  </section>
+                </>
+              )}
+              {step === 2 && (
+                <>
+                  <h3 className="sc-name">{draft.name}</h3>
+                  <p className="sc-help">
+                    {getRiskLabel(draft.riskLevel)} ризик
+                  </p>
+                  <div className="sc-summary-block">
+                    <div className="sc-summary-title">
+                      <h3>Основне</h3>
+                      <button type="button" onClick={() => go(0)}>
+                        Змінити
+                      </button>
+                    </div>
+                    <dl className="sc-summary">
+                      <div>
+                        <dt>Опис</dt>
+                        <dd>{draft.description}</dd>
+                      </div>
+                      <div>
+                        <dt>Очікуваний ROI</dt>
+                        <dd>{draft.roi}%</dd>
+                      </div>
+                    </dl>
+                  </div>
+                  <section className="sc-summary-block">
+                    <div className="sc-summary-title">
+                      <h3>Правила</h3>
+                      <button type="button" onClick={() => go(1)}>
+                        Змінити
+                      </button>
+                    </div>
+                    <dl className="sc-summary">
+                      <div>
+                        <dt>Коефіцієнти</dt>
+                        <dd>
+                          {draft.min || "Без мінімуму"} —{" "}
+                          {draft.max || "без максимуму"}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt>Формати матчів</dt>
+                        <dd>{draft.formats.join(", ") || "Усі"}</dd>
+                      </div>
+                      <div>
+                        <dt>Типи ставок</dt>
+                        <dd>{draft.types.join(", ") || "Усі"}</dd>
+                      </div>
+                      <div>
+                        <dt>Додаткові критерії</dt>
+                        <dd>
+                          <ul>
+                            {draft.criteria
+                              .filter((c) => c.trim())
+                              .map((c, i) => (
+                                <li key={i}>{c}</li>
+                              ))}
+                          </ul>
+                        </dd>
+                      </div>
+                    </dl>
+                    {protection}
+                  </section>
+                  <p className="sc-info">
+                    Стратегія не створює ставки автоматично.
+                  </p>
+                </>
+              )}
+            </fieldset>
+            {failure && (
+              <p className="sc-error" role="alert">
+                {failure}
+              </p>
+            )}
+          </div>
+          <footer className="sc-footer">
+            <button
+              disabled={saving}
+              onClick={() => (step ? go(step - 1) : close())}
+            >
+              {step ? "Назад" : "Скасувати"}
+            </button>
+            <button
+              disabled={saving}
+              className="sc-primary"
+              onClick={() => (step === 2 ? void save() : go(step + 1))}
+            >
+              {saving
+                ? "Збереження…"
+                : step === 2
+                  ? "Створити стратегію"
+                  : step === 1
+                    ? "Перевірити"
+                    : "Далі"}
+              {step < 2 && <ArrowRight size={16} />}
+            </button>
+          </footer>
+        </DialogContent>
+      </Dialog>
+      <AlertDialog open={confirm} onOpenChange={setConfirm}>
+        <AlertDialogContent>
+          <AlertDialogTitle>
+            {replacement ? "Застосувати шаблон?" : "Скасувати створення?"}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {replacement
+              ? "Шаблон замінить заповнені поля."
+              : "Введені дані буде втрачено."}
+          </AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Продовжити редагування</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-[#ff693b] text-black hover:bg-[#ee5a2e]"
+              onClick={() => {
+                if (replacement) {
+                  apply(replacement);
+                  setReplacement(null);
+                  setConfirm(false);
+                } else {
+                  reset();
+                  onOpenChange(false);
+                }
+              }}
+            >
+              {replacement ? "Застосувати" : "Скасувати створення"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
 }

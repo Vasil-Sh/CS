@@ -14,7 +14,14 @@ import { useAppStore } from "@/stores/appStore";
 
 import { logRender } from "@/lib/devLogger";
 import { AnalyticsSkeleton } from "@/components/PageSkeleton";
-import { BarChart3, Calendar, Wallet } from "lucide-react";
+import {
+  BarChart3,
+  Calendar,
+  CircleDollarSign,
+  ClipboardCheck,
+  Target,
+  Wallet,
+} from "lucide-react";
 import type { Bet, BalanceData, ScatterData } from "@/types/betting";
 import "./Analytics.css";
 
@@ -51,9 +58,7 @@ export default function Analytics() {
   // Profit is always stored in UAH, so USD bets divide by their exchange rate.
   const displayBets = useMemo(() => {
     if (currencyMode === "UAH") {
-      return bets.filter(
-        (bet: Bet) => (bet.currency || "UAH") === "UAH",
-      );
+      return bets.filter((bet: Bet) => (bet.currency || "UAH") === "UAH");
     }
     const globalRate = Number(
       localStorage.getItem("matchiq_exchange_rate") || 41.5,
@@ -238,7 +243,6 @@ export default function Analytics() {
     return Math.round((sum / completedBets.length) * 100) / 100;
   }, [completedBets]);
 
-
   const monthlyProfitData = useMemo((): MonthlyData[] => {
     const monthlyData: {
       [key: string]: {
@@ -298,24 +302,33 @@ export default function Analytics() {
     const [year, month] = latest.monthKey.split("-").map(Number);
     const lastMonth = new Date(year, month - 1, 1);
     return Array.from({ length: 4 }, (_, offset) => {
-      const date = new Date(lastMonth.getFullYear(), lastMonth.getMonth() - 3 + offset, 1);
+      const date = new Date(
+        lastMonth.getFullYear(),
+        lastMonth.getMonth() - 3 + offset,
+        1,
+      );
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-      const source = monthlyProfitData.find((item) => item.monthKey === monthKey);
+      const source = monthlyProfitData.find(
+        (item) => item.monthKey === monthKey,
+      );
       const monthName = date.toLocaleDateString("uk-UA", { month: "long" });
-      const displayMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-      return source ? {
-        ...source,
-        month: displayMonth,
-      } : {
-        month: displayMonth,
-        monthKey,
-        profit: 0,
-        cumulative: 0,
-        wins: 0,
-        losses: 0,
-        totalBets: 0,
-        winRate: 0,
-      };
+      const displayMonth =
+        monthName.charAt(0).toUpperCase() + monthName.slice(1);
+      return source
+        ? {
+            ...source,
+            month: displayMonth,
+          }
+        : {
+            month: displayMonth,
+            monthKey,
+            profit: 0,
+            cumulative: 0,
+            wins: 0,
+            losses: 0,
+            totalBets: 0,
+            winRate: 0,
+          };
     });
   }, [monthlyProfitData]);
 
@@ -416,13 +429,11 @@ export default function Analytics() {
       }));
   }, [gameFilteredBets]);
 
-
   const tabs = [
     { id: "profit", label: "Прибуток", icon: Wallet },
     { id: "odds", label: "Коефіцієнти", icon: BarChart3 },
     { id: "comparison", label: "Періоди", icon: Calendar },
   ];
-
 
   return (
     <div className="analytics-profit min-h-screen relative flex flex-col">
@@ -432,21 +443,49 @@ export default function Analytics() {
         <>
           <header className="analytics-header">
             <div className="analytics-header-top">
-              <div>
+              <div className="analytics-title-block">
+                <p className="analytics-eyebrow">
+                  ANALYTICS <span />
+                </p>
                 <h1>Аналітика</h1>
                 <p>Картина ваших рішень — без шуму.</p>
               </div>
-              <div className="analytics-header-controls" aria-label="Фільтри аналітики">
-                <div className="analytics-segment" role="group" aria-label="Фільтр гри">
+              <div
+                className="analytics-header-controls"
+                aria-label="Фільтри аналітики"
+              >
+                <div
+                  className="analytics-segment"
+                  role="group"
+                  aria-label="Фільтр гри"
+                >
                   {(["all", "CS2", "Dota2"] as const).map((game) => (
-                    <button key={game} type="button" aria-pressed={gameFilter === game} onClick={() => setGameFilter(game)}>
-                      {game === "all" ? "Усі ігри" : game === "Dota2" ? "Dota 2" : "CS2"}
+                    <button
+                      key={game}
+                      type="button"
+                      aria-pressed={gameFilter === game}
+                      onClick={() => setGameFilter(game)}
+                    >
+                      {game === "all"
+                        ? "Усі ігри"
+                        : game === "Dota2"
+                          ? "Dota 2"
+                          : "CS2"}
                     </button>
                   ))}
                 </div>
-                <div className="analytics-segment" role="group" aria-label="Валюта">
+                <div
+                  className="analytics-segment"
+                  role="group"
+                  aria-label="Валюта"
+                >
                   {(["UAH", "USD"] as const).map((currency) => (
-                    <button key={currency} type="button" aria-pressed={currencyMode === currency} onClick={() => setCurrencyMode(currency)}>
+                    <button
+                      key={currency}
+                      type="button"
+                      aria-pressed={currencyMode === currency}
+                      onClick={() => setCurrencyMode(currency)}
+                    >
                       {currency === "UAH" ? "₴ UAH" : "$ USD"}
                     </button>
                   ))}
@@ -454,12 +493,57 @@ export default function Analytics() {
               </div>
             </div>
             <dl className="analytics-head-stats">
-              <div>
-                <dd className={filteredStats.totalProfit >= 0 ? "analytics-positive" : "analytics-negative"}>{filteredStats.totalProfit >= 0 ? "+" : ""}{Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} {currencyMode === "USD" ? "$" : "₴"}</dd>
-                <dt>Прибуток <span>ROI {roi >= 0 ? "+" : ""}{roi}%</span></dt>
+              <div className="analytics-head-stat">
+                <span className="analytics-stat-icon">
+                  <CircleDollarSign aria-hidden="true" />
+                </span>
+                <div>
+                  <dt>Чистий прибуток</dt>
+                  <dd
+                    className={
+                      filteredStats.totalProfit >= 0
+                        ? "analytics-positive"
+                        : "analytics-negative"
+                    }
+                  >
+                    {filteredStats.totalProfit >= 0 ? "+" : ""}
+                    {Math.round(filteredStats.totalProfit).toLocaleString(
+                      "uk-UA",
+                    )}{" "}
+                    {currencyMode === "USD" ? "$" : "₴"}
+                  </dd>
+                  <small>
+                    ROI {roi >= 0 ? "+" : ""}
+                    {roi}%
+                  </small>
+                </div>
               </div>
-              <div><dd className="analytics-orange">{completedBets.length}</dd><dt>Розраховано <span>{winningBets.length}W / {losingBets.length}L</span></dt></div>
-              <div><dd className="analytics-blue">{avgOdds > 0 ? avgOdds.toFixed(2) : "—"}</dd><dt>Середній коеф. <span>{filteredStats.winRate}% вінрейт</span></dt></div>
+              <div className="analytics-head-stat">
+                <span className="analytics-stat-icon">
+                  <ClipboardCheck aria-hidden="true" />
+                </span>
+                <div>
+                  <dt>Розраховано</dt>
+                  <dd className="analytics-stat-neutral">
+                    {completedBets.length}
+                  </dd>
+                  <small>
+                    {winningBets.length}W / {losingBets.length}L
+                  </small>
+                </div>
+              </div>
+              <div className="analytics-head-stat">
+                <span className="analytics-stat-icon">
+                  <Target aria-hidden="true" />
+                </span>
+                <div>
+                  <dt>Середній коефіцієнт</dt>
+                  <dd className="analytics-stat-neutral">
+                    {avgOdds > 0 ? avgOdds.toFixed(2) : "—"}
+                  </dd>
+                  <small>{filteredStats.winRate}% вінрейт</small>
+                </div>
+              </div>
             </dl>
           </header>
 
@@ -473,14 +557,19 @@ export default function Analytics() {
 
             {/* Custom Tabs Navigation */}
             {gameFilteredBets.length > 0 && (
-            <div className="analytics-tabs-shell flex flex-col flex-1 min-h-0">
-              <div className="analytics-tabs" role="tablist" aria-label="Розділи аналітики">
+              <div className="analytics-tabs-shell flex flex-col flex-1 min-h-0">
+                <div
+                  className="analytics-tabs"
+                  role="tablist"
+                  aria-label="Розділи аналітики"
+                >
                   {tabs.map((tab) => {
                     return (
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className="analytics-tab"
+                        role="tab"
                         aria-selected={activeTab === tab.id}
                       >
                         <span className="flex items-center justify-center gap-2">
@@ -489,70 +578,114 @@ export default function Analytics() {
                       </button>
                     );
                   })}
-              </div>
+                </div>
 
-              {/* Tab Content */}
-              <div className="analytics-tab-content flex flex-col flex-1 min-h-0">
-                {activeTab === "profit" && (
-                  <div className="flex flex-col flex-1">
-                    {gameFilteredBets.length > 0 ? (
-                      <div className="analytics-profit-grid">
-                        <div className="analytics-bankroll-wrap">
-                          <BankrollChart data={balanceOverTime} currency={currencyMode} />
-                        </div>
-                        <aside className="analytics-period-summary" aria-label="Підсумок періоду">
-                          <h2>Підсумок періоду</h2>
-                          <dl>
-                            <div><dt>Чистий результат</dt><dd className={filteredStats.totalProfit >= 0 ? "analytics-positive" : "analytics-negative"}>{filteredStats.totalProfit >= 0 ? "+" : ""}{Math.round(filteredStats.totalProfit).toLocaleString("uk-UA")} {currencyMode === "USD" ? "$" : "₴"}</dd></div>
-                            <div><dt>Розраховано</dt><dd>{completedBets.length}</dd></div>
-                            <div><dt>Активні</dt><dd>{gameFilteredBets.filter((bet) => bet.result === "Pending").length}</dd></div>
-                          </dl>
-                        </aside>
-                        <div className="analytics-profit-charts">
-                          <MonthlyProfitChartCard data={monthlyChartData} currency={currencyMode} />
-                          <OddsVsProfitScatterCard
-                            data={scatterData}
-                            winCount={winningBets.length}
-                            lossCount={losingBets.length}
-                            currency={currencyMode}
-                          />
-                        </div>
-                        <p className="analytics-method-note">Усі показники оновлюються після розрахунку запису.</p>
-                      </div>
-                    ) : (
-                      <Card className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]">
-                        <CardContent className="py-16 text-center">
-                          <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
-                            <Wallet
-                              className="h-16 w-16 text-gray-400"
-                              strokeWidth={1.5}
+                {/* Tab Content */}
+                <div className="analytics-tab-content flex flex-col flex-1 min-h-0">
+                  {activeTab === "profit" && (
+                    <div className="flex flex-col flex-1">
+                      {gameFilteredBets.length > 0 ? (
+                        <div className="analytics-profit-grid">
+                          <div className="analytics-bankroll-wrap">
+                            <BankrollChart
+                              data={balanceOverTime}
+                              currency={currencyMode}
                             />
                           </div>
-                          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                            Немає даних про прибуток
-                          </h3>
-                          <p className="text-gray-500 text-sm">
-                            Додайте ставки для перегляду аналізу прибутку
+                          <aside
+                            className="analytics-period-summary"
+                            aria-label="Підсумок періоду"
+                          >
+                            <h2>Підсумок періоду</h2>
+                            <dl>
+                              <div>
+                                <dt>Чистий результат</dt>
+                                <dd
+                                  className={
+                                    filteredStats.totalProfit >= 0
+                                      ? "analytics-positive"
+                                      : "analytics-negative"
+                                  }
+                                >
+                                  {filteredStats.totalProfit >= 0 ? "+" : ""}
+                                  {Math.round(
+                                    filteredStats.totalProfit,
+                                  ).toLocaleString("uk-UA")}{" "}
+                                  {currencyMode === "USD" ? "$" : "₴"}
+                                </dd>
+                              </div>
+                              <div>
+                                <dt>Розраховано</dt>
+                                <dd>{completedBets.length}</dd>
+                              </div>
+                              <div>
+                                <dt>Активні</dt>
+                                <dd>
+                                  {
+                                    gameFilteredBets.filter(
+                                      (bet) => bet.result === "Pending",
+                                    ).length
+                                  }
+                                </dd>
+                              </div>
+                            </dl>
+                          </aside>
+                          <div className="analytics-profit-charts">
+                            <MonthlyProfitChartCard
+                              data={monthlyChartData}
+                              currency={currencyMode}
+                            />
+                            <OddsVsProfitScatterCard
+                              data={scatterData}
+                              winCount={winningBets.length}
+                              lossCount={losingBets.length}
+                              currency={currencyMode}
+                            />
+                          </div>
+                          <p className="analytics-method-note">
+                            Усі показники оновлюються після розрахунку запису.
                           </p>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </div>
-                )}
+                        </div>
+                      ) : (
+                        <Card className="rounded-2xl bg-white overflow-hidden flex-1 flex items-center justify-center shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_16px_rgba(0,0,0,0.06)]">
+                          <CardContent className="py-16 text-center">
+                            <div className="p-8 bg-gray-100 rounded-2xl inline-block mb-6">
+                              <Wallet
+                                className="h-16 w-16 text-gray-400"
+                                strokeWidth={1.5}
+                              />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                              Немає даних про прибуток
+                            </h3>
+                            <p className="text-gray-500 text-sm">
+                              Додайте ставки для перегляду аналізу прибутку
+                            </p>
+                          </CardContent>
+                        </Card>
+                      )}
+                    </div>
+                  )}
 
-                {activeTab === "goals" && <GoalsManager />}
+                  {activeTab === "goals" && <GoalsManager />}
 
-                {/* ===== КОЕФІЦІЄНТИ TAB ===== */}
-                {activeTab === "odds" && (
-                  <OddsOverview bets={gameFilteredBets} currency={currencyMode} />
-                )}
+                  {/* ===== КОЕФІЦІЄНТИ TAB ===== */}
+                  {activeTab === "odds" && (
+                    <OddsOverview
+                      bets={gameFilteredBets}
+                      currency={currencyMode}
+                    />
+                  )}
 
-                {activeTab === "comparison" && (
-                  <PeriodComparison bets={gameFilteredBets} currency={currencyMode} />
-                )}
-                {activeTab === "risks" && <RiskManagement />}
+                  {activeTab === "comparison" && (
+                    <PeriodComparison
+                      bets={gameFilteredBets}
+                      currency={currencyMode}
+                    />
+                  )}
+                  {activeTab === "risks" && <RiskManagement />}
+                </div>
               </div>
-            </div>
             )}
           </div>
         </>

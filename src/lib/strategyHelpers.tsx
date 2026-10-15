@@ -39,9 +39,7 @@ export function getRiskLabel(risk: string): string {
   }
 }
 
-export function parseCriteriaForValidation(
-  criteria: string[],
-): {
+export function parseCriteriaForValidation(criteria: string[]): {
   minOdds?: number;
   maxOdds?: number;
   allowedFormats?: string[];
@@ -54,7 +52,9 @@ export function parseCriteriaForValidation(
     allowedBetTypes?: string[];
   } = {};
 
-  criteria.forEach((criterion) => {
+  const items = Array.isArray(criteria) ? criteria : [];
+  items.forEach((criterion) => {
+    if (typeof criterion !== "string") return;
     const lowerCriterion = criterion.toLowerCase();
 
     const minOddsMatch = lowerCriterion.match(

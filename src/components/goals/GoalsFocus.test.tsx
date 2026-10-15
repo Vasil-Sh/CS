@@ -92,12 +92,13 @@ describe("Goals master detail", () => {
       "Залишилось 0 ₴",
     );
   });
-  it("leaves the completed-goal rows in their existing layout", () => {
+  it("marks completed-goal rows with the is-complete modifier", () => {
     const h = controller([{ ...goals[0], status: "completed" }]);
     h.activeTab = "completed";
     render(<GoalsFocus h={h} />);
-    expect(screen.getByRole("button", { name: /Накопичити/ })).not.toHaveClass(
+    expect(screen.getByRole("button", { name: /Накопичити/ })).toHaveClass(
       "goals-active-card",
+      "is-complete",
     );
   });
   it("searches legacy numeric names without crashing", () => {

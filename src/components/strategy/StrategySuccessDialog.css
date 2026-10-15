@@ -36,7 +36,9 @@
   margin-bottom: 14px;
 }
 .ss-header h2 {
-  font: 600 32px/1.2 Oswald, sans-serif;
+  font:
+    600 32px/1.2 Oswald,
+    sans-serif;
   color: #f8f8f5;
   text-transform: uppercase;
   padding-right: 24px;
@@ -193,9 +195,14 @@
   background: #ff693b;
   color: #fff;
   border: 1px solid #ff693b;
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    transform 0.18s;
 }
 .ss-footer .ss-submit:hover {
   background: #ff825d;
   border-color: #ff825d;
   color: #fff;
+  transform: translateY(-1px);
 }
