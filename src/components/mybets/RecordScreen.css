@@ -80,12 +80,12 @@
   display: grid;
   grid-template-columns: 1.15fr 1.15fr repeat(4, minmax(0, 1fr));
   gap: 10px;
-  margin: -23px auto 0;
-  padding: 14px 9px 0;
+  margin: -44px auto 0;
+  padding: 0;
   width: calc(100% - 48px);
   max-width: 1540px;
   border-radius: 10px;
-  background: #f5f7fa;
+  background: transparent;
 }
 .record-metric {
   display: flex;
@@ -96,6 +96,15 @@
   border: 1px solid var(--record-line);
   background: #fff;
   border-radius: 7px;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+.record-metric:hover {
+  transform: translateY(-3px);
+  border-color: #b7bcb7;
+  box-shadow: 0 8px 20px #161d170c;
 }
 .record-metric > svg {
   flex-shrink: 0;

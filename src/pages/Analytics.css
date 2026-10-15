@@ -137,6 +137,15 @@
   background: #fff;
   color: #0f172a;
   box-shadow: 0 11px 25px rgba(15, 23, 42, 0.09);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease;
+}
+.analytics-head-stat:hover {
+  transform: translateY(-3px);
+  border-color: #b7bcb7;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
 }
 .analytics-stat-icon {
   display: grid;
