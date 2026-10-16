@@ -8,7 +8,7 @@ import {
   ArrowUpRight,
   BookOpen,
   Circle,
-  CircleDot,
+  CircleCheck,
   Plus,
 } from "lucide-react";
 import StrategyViolationDialog from "./StrategyViolationDialog";
@@ -413,7 +413,7 @@ export default function CS2BettingForm(props: Props) {
                     onClick={() => changeCategory(value)}
                   >
                     {d.betCategory === value ? (
-                      <CircleDot size={19} />
+                      <CircleCheck size={19} />
                     ) : (
                       <Circle size={19} />
                     )}

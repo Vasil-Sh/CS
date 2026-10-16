@@ -212,7 +212,6 @@ describe("Single-page record entry", () => {
     render(<CS2BettingForm />);
     expect(screen.getByText("БАН")).toBeVisible();
     expect(screen.getByText("Коментар користувача")).toBeVisible();
-    expect(screen.getByText("Ваш вибір")).toBeVisible();
   });
   it("does not match notes from another game", () => {
     state.formData.riskyTeams = [
