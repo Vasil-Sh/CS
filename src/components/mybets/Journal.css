@@ -168,6 +168,20 @@
 }
 .journal-statuses button span {
   font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 6px;
+  border-radius: 100px;
+  background: #e5e8ef;
+  color: #677287;
+  font-size: 12px;
+}
+.journal-statuses [aria-pressed="true"] span {
+  background: #ff6035;
+  color: #fff;
 }
 .journal-record-count {
   color: var(--journal-muted);
