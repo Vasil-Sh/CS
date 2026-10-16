@@ -281,6 +281,12 @@
   min-width: 0;
   border-radius: 3px;
 }
+.journal-match-static {
+  display: block;
+  width: 100%;
+  text-align: left;
+  min-width: 0;
+}
 .journal-match-inline {
   display: flex;
   align-items: center;

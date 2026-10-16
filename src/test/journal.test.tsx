@@ -190,12 +190,14 @@ describe("full-width journal", () => {
     await screen.findByText("Моя ціль");
   });
   it("toggles details with the same disclosure and restores focus on close", () => {
-    mount();
-    const toggle = screen.getByRole("button", { name: `Деталі: ${bet.match}` });
+    mount({ ...props(), bets: [express] });
+    const toggle = screen.getByRole("button", {
+      name: `Деталі: ${express.match}`,
+    });
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "true");
     expect(
-      screen.getByRole("region", { name: "Деталі запису" }),
+      screen.getByRole("region", { name: "Події експресу" }),
     ).toHaveAttribute("id", toggle.getAttribute("aria-controls"));
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "false");
@@ -203,7 +205,7 @@ describe("full-width journal", () => {
     fireEvent.click(screen.getByRole("button", { name: "Закрити деталі" }));
     expect(toggle).toHaveFocus();
     expect(
-      screen.queryByRole("region", { name: "Деталі запису" }),
+      screen.queryByRole("region", { name: "Події експресу" }),
     ).not.toBeInTheDocument();
   });
   it("expands five structured legs directly after the parent row, without financial duplicates", () => {
@@ -240,11 +242,10 @@ describe("full-width journal", () => {
   it("keeps only one row open and clears details when filtering it out", async () => {
     const p = { ...props(), bets: [bet, express] };
     const result = mount(p);
-    openDetails(bet.match);
     openDetails(express.match);
     expect(
-      screen.queryByRole("heading", { name: "Деталі запису" }),
-    ).not.toBeInTheDocument();
+      screen.getByRole("button", { name: `Деталі: ${express.match}` }),
+    ).toHaveAttribute("aria-expanded", "true");
     result.rerender(
       <MemoryRouter>
         <JournalTable {...p} searchText="TYLOO" />
@@ -264,26 +265,33 @@ describe("full-width journal", () => {
       screen.getByRole("button", { name: `Деталі: ${express.match}` }),
     ).toHaveAttribute("aria-expanded", "false");
   });
-  it("shows strategy and saved notes without rewriting records", () => {
+  it("keeps ordinal rows non-expandable without a details panel", () => {
+    mount({ ...props(), bets: [bet, express] });
+    expect(
+      screen.queryByRole("button", { name: `Деталі: ${bet.match}` }),
+    ).not.toBeInTheDocument();
+    const staticCell = document.querySelector(".journal-match-static");
+    expect(staticCell).not.toBeNull();
+    fireEvent.click(staticCell!);
+    expect(
+      screen.queryByRole("region", { name: "Деталі запису" }),
+    ).not.toBeInTheDocument();
+  });
+  it("shows strategy and saved notes for express records", () => {
     mount({
       ...props(),
       bets: [
         {
-          ...bet,
+          ...express,
           strategy: "Обережна стратегія",
           notes: "Перевірити склад\nДруга нотатка",
-          matchUrl: "https://example.com/match",
         },
       ],
     });
-    openDetails(bet.match);
-    const details = screen.getByRole("region", { name: "Деталі запису" });
+    openDetails(express.match);
+    const details = screen.getByRole("region", { name: "Події експресу" });
     expect(within(details).getByText("Обережна стратегія")).toBeVisible();
     expect(within(details).getByText(/Перевірити склад/)).toBeVisible();
-    // Tournament and match link are hidden for ordinal records.
-    expect(
-      within(details).queryByRole("link", { name: /Відкрити матч/ }),
-    ).not.toBeInTheDocument();
   });
   it("shows tournament and match link only for express records", () => {
     mount({
@@ -316,14 +324,17 @@ describe("full-width journal", () => {
     ).not.toBeInTheDocument();
   });
   it("offers inline resolution only for pending records", () => {
-    const p = { ...props(), bets: [{ ...bet, result: "Pending" as const }] };
+    const p = {
+      ...props(),
+      bets: [{ ...express, result: "Pending" as const }],
+    };
     mount(p);
-    openDetails(bet.match);
+    openDetails(express.match);
     fireEvent.click(screen.getByRole("button", { name: "Позначити виграш" }));
     fireEvent.click(screen.getByRole("button", { name: "Позначити програш" }));
     expect(p.onUpdateResult).toHaveBeenCalledWith(p.bets[0], "Win");
     expect(p.onUpdateResult).toHaveBeenCalledWith(p.bets[0], "Loss");
-    expect(screen.queryByText("+200 ₴")).not.toBeInTheDocument();
+    expect(screen.queryByText("+178,65 ₴")).not.toBeInTheDocument();
   });
   it("places Telegram and deletion in the row menu", async () => {
     const p = props();

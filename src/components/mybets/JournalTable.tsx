@@ -134,6 +134,7 @@ export default function JournalTable(p: Props) {
     p.onPageChange(1);
   }, [game, currency, category, size]);
   const choose = (bet: Bet) => {
+    if (!journalExpress(bet)) return;
     const key = journalKey(bet);
     setSelectedKey((current) => (current === key ? null : key));
   };
@@ -385,20 +386,10 @@ export default function JournalTable(p: Props) {
         const t1 = bet.team1 || parts[0] || "";
         const t2 = bet.team2 || parts[1] || "";
         const matchName = bet.match.replace(/\s+vs\s+/i, " — ");
-        return (
-          <button
-            type="button"
-            className="journal-match-button"
-            ref={(node) => {
-              if (node) disclosureRefs.current.set(journalKey(bet), node);
-              else disclosureRefs.current.delete(journalKey(bet));
-            }}
-            onClick={() => choose(bet)}
-            aria-label={`Деталі: ${bet.match}`}
-            aria-expanded={selectedKey === journalKey(bet)}
-            aria-controls={panelId(bet)}
-          >
-            {journalExpress(bet) ? (
+        const isExpress = journalExpress(bet);
+        const inner = (
+          <>
+            {isExpress ? (
               <span className="journal-match-title journal-match-inline">
                 <ListChecks size={24} />
                 <strong>
@@ -419,7 +410,7 @@ export default function JournalTable(p: Props) {
                 </span>
               </span>
             )}
-            {!journalExpress(bet) && (
+            {!isExpress && (
               <span className="journal-selection">
                 Вибір: <span>{journalSelection(bet)}</span>
               </span>
@@ -429,10 +420,10 @@ export default function JournalTable(p: Props) {
                 {bet.game === "Dota2" ? "Dota 2" : bet.game || "CS2"} ·{" "}
                 {bet.format || "—"}
               </span>
-              {!journalExpress(bet) && (
+              {!isExpress && (
                 <span className="journal-meta-chip">{journalMarket(bet)}</span>
               )}
-              {journalExpress(bet) && (
+              {isExpress && (
                 <span className="journal-expand-label">
                   {selectedKey === journalKey(bet)
                     ? "Згорнути події"
@@ -441,7 +432,25 @@ export default function JournalTable(p: Props) {
                 </span>
               )}
             </span>
+          </>
+        );
+        return isExpress ? (
+          <button
+            type="button"
+            className="journal-match-button"
+            ref={(node) => {
+              if (node) disclosureRefs.current.set(journalKey(bet), node);
+              else disclosureRefs.current.delete(journalKey(bet));
+            }}
+            onClick={() => choose(bet)}
+            aria-label={`Деталі: ${bet.match}`}
+            aria-expanded={selectedKey === journalKey(bet)}
+            aria-controls={panelId(bet)}
+          >
+            {inner}
           </button>
+        ) : (
+          <div className="journal-match-static">{inner}</div>
         );
       }
       case "amount":
