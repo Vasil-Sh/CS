@@ -117,7 +117,14 @@
   border-radius: 7px;
   background: rgba(13, 20, 24, 0.85);
 }
-.analytics-segment[aria-label="Валюта"] button {
+.analytics-segment[aria-label="Фільтр гри"] {
+  padding: 4px;
+  gap: 3px;
+  border-radius: 7px;
+  background: rgba(13, 20, 24, 0.85);
+}
+.analytics-segment[aria-label="Валюта"] button,
+.analytics-segment[aria-label="Фільтр гри"] button {
   min-height: 0;
   padding: 8px 14px;
   border: 0;
@@ -127,7 +134,8 @@
   font-size: 13px;
   font-weight: 400;
 }
-.analytics-segment[aria-label="Валюта"] button[aria-pressed="true"] {
+.analytics-segment[aria-label="Валюта"] button[aria-pressed="true"],
+.analytics-segment[aria-label="Фільтр гри"] button[aria-pressed="true"] {
   background: #ff592c;
   color: #171b17;
 }
