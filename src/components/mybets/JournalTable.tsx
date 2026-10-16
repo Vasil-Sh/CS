@@ -416,7 +416,6 @@ export default function JournalTable(p: Props) {
                   <TeamLogo src={bet.logoTeam1} name={t1} />
                   <strong>{matchName}</strong>
                   {t2 && <TeamLogo src={bet.logoTeam2} name={t2} />}
-                  <ChevronDown size={15} className="journal-disclosure-icon" />
                 </span>
               </span>
             )}
