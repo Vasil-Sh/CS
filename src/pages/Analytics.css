@@ -225,14 +225,13 @@
 }
 .analytics-tab {
   margin-bottom: -1px;
-  padding: 0 2px 14px;
+  padding: 5px 6px 12px;
   border: 0;
   border-bottom: 2px solid transparent;
-  color: #6c7b8f;
+  color: #7a8499;
   background: transparent;
   font:
-    750 15px/1.3 Inter,
-    ui-sans-serif,
+    600 21px/1.4 Oswald,
     sans-serif;
   transition:
     color 0.15s,
@@ -497,7 +496,7 @@
     overflow-x: auto;
   }
   .analytics-tab {
-    font-size: 14px;
+    font-size: 18px;
     white-space: nowrap;
   }
   .analytics-period-summary {
