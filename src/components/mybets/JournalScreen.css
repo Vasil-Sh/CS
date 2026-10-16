@@ -44,7 +44,7 @@
 .journal-header .record-entry-stats {
   grid-template-columns: repeat(6, minmax(0, 1fr));
   width: calc(100% - 48px);
-  margin-top: -16px;
+  margin-top: -44px;
   padding: 0;
   gap: 10px;
   background: transparent;
