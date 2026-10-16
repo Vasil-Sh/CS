@@ -104,15 +104,14 @@ export default function RecordPageHeader({
         value: money(bank),
         hint: journal ? currencyHint : "Баланс у вибраній валюті",
         Icon: Wallet,
-        color: "bank",
+        color: "",
       },
       {
         label: "Чистий результат",
         value: (stats.profit > 0 ? "+" : "") + money(stats.profit),
         hint: journal ? currencyHint : "За весь час",
         Icon: BarChart3,
-        color:
-          stats.profit < 0 ? "negative" : stats.profit > 0 ? "positive" : "",
+        color: stats.profit > 0 ? "positive" : "",
       },
       {
         label: "Всього записів",
@@ -121,7 +120,7 @@ export default function RecordPageHeader({
           ? `Активних: ${counts.activeCount}`
           : "Немає активних",
         Icon: FileText,
-        color: "total",
+        color: "",
       },
       {
         label: "Виграші",
@@ -135,14 +134,14 @@ export default function RecordPageHeader({
         value: counts.losses,
         hint: "Невдалі записи",
         Icon: ThumbsDown,
-        color: "negative",
+        color: "",
       },
       {
         label: "В активних записах",
         value: money(stats.activeAmount),
         hint: `Очікують: ${stats.activeCount}`,
         Icon: Clock,
-        color: "pending",
+        color: "",
       },
     ];
     return (
