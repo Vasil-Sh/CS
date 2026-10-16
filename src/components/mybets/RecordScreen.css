@@ -182,11 +182,11 @@
   border-bottom-color: var(--record-line);
 }
 .record-add-page .record-tab {
-  font-family: inherit;
-  font-size: 17px;
-  font-weight: 650;
-  color: #7a8392;
-  padding: 9px 5px 13px;
+  font:
+    600 21px/1.4 Oswald,
+    sans-serif;
+  color: #7a8499;
+  padding: 5px 6px 12px;
 }
 .record-add-page .record-tab.is-active {
   color: #ff572b;
