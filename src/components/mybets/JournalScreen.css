@@ -9,7 +9,7 @@
 }
 .journal-header .record-entry-hero {
   min-height: 244px;
-  padding: 64px 3.4% 40px;
+  padding: 64px 3.4% 56px;
   background-image:
     linear-gradient(90deg, #0b131733, transparent 65%),
     url("/assets/records/journal-hero.jpg");
