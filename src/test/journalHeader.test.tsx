@@ -43,7 +43,6 @@ const bets: Bet[] = [
 ];
 function mount(currency: "UAH" | "USD" = "UAH") {
   const onCurrencyChange = vi.fn();
-  const onAdd = vi.fn();
   const result = render(
     <RecordPageHeader
       variant="journal"
@@ -55,16 +54,15 @@ function mount(currency: "UAH" | "USD" = "UAH") {
       onCurrencyChange={onCurrencyChange}
       onEditBank={vi.fn()}
       hideEditBank
-      extraAction={<button onClick={onAdd}>Додати запис</button>}
     />,
   );
-  return { ...result, onCurrencyChange, onAdd };
+  return { ...result, onCurrencyChange };
 }
 function metric(label: string) {
   return screen.getByText(label).closest(".record-metric")!;
 }
 describe("journal header design", () => {
-  it("renders six cards, journal heading, add action and currency switch", () => {
+  it("renders six cards, journal heading and currency switch", () => {
     const h = mount();
     expect(screen.getByRole("heading", { name: "Журнал" })).toBeVisible();
     expect(screen.getByText("RECORD JOURNAL")).toBeVisible();
@@ -72,8 +70,9 @@ describe("journal header design", () => {
     expect(
       screen.queryByRole("button", { name: "Редагувати банк" }),
     ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Додати запис" }));
-    expect(h.onAdd).toHaveBeenCalledOnce();
+    expect(
+      screen.queryByRole("button", { name: "Додати запис" }),
+    ).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "$ USD" }));
     expect(h.onCurrencyChange).toHaveBeenCalledWith("USD");
   });

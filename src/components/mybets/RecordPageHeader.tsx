@@ -161,7 +161,6 @@ export default function RecordPageHeader({
                 : "Збережіть матч, прогноз і власні аргументи."}
             </p>
           </div>
-          {journal && <div className="journal-hero-action">{extraAction}</div>}
           {!hideCurrency && (
             <div className="record-currency" aria-label="Валюта статистики">
               {(["UAH", "USD"] as const).map((value) => (

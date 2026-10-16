@@ -32,16 +32,6 @@
   top: 26px;
   right: 2.2%;
 }
-.journal-hero-action {
-  position: absolute;
-  top: 26px;
-  right: calc(2.2% + 176px);
-}
-.journal-hero-action .record-header-add {
-  min-height: 46px;
-  background: #ff572b;
-  font-weight: 600;
-}
 .journal-header .record-currency {
   padding: 4px;
   gap: 3px;
@@ -57,29 +47,6 @@
   margin-top: -16px;
   padding: 12px 6px 0;
   background: #f5f7fa;
-}
-.journal-header .record-metric {
-  padding: 16px 18px;
-  gap: 14px;
-  min-height: 128px;
-}
-.journal-header .record-metric > svg {
-  width: 26px;
-  height: 26px;
-}
-.journal-header .record-metric span {
-  font-size: 13px;
-  padding-right: 0;
-}
-.journal-header .record-metric strong {
-  font:
-    600 clamp(26px, 2.5vw, 36px)/1.2 Oswald,
-    sans-serif;
-  margin: 12px 0 4px;
-  letter-spacing: -0.025em;
-}
-.journal-header .record-metric small {
-  font-size: 12px;
 }
 .journal-page .record-workspace {
   max-width: 1580px;
@@ -404,15 +371,6 @@
     top: 20px;
     right: 16px;
   }
-  .journal-hero-action {
-    top: 20px;
-    left: 16px;
-    right: auto;
-  }
-  .journal-hero-action .record-header-add {
-    padding: 10px 12px;
-    font-size: 12px;
-  }
   .journal-header .record-currency button {
     padding: 8px 10px;
   }
@@ -421,20 +379,6 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
     padding: 8px 0 0;
-  }
-  .journal-header .record-metric {
-    padding: 14px 10px;
-    gap: 9px;
-  }
-  .journal-header .record-metric > svg {
-    width: 20px;
-    height: 20px;
-  }
-  .journal-header .record-metric span {
-    font-size: 11px;
-  }
-  .journal-header .record-metric strong {
-    font-size: 28px;
   }
   .journal-page .record-workspace {
     padding: 18px 10px 28px;

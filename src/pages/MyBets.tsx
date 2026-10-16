@@ -25,7 +25,6 @@ import RecordPageHeader from "@/components/mybets/RecordPageHeader";
 import "@/components/mybets/RecordEntry.css";
 import "@/components/mybets/RecordScreen.css";
 import "@/components/mybets/JournalScreen.css";
-import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import type { Bet } from "@/types/betting";
 import ResultNoteDialog from "@/components/mybets/ResultNoteDialog";
@@ -482,15 +481,6 @@ export default function MyBets() {
           title="Журнал"
           subtitle="Ваші рішення, результати та висновки."
           hideEditBank
-          extraAction={
-            <button
-              className="record-header-add"
-              onClick={() => setActiveTab("add")}
-            >
-              <Plus size={18} />
-              Додати запис
-            </button>
-          }
         />
       ) : (
         <RecordPageHeader

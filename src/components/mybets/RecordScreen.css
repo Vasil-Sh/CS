@@ -71,6 +71,13 @@
   right: 3%;
   background: #0d1418d9;
   border-radius: 7px;
+  padding: 4px;
+  gap: 3px;
+}
+.record-entry-hero .record-currency button {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 4px;
 }
 .record-entry-hero .record-currency button[aria-pressed="true"] {
   background: #ff592c;
