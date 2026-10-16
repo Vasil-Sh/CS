@@ -139,7 +139,7 @@
   font-size: 28px;
   font-weight: 750;
   line-height: 1.2;
-  color: var(--stat, #10151d);
+  color: #10151d;
 }
 .risk-summary-cards .neutral {
   --stat: #637083;

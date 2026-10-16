@@ -231,6 +231,11 @@
   background: #fff;
   color: #718096;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .analytics-empty-state h3 {
   margin: 0;
