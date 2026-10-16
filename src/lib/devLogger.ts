@@ -20,7 +20,11 @@ export function logRender(componentName: string): void {
 
   if (!entry || now - entry.firstRender > WINDOW_MS) {
     // Reset window
-    componentRenders.set(componentName, { count: 1, firstRender: now, lastRender: now });
+    componentRenders.set(componentName, {
+      count: 1,
+      firstRender: now,
+      lastRender: now,
+    });
     return;
   }
 
@@ -30,7 +34,7 @@ export function logRender(componentName: string): void {
   if (entry.count === MAX_RENDERS) {
     console.error(
       `🔄 [DEV] ${componentName} перерендерилась ${entry.count} разів за ${WINDOW_MS}мс! Можливий безкінечний цикл.`,
-      '\n   Перевір useState/useEffect без залежностей або зміну залежностей на кожному рендері.',
+      "\n   Перевір useState/useEffect без залежностей або зміну залежностей на кожному рендері.",
     );
   }
 }

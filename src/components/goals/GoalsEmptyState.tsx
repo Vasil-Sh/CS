@@ -21,9 +21,7 @@ export default function GoalsEmptyState({ type, onCreateGoal }: Props) {
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             Немає завершених цілей
           </h3>
-          <p className="text-gray-500 text-sm">
-            Завершені цілі з'являться тут
-          </p>
+          <p className="text-gray-500 text-sm">Завершені цілі з'являться тут</p>
         </div>
       </div>
     );

@@ -12,14 +12,18 @@ interface StrategyData {
  * Displays the primary strategy name on the KPI card.
  * Created as a separate file to bypass Vite caching issue with SOH.
  */
-import { memo } from 'react';
-import { Target } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { ShineBorder } from '@/components/ui/shine-border';
-import { UserDataService } from '@/lib/userDataService';
-import { useAppStore } from '@/stores/appStore';
-import { useAuth } from '@/contexts/AuthContext';
-import { CARD_BASE_STYLE, applyCardHover, resetCardHover } from '@/lib/cardStyles';
+import { memo } from "react";
+import { Target } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ShineBorder } from "@/components/ui/shine-border";
+import { UserDataService } from "@/lib/userDataService";
+import { useAppStore } from "@/stores/appStore";
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  CARD_BASE_STYLE,
+  applyCardHover,
+  resetCardHover,
+} from "@/lib/cardStyles";
 
 interface StrategyKpiCardProps {
   onNavigate: () => void;
@@ -27,33 +31,60 @@ interface StrategyKpiCardProps {
 
 const riskBadgeClass = (risk: string) => {
   switch (risk) {
-    case 'Low': return 'bg-[#DCFCE7] text-gray-500';
-    case 'Medium': return 'bg-yellow-100 text-gray-500';
-    case 'High': return 'bg-[#FEE2E2] text-red-600';
-    default: return 'bg-gray-100 text-gray-500';
+    case "Low":
+      return "bg-[#DCFCE7] text-gray-500";
+    case "Medium":
+      return "bg-yellow-100 text-gray-500";
+    case "High":
+      return "bg-[#FEE2E2] text-red-600";
+    default:
+      return "bg-gray-100 text-gray-500";
   }
 };
 
 const riskLabel = (risk: string) => {
   switch (risk) {
-    case 'Low': return 'Низький';
-    case 'Medium': return 'Середній';
-    case 'High': return 'Високий';
-    default: return risk;
+    case "Low":
+      return "Низький";
+    case "Medium":
+      return "Середній";
+    case "High":
+      return "Високий";
+    default:
+      return risk;
   }
 };
 
-const StrategyKpiCardMemo = memo(function StrategyKpiCard({ onNavigate }: StrategyKpiCardProps) {
+const StrategyKpiCardMemo = memo(function StrategyKpiCard({
+  onNavigate,
+}: StrategyKpiCardProps) {
   const { user } = useAuth();
-  const resolvedUser = user?.username || localStorage.getItem('username') || 'default';
+  const resolvedUser =
+    user?.username || localStorage.getItem("username") || "default";
   useAppStore((s) => s.strategyVersion); // re-render on changes
 
   // Read primary strategy directly from localStorage
-  const pid = UserDataService.getUserData<string>(resolvedUser, 'primary_strategy', '')
-    || (() => { const r = localStorage.getItem('primaryStrategy'); if (r) try { return JSON.parse(r); } catch { return r; } return ''; })();
+  const pid =
+    UserDataService.getUserData<string>(resolvedUser, "primary_strategy", "") ||
+    (() => {
+      const r = localStorage.getItem("primaryStrategy");
+      if (r)
+        try {
+          return JSON.parse(r);
+        } catch {
+          return r;
+        }
+      return "";
+    })();
 
-  const strategies = UserDataService.getUserData<StrategyData[]>(resolvedUser, 'strategies_data', []);
-  const active = pid ? strategies.find((s) => s.id === pid || s.name === pid) : null;
+  const strategies = UserDataService.getUserData<StrategyData[]>(
+    resolvedUser,
+    "strategies_data",
+    [],
+  );
+  const active = pid
+    ? strategies.find((s) => s.id === pid || s.name === pid)
+    : null;
 
   const roi = 0; // computed by parent
 
@@ -66,25 +97,39 @@ const StrategyKpiCardMemo = memo(function StrategyKpiCard({ onNavigate }: Strate
       onMouseEnter={(e) => applyCardHover(e.currentTarget)}
       onMouseLeave={(e) => resetCardHover(e.currentTarget)}
     >
-      <ShineBorder shineColor={["#447afc", "#7C3AED", "#F59E0B"]} duration={12} borderWidth={2} />
+      <ShineBorder
+        shineColor={["#447afc", "#7C3AED", "#F59E0B"]}
+        duration={12}
+        borderWidth={2}
+      />
       <div className="flex items-center gap-2 mb-3">
         <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50">
           <Target className="h-5 w-5 text-primary" strokeWidth={1.5} />
         </div>
-        <span className="text-lg font-semibold text-gray-900">Активна стратегія</span>
+        <span className="text-lg font-semibold text-gray-900">
+          Активна стратегія
+        </span>
       </div>
       {active ? (
         <>
-          <div className="text-3xl font-bold text-gray-900 tracking-tight mb-2 break-words" title={active.name}>
+          <div
+            className="text-3xl font-bold text-gray-900 tracking-tight mb-2 break-words"
+            title={active.name}
+          >
             {active.name}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge className={`${riskBadgeClass(active.riskLevel ?? '')} text-xs font-medium px-2 py-0.5 border-0 rounded-full hover:opacity-100`}>
-              {riskLabel(active.riskLevel ?? '')}
+            <Badge
+              className={`${riskBadgeClass(active.riskLevel ?? "")} text-xs font-medium px-2 py-0.5 border-0 rounded-full hover:opacity-100`}
+            >
+              {riskLabel(active.riskLevel ?? "")}
             </Badge>
             {roi !== null ? (
-              <span className={`text-sm font-semibold ${roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                ROI {roi >= 0 ? '+' : ''}{roi.toFixed(1)}%
+              <span
+                className={`text-sm font-semibold ${roi >= 0 ? "text-green-500" : "text-red-500"}`}
+              >
+                ROI {roi >= 0 ? "+" : ""}
+                {roi.toFixed(1)}%
               </span>
             ) : (
               <span className="text-sm text-gray-400">Немає ставок</span>
@@ -93,8 +138,12 @@ const StrategyKpiCardMemo = memo(function StrategyKpiCard({ onNavigate }: Strate
         </>
       ) : (
         <div className="flex flex-col flex-1">
-          <div className="text-3xl font-bold text-gray-400 tracking-tight mb-2">Не обрано</div>
-          <span className="text-sm text-gray-400">Оберіть основну стратегію</span>
+          <div className="text-3xl font-bold text-gray-400 tracking-tight mb-2">
+            Не обрано
+          </div>
+          <span className="text-sm text-gray-400">
+            Оберіть основну стратегію
+          </span>
         </div>
       )}
     </button>

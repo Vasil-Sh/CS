@@ -17,7 +17,7 @@ const mkBet = (overrides: Partial<Bet> = {}): Bet =>
     amount: 100,
     date: "2026-07-21",
     ...overrides,
-  } as unknown as Bet);
+  }) as unknown as Bet;
 
 // ── getCurrencySymbol ──
 
@@ -68,7 +68,9 @@ describe("getExpressEventCount", () => {
   });
 
   it("returns 0 when format is undefined", () => {
-    expect(getExpressEventCount(mkBet({ format: undefined as unknown as string }))).toBe(0);
+    expect(
+      getExpressEventCount(mkBet({ format: undefined as unknown as string })),
+    ).toBe(0);
   });
 });
 
@@ -169,7 +171,12 @@ describe("getSelectedTeamLogo", () => {
   });
 
   it("returns null when no logos are set", () => {
-    const bet = mkBet({ team1: "A", team2: "B", logoTeam1: null, logoTeam2: null });
+    const bet = mkBet({
+      team1: "A",
+      team2: "B",
+      logoTeam1: null,
+      logoTeam2: null,
+    });
     expect(getSelectedTeamLogo(bet, "B")).toBeNull();
   });
 });

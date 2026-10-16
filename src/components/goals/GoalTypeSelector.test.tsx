@@ -6,7 +6,12 @@ import GoalTypeSelector from "./GoalTypeSelector";
 afterEach(cleanup);
 function Form() {
   const [type, setType] = useState<GoalType>("amount");
-  return <><GoalTypeSelector value={type} onChange={setType} /><input aria-label="Назва" defaultValue="Моя ціль" /></>;
+  return (
+    <>
+      <GoalTypeSelector value={type} onChange={setType} />
+      <input aria-label="Назва" defaultValue="Моя ціль" />
+    </>
+  );
 }
 describe("Goal type selector", () => {
   it("shows four accessible choices with amount selected", () => {
@@ -17,7 +22,11 @@ describe("Goal type selector", () => {
   });
   it("switches each type and its description without resetting the name", () => {
     render(<Form />);
-    for (const [label, description] of [["ROI", "Відстежувати прибутковість ставок."], ["Win Rate", "Відстежувати частку перемог."], ["Лесенка", "Відстежувати кроки та банк."]]) {
+    for (const [label, description] of [
+      ["ROI", "Відстежувати прибутковість ставок."],
+      ["Win Rate", "Відстежувати частку перемог."],
+      ["Лесенка", "Відстежувати кроки та банк."],
+    ]) {
       fireEvent.click(screen.getByRole("radio", { name: label }));
       expect(screen.getByRole("radio", { name: label })).toBeChecked();
       expect(screen.getByText(description)).toBeInTheDocument();

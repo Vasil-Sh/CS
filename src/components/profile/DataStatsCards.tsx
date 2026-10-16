@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import type { CSSProperties } from "react";
 
 interface Stats {
   bets: number;
@@ -14,13 +14,17 @@ interface Props {
   cardHoverStyle: CSSProperties;
 }
 
-export default function DataStatsCards({ stats, cardBaseStyle, cardHoverStyle }: Props) {
+export default function DataStatsCards({
+  stats,
+  cardBaseStyle,
+  cardHoverStyle,
+}: Props) {
   const labels: Array<{ key: keyof Stats; label: string }> = [
-    { key: 'bets', label: 'Ваші ставки' },
-    { key: 'riskyTeams', label: 'Ризикові команди' },
-    { key: 'strategies', label: 'Стратегії' },
-    { key: 'goals', label: 'Цілі' },
-    { key: 'tgGroups', label: 'Telegram Групи' },
+    { key: "bets", label: "Ваші ставки" },
+    { key: "riskyTeams", label: "Ризикові команди" },
+    { key: "strategies", label: "Стратегії" },
+    { key: "goals", label: "Цілі" },
+    { key: "tgGroups", label: "Telegram Групи" },
   ];
 
   return (
@@ -30,11 +34,19 @@ export default function DataStatsCards({ stats, cardBaseStyle, cardHoverStyle }:
           key={key}
           className="bg-white border border-gray-100 hover:border-gray-300 rounded-3xl px-6 py-5"
           style={cardBaseStyle}
-          onMouseEnter={(e) => { Object.assign(e.currentTarget.style, cardHoverStyle); }}
-          onMouseLeave={(e) => { Object.assign(e.currentTarget.style, cardBaseStyle); }}
+          onMouseEnter={(e) => {
+            Object.assign(e.currentTarget.style, cardHoverStyle);
+          }}
+          onMouseLeave={(e) => {
+            Object.assign(e.currentTarget.style, cardBaseStyle);
+          }}
         >
-          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">{label}</p>
-          <p className="text-2xl font-bold text-gray-900 tracking-tight">{stats[key]}</p>
+          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">
+            {label}
+          </p>
+          <p className="text-2xl font-bold text-gray-900 tracking-tight">
+            {stats[key]}
+          </p>
         </div>
       ))}
     </div>

@@ -17,7 +17,7 @@
   position: absolute;
   z-index: -2;
   inset: 0;
-  background: #111719 url("/assets/analytics/analytics-hero-monitor.png")
+  background: #111719 url("/assets/analytics/analytics-hero-dota-analysis.png")
     center/cover no-repeat;
 }
 .analytics-header::after {

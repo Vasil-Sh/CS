@@ -10,7 +10,6 @@ import {
   Circle,
   CircleDot,
   Plus,
-  FileText,
 } from "lucide-react";
 import StrategyViolationDialog from "./StrategyViolationDialog";
 import SidebarCalculations from "./betting-form/SidebarCalculations";
@@ -26,6 +25,30 @@ import BettingFormMatchSection from "./betting-form/BettingFormMatchSection";
 import BettingFormFinances from "./betting-form/BettingFormFinances";
 import { getBetTypeLabel } from "@/lib/displayHelpers";
 import { proxyLogoUrl } from "@/lib/logoProxy";
+import "./mybets/RecordCompactForm.css";
+
+const statusTone = (value: string) => {
+  switch (value) {
+    case "БАН":
+      return "ban";
+    case "Ризиковані":
+      return "warning";
+    case "Нестабільні":
+      return "unstable";
+    case "Обережно":
+      return "caution";
+    case "Під питанням":
+      return "question";
+    case "Неоцінена":
+      return "neutral";
+    case "Стабільні":
+      return "safe";
+    case "Надійна":
+      return "reliable";
+    default:
+      return "neutral";
+  }
+};
 
 import { useBettingForm, type MatchPrefillData } from "@/hooks/useBettingForm";
 export type { MatchPrefillData } from "@/hooks/useBettingForm";
@@ -159,6 +182,13 @@ export default function CS2BettingForm(props: Props) {
       mode={mode}
       hideOdds={mode === "prediction"}
       hideHeading
+      teamOptions={(h.availableTeams || [])
+        .filter((team) =>
+          d.game === "Dota2"
+            ? /dota|дота/i.test(team.game)
+            : /cs|кс/i.test(team.game),
+        )
+        .map((team) => team.name)}
       extraPredictionSlot={extraPredictionSlot}
       data={{
         game: h.formData.game,
@@ -170,8 +200,8 @@ export default function CS2BettingForm(props: Props) {
         betType: h.formData.betType,
         selection: h.formData.selection,
         odds: h.formData.odds,
-        logoTeam1: h.prefillLogosRef.current.logoTeam1,
-        logoTeam2: h.prefillLogosRef.current.logoTeam2,
+        logoTeam1: teamLogo(d.team1, 0),
+        logoTeam2: teamLogo(d.team2, 1),
       }}
       isParsing={h.isParsingMatch}
       isExpressFromMatches={h.isExpressFromMatches}
@@ -288,7 +318,7 @@ export default function CS2BettingForm(props: Props) {
     </div>
   );
   return (
-    <div className="record-entry entry-single">
+    <div className="record-entry entry-single record-compact-layout">
       <StrategyViolationDialog
         open={h.showViolationDialog}
         onOpenChange={h.setShowViolationDialog}
@@ -312,62 +342,64 @@ export default function CS2BettingForm(props: Props) {
             <header className="single-heading">
               <h2 id="single-risk-title">Ризиковані команди</h2>
             </header>
-            {!teams.length && (
-              <p className="single-risk-empty">
-                Оберіть команди — тут з’являться їхні статуси та збережені
-                примітки.
-              </p>
-            )}
-            {teams.map((team) => {
-              const note = findRiskyTeams(
-                team.name,
-                "",
-                getGameFilterValue(team.game),
-                d.riskyTeams,
-              )[0];
-              const risk = note && /бан|ризик|нестаб/i.test(note.status);
-              const selected = candidates.some(
-                (item) =>
-                  item.name === team.name &&
-                  item.game === team.game &&
-                  item.selected,
-              );
-              return (
-                <article
-                  className={`single-team-card ${risk ? "is-risk" : ""} ${note && /бан/i.test(note.status) ? "is-ban" : ""}`}
-                  key={team.game + team.name}
-                >
-                  <div className="single-team-heading">
-                    <img
-                      src={displayLogo(team.logo || note?.logo, team.game)}
-                      alt=""
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = "/assets/team-placeholder.svg";
-                      }}
-                    />
-                    <div>
-                      <h3>{team.name}</h3>
-                      {selected && <small>Ваш вибір</small>}
-                    </div>
-                    {note?.status && (
-                      <span className="single-status">{note.status}</span>
-                    )}
-                  </div>
-                  <p>
-                    {note
-                      ? note.notes || "Додаткового коментаря немає."
-                      : "Немає збережених приміток"}
-                  </p>
-                </article>
-              );
-            })}
+            <div className="single-risk-body">
+              {!teams.length ? (
+                <p className="single-risk-empty">
+                  Оберіть команди — тут з’являться їхні статуси та збережені
+                  примітки.
+                </p>
+              ) : (
+                teams.map((team) => {
+                  const note = findRiskyTeams(
+                    team.name,
+                    "",
+                    getGameFilterValue(team.game),
+                    d.riskyTeams,
+                  )[0];
+                  const risk = note && /бан|ризик|нестаб/i.test(note.status);
+                  return (
+                    <article
+                      className={`single-team-card ${risk ? "is-risk" : ""} ${note && /бан/i.test(note.status) ? "is-ban" : ""}`}
+                      key={team.game + team.name}
+                    >
+                      <div className="single-team-heading">
+                        <img
+                          src={displayLogo(team.logo || note?.logo, team.game)}
+                          alt=""
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src =
+                              "/assets/team-placeholder.svg";
+                          }}
+                        />
+                        <div className="single-team-name">
+                          <h3>{team.name}</h3>
+                          {note?.status && (
+                            <span
+                              className={`single-status ${statusTone(note.status)}`}
+                            >
+                              {note.status}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <p>
+                        {note
+                          ? note.notes || "Додаткового коментаря немає."
+                          : "Немає збережених приміток"}
+                      </p>
+                    </article>
+                  );
+                })
+              )}
+            </div>
             <Link className="record-risk-link" to="/app/risky-teams">
-              <BookOpen size={20} /> Довідник команд <ArrowUpRight size={15} />
+              <BookOpen size={20} /> Ризиковані команди{" "}
+              <ArrowUpRight size={15} />
             </Link>
           </aside>
           <section
-            className="single-card single-prediction"
+            className="single-card single-prediction record-compact-card"
             aria-labelledby="single-prediction-title"
           >
             <header className="single-heading">
@@ -474,9 +506,12 @@ export default function CS2BettingForm(props: Props) {
               <summary>
                 <Target size={16} /> Ціль і стратегія{" "}
                 <span>
-                  {h.activeGoals.find((goal) => goal.id === d.goalId)?.name ||
-                    "Без цілі"}{" "}
-                  · {h.primaryStrategy?.name || "Без стратегії"}
+                  {[
+                    h.activeGoals.find((goal) => goal.id === d.goalId)?.name,
+                    h.primaryStrategy?.name,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ") || "необов’язково"}
                 </span>
                 <ChevronDown size={14} />
               </summary>
@@ -489,25 +524,6 @@ export default function CS2BettingForm(props: Props) {
                   введену суму.
                 </small>
               </div>
-            </details>
-            <details className="single-options record-own-analysis">
-              <summary>
-                <FileText size={17} /> Власний аналіз <span>необов’язково</span>
-                <ChevronDown size={14} />
-              </summary>
-              <label htmlFor="record-notes">Ваші аргументи та примітки</label>
-              <textarea
-                id="record-notes"
-                value={d.notes || ""}
-                rows={4}
-                placeholder="Що вплинуло на ваш прогноз?"
-                onChange={(event) =>
-                  h.setFormData((prev) => ({
-                    ...prev,
-                    notes: event.target.value,
-                  }))
-                }
-              />
             </details>
             <BettingFormFinances
               analysisOnly

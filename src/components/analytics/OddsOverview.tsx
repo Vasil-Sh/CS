@@ -17,60 +17,188 @@ const intervals = [
 ];
 
 export function summarizeOdds(bets: Bet[]) {
-  const settled = bets.filter(b => (b.result === "Win" || b.result === "Loss") && Number.isFinite(b.odds) && b.odds >= 1);
+  const settled = bets.filter(
+    (b) =>
+      (b.result === "Win" || b.result === "Loss") &&
+      Number.isFinite(b.odds) &&
+      b.odds >= 1,
+  );
   return {
     count: settled.length,
-    categories: categories.map(category => {
-      const records = settled.filter(b => b.odds >= category.min && b.odds < category.max);
-      const wins = records.filter(b => b.result === "Win").length;
-      return { ...category, count: records.length, wins, losses: records.length - wins,
-        winRate: records.length ? Math.round(wins / records.length * 100) : null,
-        profit: records.reduce((sum, b) => sum + (Number.isFinite(b.profit) ? b.profit! : 0), 0) };
+    categories: categories.map((category) => {
+      const records = settled.filter(
+        (b) => b.odds >= category.min && b.odds < category.max,
+      );
+      const wins = records.filter((b) => b.result === "Win").length;
+      return {
+        ...category,
+        count: records.length,
+        wins,
+        losses: records.length - wins,
+        winRate: records.length
+          ? Math.round((wins / records.length) * 100)
+          : null,
+        profit: records.reduce(
+          (sum, b) => sum + (Number.isFinite(b.profit) ? b.profit! : 0),
+          0,
+        ),
+      };
     }),
-    distribution: intervals.map(interval => ({ ...interval, count: settled.filter(b => b.odds >= interval.min && b.odds < interval.max).length })),
+    distribution: intervals.map((interval) => ({
+      ...interval,
+      count: settled.filter(
+        (b) => b.odds >= interval.min && b.odds < interval.max,
+      ).length,
+    })),
   };
 }
 
-export default function OddsOverview({ bets, currency }: { bets: Bet[]; currency: "UAH" | "USD" }) {
+export default function OddsOverview({
+  bets,
+  currency,
+}: {
+  bets: Bet[];
+  currency: "UAH" | "USD";
+}) {
   const data = useMemo(() => summarizeOdds(bets), [bets]);
-  const maxCount = Math.max(0, ...data.distribution.map(item => item.count));
-  const betCount = (count: number) => `${count} ${count % 100 >= 11 && count % 100 <= 14 ? "ставок" : count % 10 === 1 ? "ставка" : count % 10 >= 2 && count % 10 <= 4 ? "ставки" : "ставок"}`;
-  const money = (value: number) => `${value > 0 ? "+" : value < 0 ? "−" : ""}${Math.abs(value).toLocaleString("uk-UA", { maximumFractionDigits: 2 })} ${currency === "USD" ? "$" : "₴"}`;
-  return <div className="odds-overview">
-    <section className="odds-panel odds-rates" aria-labelledby="odds-rates-title">
-      <h2 id="odds-rates-title">Вінрейт за коефіцієнтами</h2>
-      <p className="odds-subtitle">Розраховані записи за діапазонами.</p>
-      {data.categories.map(item => <div className="odds-rate-row" key={item.name}>
-        <div className="odds-range"><h3>{item.label}</h3><span>{betCount(item.count)}</span></div>
-        <div className="odds-progress" role="progressbar" aria-label={`Вінрейт ${item.name.toLowerCase()}: ${item.winRate === null ? "немає даних" : `${item.winRate}%`}`} aria-valuenow={item.winRate ?? 0} aria-valuemin={0} aria-valuemax={100}>
-          {item.count > 0 && <>
-            <span className="odds-progress-win" style={{ width: `${(item.wins / item.count) * 100}%` }} />
-            <span className="odds-progress-loss" style={{ width: `${(item.losses / item.count) * 100}%` }} />
-          </>}
+  const maxCount = Math.max(0, ...data.distribution.map((item) => item.count));
+  const betCount = (count: number) =>
+    `${count} ${count % 100 >= 11 && count % 100 <= 14 ? "ставок" : count % 10 === 1 ? "ставка" : count % 10 >= 2 && count % 10 <= 4 ? "ставки" : "ставок"}`;
+  const money = (value: number) =>
+    `${value > 0 ? "+" : value < 0 ? "−" : ""}${Math.abs(value).toLocaleString("uk-UA", { maximumFractionDigits: 2 })} ${currency === "USD" ? "$" : "₴"}`;
+  return (
+    <div className="odds-overview">
+      <section
+        className="odds-panel odds-rates"
+        aria-labelledby="odds-rates-title"
+      >
+        <h2 id="odds-rates-title">Вінрейт за коефіцієнтами</h2>
+        <p className="odds-subtitle">Розраховані записи за діапазонами.</p>
+        {data.categories.map((item) => (
+          <div className="odds-rate-row" key={item.name}>
+            <div className="odds-range">
+              <h3>{item.label}</h3>
+              <span>{betCount(item.count)}</span>
+            </div>
+            <div
+              className="odds-progress"
+              role="progressbar"
+              aria-label={`Вінрейт ${item.name.toLowerCase()}: ${item.winRate === null ? "немає даних" : `${item.winRate}%`}`}
+              aria-valuenow={item.winRate ?? 0}
+              aria-valuemin={0}
+              aria-valuemax={100}
+            >
+              {item.count > 0 && (
+                <>
+                  <span
+                    className="odds-progress-win"
+                    style={{ width: `${(item.wins / item.count) * 100}%` }}
+                  />
+                  <span
+                    className="odds-progress-loss"
+                    style={{ width: `${(item.losses / item.count) * 100}%` }}
+                  />
+                </>
+              )}
+            </div>
+            <strong className="odds-rate-value">
+              {item.winRate === null ? "—" : `${item.winRate}%`}
+            </strong>
+            <div
+              className="odds-outcomes"
+              aria-label={`${item.wins} перемог, ${item.losses} поразок`}
+            >
+              <span className="odds-positive">{item.wins}W</span>
+              <span> / </span>
+              <span className="odds-negative">{item.losses}L</span>
+            </div>
+          </div>
+        ))}
+      </section>
+      <section aria-labelledby="odds-categories-title">
+        <h2 className="odds-section-title" id="odds-categories-title">
+          Категорії коефіцієнтів
+        </h2>
+        <div className="odds-category-grid">
+          {data.categories.map((item) => (
+            <article className="odds-panel odds-category" key={item.name}>
+              <h3>{item.name}</h3>
+              <p className="odds-category-range">{item.label}</p>
+              <dl>
+                <div>
+                  <dt>Кількість ставок</dt>
+                  <dd>
+                    {item.count}
+                    {item.count > 0 && item.count < 10 && (
+                      <span
+                        className="odds-sample"
+                        title="Менше 10 розрахованих ставок — замало для надійного висновку"
+                      >
+                        Мало даних
+                      </span>
+                    )}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Вінрейт</dt>
+                  <dd>{item.winRate === null ? "—" : `${item.winRate}%`}</dd>
+                </div>
+                <div>
+                  <dt>Прибуток</dt>
+                  <dd
+                    className={
+                      item.profit > 0
+                        ? "odds-positive"
+                        : item.profit < 0
+                          ? "odds-negative"
+                          : ""
+                    }
+                  >
+                    {item.count ? money(item.profit) : "—"}
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          ))}
         </div>
-        <strong className="odds-rate-value">{item.winRate === null ? "—" : `${item.winRate}%`}</strong>
-        <div className="odds-outcomes" aria-label={`${item.wins} перемог, ${item.losses} поразок`}><span className="odds-positive">{item.wins}W</span><span> / </span><span className="odds-negative">{item.losses}L</span></div>
-      </div>)}
-    </section>
-    <section aria-labelledby="odds-categories-title">
-      <h2 className="odds-section-title" id="odds-categories-title">Категорії коефіцієнтів</h2>
-      <div className="odds-category-grid">{data.categories.map(item => <article className="odds-panel odds-category" key={item.name}>
-        <h3>{item.name}</h3><p className="odds-category-range">{item.label}</p>
-        <dl>
-          <div><dt>Кількість ставок</dt><dd>{item.count}{item.count > 0 && item.count < 10 && <span className="odds-sample" title="Менше 10 розрахованих ставок — замало для надійного висновку">Мало даних</span>}</dd></div>
-          <div><dt>Вінрейт</dt><dd>{item.winRate === null ? "—" : `${item.winRate}%`}</dd></div>
-          <div><dt>Прибуток</dt><dd className={item.profit > 0 ? "odds-positive" : item.profit < 0 ? "odds-negative" : ""}>{item.count ? money(item.profit) : "—"}</dd></div>
-        </dl>
-      </article>)}</div>
-    </section>
-    <section className="odds-panel odds-distribution" aria-labelledby="odds-distribution-title">
-      <h2 id="odds-distribution-title">Розподіл записів</h2>
-      <p className="odds-subtitle">Кількість розрахованих записів за діапазонами коефіцієнтів.</p>
-      <ul className="odds-histogram">{data.distribution.map(item => <li key={item.label}>
-        <div className="odds-histogram-column"><strong>{item.count}</strong><span className={maxCount > 0 && item.count === maxCount ? "odds-histogram-bar is-largest" : "odds-histogram-bar"} style={{ height: `${maxCount ? item.count / maxCount * 26 : 0}px` }} /></div>
-        <span className="odds-bin-label">{item.label}</span>
-      </li>)}</ul>
-    </section>
-    <p className="odds-note"><Info size={15} aria-hidden="true" /><span>{data.count ? "Враховано лише розраховані ставки. Помаранчевим виділено найчисленніший діапазон. Вінрейт сам по собі не визначає прибутковість." : "Ще немає розрахованих ставок для цього фільтра. Показники з’являться після розрахунку записів."}</span></p>
-  </div>;
+      </section>
+      <section
+        className="odds-panel odds-distribution"
+        aria-labelledby="odds-distribution-title"
+      >
+        <h2 id="odds-distribution-title">Розподіл записів</h2>
+        <p className="odds-subtitle">
+          Кількість розрахованих записів за діапазонами коефіцієнтів.
+        </p>
+        <ul className="odds-histogram">
+          {data.distribution.map((item) => (
+            <li key={item.label}>
+              <div className="odds-histogram-column">
+                <strong>{item.count}</strong>
+                <span
+                  className={
+                    maxCount > 0 && item.count === maxCount
+                      ? "odds-histogram-bar is-largest"
+                      : "odds-histogram-bar"
+                  }
+                  style={{
+                    height: `${maxCount ? (item.count / maxCount) * 26 : 0}px`,
+                  }}
+                />
+              </div>
+              <span className="odds-bin-label">{item.label}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <p className="odds-note">
+        <Info size={15} aria-hidden="true" />
+        <span>
+          {data.count
+            ? "Враховано лише розраховані ставки. Помаранчевим виділено найчисленніший діапазон. Вінрейт сам по собі не визначає прибутковість."
+            : "Ще немає розрахованих ставок для цього фільтра. Показники з’являться після розрахунку записів."}
+        </span>
+      </p>
+    </div>
+  );
 }

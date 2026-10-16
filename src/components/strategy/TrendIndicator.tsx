@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface StrategyStats {
   totalBets: number;
@@ -23,9 +23,16 @@ export default function TrendIndicator({ stats }: { stats: StrategyStats }) {
   if (Math.abs(change) < 1) return null;
 
   return (
-    <div className={`flex items-center justify-center gap-1 text-xs font-medium ${change > 0 ? 'text-green-500' : 'text-red-500'}`}>
-      {change > 0 ? <TrendingUp className="h-3 w-3" strokeWidth={1.5} /> : <TrendingDown className="h-3 w-3" strokeWidth={1.5} />}
-      {change > 0 ? '+' : ''}{change.toFixed(1)}%
+    <div
+      className={`flex items-center justify-center gap-1 text-xs font-medium ${change > 0 ? "text-green-500" : "text-red-500"}`}
+    >
+      {change > 0 ? (
+        <TrendingUp className="h-3 w-3" strokeWidth={1.5} />
+      ) : (
+        <TrendingDown className="h-3 w-3" strokeWidth={1.5} />
+      )}
+      {change > 0 ? "+" : ""}
+      {change.toFixed(1)}%
     </div>
   );
 }

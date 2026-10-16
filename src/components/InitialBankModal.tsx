@@ -43,7 +43,12 @@ export default function InitialBankModal({
     }
     setIsSubmitting(true);
     try {
-      await BankrollService.setInitialBank(currentUser, value, currency, savedRate);
+      await BankrollService.setInitialBank(
+        currentUser,
+        value,
+        currency,
+        savedRate,
+      );
       toast.success(
         `Стартовий банк оновлено: ${value} ${currency === "USD" ? "$" : "₴"}`,
       );
@@ -109,7 +114,11 @@ export default function InitialBankModal({
             </div>
             {currency === "USD" && amount && parseFloat(amount) > 0 && (
               <p className="initial-bank-hint">
-                ≈ {(parseFloat(amount) * savedRate).toLocaleString("uk-UA", { maximumFractionDigits: 0 })} ₴ за курсом {savedRate} ₴/$
+                ≈{" "}
+                {(parseFloat(amount) * savedRate).toLocaleString("uk-UA", {
+                  maximumFractionDigits: 0,
+                })}{" "}
+                ₴ за курсом {savedRate} ₴/$
               </p>
             )}
           </div>

@@ -1,14 +1,14 @@
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 
 interface StrategyViolation {
-  type: 'odds' | 'format' | 'betType';
+  type: "odds" | "format" | "betType";
   message: string;
 }
 
@@ -27,7 +27,7 @@ export default function StrategyViolationDialog({
   strategyName,
   violations,
   onConfirm,
-  onCancel
+  onCancel,
 }: StrategyViolationDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -37,14 +37,20 @@ export default function StrategyViolationDialog({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-red-100">
-                <AlertTriangle className="h-5 w-5 text-red-600" strokeWidth={1.5} />
+                <AlertTriangle
+                  className="h-5 w-5 text-red-600"
+                  strokeWidth={1.5}
+                />
               </div>
               <div>
                 <DialogTitle className="text-lg font-bold text-gray-900">
                   Порушення стратегії
                 </DialogTitle>
                 <DialogDescription className="text-sm text-gray-500 mt-0.5">
-                  Стратегія: <span className="font-semibold text-gray-900">"{strategyName}"</span>
+                  Стратегія:{" "}
+                  <span className="font-semibold text-gray-900">
+                    "{strategyName}"
+                  </span>
                 </DialogDescription>
               </div>
             </div>
@@ -66,7 +72,10 @@ export default function StrategyViolationDialog({
               key={index}
               className="flex items-start gap-3 px-4 py-3.5 bg-white border border-red-200 rounded-2xl"
             >
-              <AlertTriangle className="h-4 w-4 flex-shrink-0 text-red-600 mt-0.5" strokeWidth={1.5} />
+              <AlertTriangle
+                className="h-4 w-4 flex-shrink-0 text-red-600 mt-0.5"
+                strokeWidth={1.5}
+              />
               <p className="text-sm font-medium text-[#991B1B] leading-relaxed">
                 {violation.message}
               </p>
@@ -76,7 +85,10 @@ export default function StrategyViolationDialog({
           {/* Info Banner */}
           <div className="px-4 py-3.5 bg-white border border-gray-200 rounded-2xl">
             <p className="text-sm text-gray-900 leading-relaxed flex items-start gap-1.5">
-              <AlertTriangle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" strokeWidth={1.5} />
+              <AlertTriangle
+                className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5"
+                strokeWidth={1.5}
+              />
               Ви все одно можете створити ставку, підтвердивши попередження.
             </p>
           </div>

@@ -27,7 +27,11 @@ export function SkeletonCard({ lines = 3 }: { lines?: number }) {
   return (
     <div className="bg-white border border-gray-100 rounded-3xl px-6 py-5 animate-pulse">
       {Array.from({ length: lines }, (_, i) => (
-        <div key={i} className="h-4 bg-gray-200 rounded mb-2" style={{ width: `${85 - i * 20}%` }} />
+        <div
+          key={i}
+          className="h-4 bg-gray-200 rounded mb-2"
+          style={{ width: `${85 - i * 20}%` }}
+        />
       ))}
     </div>
   );
@@ -39,11 +43,15 @@ export function AnalyticsSkeleton() {
       <div className="h-12 w-64 bg-gray-200 rounded animate-pulse" />
       {/* 4 stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        {Array.from({ length: 4 }, (_, i) => <StatCardSkeleton key={i} />)}
+        {Array.from({ length: 4 }, (_, i) => (
+          <StatCardSkeleton key={i} />
+        ))}
       </div>
       {/* 4 stat cards row 2 */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        {Array.from({ length: 4 }, (_, i) => <StatCardSkeleton key={i} />)}
+        {Array.from({ length: 4 }, (_, i) => (
+          <StatCardSkeleton key={i} />
+        ))}
       </div>
       {/* BalanceTracker */}
       <SkeletonCard lines={4} />
@@ -54,7 +62,9 @@ export function AnalyticsSkeleton() {
       </div>
       {/* 3 odds cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {Array.from({ length: 3 }, (_, i) => <StatCardSkeleton key={i} />)}
+        {Array.from({ length: 3 }, (_, i) => (
+          <StatCardSkeleton key={i} />
+        ))}
       </div>
     </div>
   );
@@ -66,7 +76,9 @@ export function MyBetsSkeleton() {
       <div className="h-12 w-64 bg-gray-200 rounded animate-pulse" />
       {/* 8 stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        {Array.from({ length: 8 }, (_, i) => <StatCardSkeleton key={i} />)}
+        {Array.from({ length: 8 }, (_, i) => (
+          <StatCardSkeleton key={i} />
+        ))}
       </div>
       {/* Form skeleton */}
       <SkeletonCard lines={6} />
@@ -80,7 +92,9 @@ export function StrategySkeleton() {
       <div className="h-12 w-64 bg-gray-200 rounded animate-pulse" />
       {/* KPI cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-        {Array.from({ length: 4 }, (_, i) => <StatCardSkeleton key={i} />)}
+        {Array.from({ length: 4 }, (_, i) => (
+          <StatCardSkeleton key={i} />
+        ))}
       </div>
       {/* Content */}
       <SkeletonCard lines={5} />

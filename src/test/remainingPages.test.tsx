@@ -9,14 +9,22 @@ import Landing from "@/pages/Landing";
 
 describe("NotFound", () => {
   it("renders 404 heading", () => {
-    const { container } = render(<MemoryRouter><NotFound /></MemoryRouter>);
+    const { container } = render(
+      <MemoryRouter>
+        <NotFound />
+      </MemoryRouter>,
+    );
     expect(container.textContent).toContain("404");
   });
 });
 
 describe("Landing", () => {
   it("renders marketing page", () => {
-    const { container } = render(<MemoryRouter><Landing /></MemoryRouter>);
+    const { container } = render(
+      <MemoryRouter>
+        <Landing />
+      </MemoryRouter>,
+    );
     expect(container).toBeTruthy();
   });
 });

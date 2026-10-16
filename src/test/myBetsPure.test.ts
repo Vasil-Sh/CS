@@ -20,18 +20,28 @@ type Bet = {
 
 // ── syncStats (local stats computation) ──
 
-function syncStats(bets: Bet[]): { totalBets: number; winRate: number; totalProfit: number; averageROI: number } {
-  const completed = bets.filter((b) => b.result === "Win" || b.result === "Loss");
+function syncStats(bets: Bet[]): {
+  totalBets: number;
+  winRate: number;
+  totalProfit: number;
+  averageROI: number;
+} {
+  const completed = bets.filter(
+    (b) => b.result === "Win" || b.result === "Loss",
+  );
   const wins = completed.filter((b) => b.result === "Win").length;
   const totalProfit = completed.reduce((sum, b) => sum + (b.profit || 0), 0);
   return {
     totalBets: bets.length,
-    winRate: completed.length > 0 ? Math.round((wins / completed.length) * 100) : 0,
+    winRate:
+      completed.length > 0 ? Math.round((wins / completed.length) * 100) : 0,
     totalProfit: Math.round(totalProfit * 100) / 100,
     averageROI:
       completed.length > 0
         ? Math.round(
-            (completed.reduce((sum, b) => sum + (b.roi || 0), 0) / completed.length) * 100,
+            (completed.reduce((sum, b) => sum + (b.roi || 0), 0) /
+              completed.length) *
+              100,
           ) / 100
         : 0,
   };
@@ -48,7 +58,14 @@ describe("syncStats", () => {
 
   it("single win: 100% winRate", () => {
     const bets: Bet[] = [
-      { result: "Win", profit: 200, amount: 100, odds: 3, date: "2026-07-21", roi: 200 },
+      {
+        result: "Win",
+        profit: 200,
+        amount: 100,
+        odds: 3,
+        date: "2026-07-21",
+        roi: 200,
+      },
     ];
     const s = syncStats(bets);
     expect(s.totalBets).toBe(1);
@@ -58,7 +75,14 @@ describe("syncStats", () => {
 
   it("single loss: 0% winRate, negative profit", () => {
     const bets: Bet[] = [
-      { result: "Loss", profit: -100, amount: 100, odds: 2, date: "2026-07-21", roi: -100 },
+      {
+        result: "Loss",
+        profit: -100,
+        amount: 100,
+        odds: 2,
+        date: "2026-07-21",
+        roi: -100,
+      },
     ];
     const s = syncStats(bets);
     expect(s.totalBets).toBe(1);
@@ -68,9 +92,30 @@ describe("syncStats", () => {
 
   it("2W / 1L → 66% winRate", () => {
     const bets: Bet[] = [
-      { result: "Win", profit: 500, amount: 100, odds: 6, date: "2026-07-21", roi: 500 },
-      { result: "Win", profit: 300, amount: 200, odds: 2.5, date: "2026-07-20", roi: 150 },
-      { result: "Loss", profit: -400, amount: 400, odds: 2, date: "2026-07-19", roi: -100 },
+      {
+        result: "Win",
+        profit: 500,
+        amount: 100,
+        odds: 6,
+        date: "2026-07-21",
+        roi: 500,
+      },
+      {
+        result: "Win",
+        profit: 300,
+        amount: 200,
+        odds: 2.5,
+        date: "2026-07-20",
+        roi: 150,
+      },
+      {
+        result: "Loss",
+        profit: -400,
+        amount: 400,
+        odds: 2,
+        date: "2026-07-19",
+        roi: -100,
+      },
     ];
     const s = syncStats(bets);
     // 2/3 = 66.66%, Math.round → 67
@@ -80,9 +125,30 @@ describe("syncStats", () => {
 
   it("ignores Pending bets in winRate", () => {
     const bets: Bet[] = [
-      { result: "Win", profit: 100, amount: 100, odds: 2, date: "2026-07-21", roi: 100 },
-      { result: "Pending", profit: 0, amount: 100, odds: 2, date: "2026-07-20", roi: 0 },
-      { result: "Pending", profit: 0, amount: 200, odds: 1.5, date: "2026-07-19", roi: 0 },
+      {
+        result: "Win",
+        profit: 100,
+        amount: 100,
+        odds: 2,
+        date: "2026-07-21",
+        roi: 100,
+      },
+      {
+        result: "Pending",
+        profit: 0,
+        amount: 100,
+        odds: 2,
+        date: "2026-07-20",
+        roi: 0,
+      },
+      {
+        result: "Pending",
+        profit: 0,
+        amount: 200,
+        odds: 1.5,
+        date: "2026-07-19",
+        roi: 0,
+      },
     ];
     const s = syncStats(bets);
     expect(s.totalBets).toBe(3);
@@ -91,7 +157,14 @@ describe("syncStats", () => {
 
   it("all Pending → winRate 0", () => {
     const bets: Bet[] = [
-      { result: "Pending", profit: 0, amount: 100, odds: 2, date: "2026-07-21", roi: 0 },
+      {
+        result: "Pending",
+        profit: 0,
+        amount: 100,
+        odds: 2,
+        date: "2026-07-21",
+        roi: 0,
+      },
     ];
     const s = syncStats(bets);
     expect(s.winRate).toBe(0);
@@ -101,7 +174,11 @@ describe("syncStats", () => {
 
 // ── Bet categorization (active/winning/losing) ──
 
-function categorizeBets(bets: Bet[]): { activeBets: Bet[]; winningBets: Bet[]; losingBets: Bet[] } {
+function categorizeBets(bets: Bet[]): {
+  activeBets: Bet[];
+  winningBets: Bet[];
+  losingBets: Bet[];
+} {
   const active: Bet[] = [];
   const winning: Bet[] = [];
   const losing: Bet[] = [];
@@ -118,7 +195,13 @@ describe("categorizeBets", () => {
     const bets: Bet[] = [
       { result: "Win", profit: 100, amount: 100, odds: 2, date: "2026-07-21" },
       { result: "Loss", profit: -50, amount: 50, odds: 2, date: "2026-07-20" },
-      { result: "Pending", profit: 0, amount: 200, odds: 1.5, date: "2026-07-19" },
+      {
+        result: "Pending",
+        profit: 0,
+        amount: 200,
+        odds: 1.5,
+        date: "2026-07-19",
+      },
       { result: "Win", profit: 300, amount: 150, odds: 3, date: "2026-07-18" },
     ];
     const { activeBets, winningBets, losingBets } = categorizeBets(bets);
@@ -152,7 +235,8 @@ function calculateResultProfit(
   result: "Win" | "Loss",
 ): { originalProfit: number; profitInUAH: number; roi: number } {
   const betAmount = bet.amount;
-  const originalProfit = result === "Win" ? (bet.odds - 1) * betAmount : -betAmount;
+  const originalProfit =
+    result === "Win" ? (bet.odds - 1) * betAmount : -betAmount;
   const profitInUAH = originalProfit; // simplified, no exchange rate
   const roi = (profitInUAH / bet.amount) * 100;
   return { originalProfit, profitInUAH, roi };
@@ -161,7 +245,13 @@ function calculateResultProfit(
 describe("executeResultUpdate profit calculation", () => {
   it("Win: profit = (odds-1) × amount", () => {
     const { originalProfit, roi } = calculateResultProfit(
-      { result: "Pending", profit: 0, amount: 100, odds: 2.5, date: "2026-07-21" },
+      {
+        result: "Pending",
+        profit: 0,
+        amount: 100,
+        odds: 2.5,
+        date: "2026-07-21",
+      },
       "Win",
     );
     expect(originalProfit).toBe(150); // (2.5-1)*100
@@ -170,7 +260,13 @@ describe("executeResultUpdate profit calculation", () => {
 
   it("Loss: profit = -amount", () => {
     const { originalProfit, roi } = calculateResultProfit(
-      { result: "Pending", profit: 0, amount: 200, odds: 3, date: "2026-07-21" },
+      {
+        result: "Pending",
+        profit: 0,
+        amount: 200,
+        odds: 3,
+        date: "2026-07-21",
+      },
       "Loss",
     );
     expect(originalProfit).toBe(-200);
@@ -179,7 +275,13 @@ describe("executeResultUpdate profit calculation", () => {
 
   it("high odds Win", () => {
     const { originalProfit } = calculateResultProfit(
-      { result: "Pending", profit: 0, amount: 50, odds: 10, date: "2026-07-21" },
+      {
+        result: "Pending",
+        profit: 0,
+        amount: 50,
+        odds: 10,
+        date: "2026-07-21",
+      },
       "Win",
     );
     expect(originalProfit).toBe(450);
@@ -187,7 +289,13 @@ describe("executeResultUpdate profit calculation", () => {
 
   it("odds=1.0 Win → 0 profit (even)", () => {
     const { originalProfit } = calculateResultProfit(
-      { result: "Pending", profit: 0, amount: 100, odds: 1.0, date: "2026-07-21" },
+      {
+        result: "Pending",
+        profit: 0,
+        amount: 100,
+        odds: 1.0,
+        date: "2026-07-21",
+      },
       "Win",
     );
     expect(originalProfit).toBe(0);
@@ -214,16 +322,16 @@ function filterBets(
     if (periodFilter !== "all") {
       const now = new Date();
       const betDate = new Date(b.date);
-      const diffDays = Math.floor((now.getTime() - betDate.getTime()) / 86400000);
+      const diffDays = Math.floor(
+        (now.getTime() - betDate.getTime()) / 86400000,
+      );
       if (periodFilter === "week" && diffDays > 7) return false;
       if (periodFilter === "month" && diffDays > 30) return false;
       if (periodFilter === "quarter" && diffDays > 90) return false;
     }
     if (searchText) {
       const q = searchText.toLowerCase();
-      if (
-        !(b.date || "").toLowerCase().includes(q)
-      ) return false;
+      if (!(b.date || "").toLowerCase().includes(q)) return false;
     }
     return true;
   });
@@ -309,14 +417,28 @@ describe('tableFilter "today"', () => {
 describe("hasUsdBets", () => {
   it("true when bet has USD currency", () => {
     const bets: Bet[] = [
-      { result: "Win", profit: 100, amount: 100, odds: 2, date: "2026-07-21", currency: "USD" },
+      {
+        result: "Win",
+        profit: 100,
+        amount: 100,
+        odds: 2,
+        date: "2026-07-21",
+        currency: "USD",
+      },
     ];
     expect(bets.some((b) => b.currency === "USD")).toBe(true);
   });
 
   it("false when all bets are UAH", () => {
     const bets: Bet[] = [
-      { result: "Win", profit: 100, amount: 100, odds: 2, date: "2026-07-21", currency: "UAH" },
+      {
+        result: "Win",
+        profit: 100,
+        amount: 100,
+        odds: 2,
+        date: "2026-07-21",
+        currency: "UAH",
+      },
     ];
     expect(bets.some((b) => b.currency === "USD")).toBe(false);
   });

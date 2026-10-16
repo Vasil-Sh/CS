@@ -4,12 +4,27 @@ import "./CreateGoalDialog.css";
 
 const options: { value: GoalType; label: string; description: string }[] = [
   { value: "amount", label: "Сума", description: "Досягти заданої суми." },
-  { value: "roi", label: "ROI", description: "Відстежувати прибутковість ставок." },
-  { value: "winrate", label: "Win Rate", description: "Відстежувати частку перемог." },
-  { value: "ladder", label: "Лесенка", description: "Відстежувати кроки та банк." },
+  {
+    value: "roi",
+    label: "ROI",
+    description: "Відстежувати прибутковість ставок.",
+  },
+  {
+    value: "winrate",
+    label: "Win Rate",
+    description: "Відстежувати частку перемог.",
+  },
+  {
+    value: "ladder",
+    label: "Лесенка",
+    description: "Відстежувати кроки та банк.",
+  },
 ];
 
-export default function GoalTypeSelector({ value, onChange }: {
+export default function GoalTypeSelector({
+  value,
+  onChange,
+}: {
   value: GoalType;
   onChange: (value: GoalType) => void;
 }) {
@@ -19,8 +34,13 @@ export default function GoalTypeSelector({ value, onChange }: {
       <div className="goal-type-options">
         {options.map((option) => (
           <label key={option.value} className="goal-type-option">
-            <input type="radio" name={id} value={option.value}
-              checked={value === option.value} onChange={() => onChange(option.value)} />
+            <input
+              type="radio"
+              name={id}
+              value={option.value}
+              checked={value === option.value}
+              onChange={() => onChange(option.value)}
+            />
             <span>{option.label}</span>
           </label>
         ))}

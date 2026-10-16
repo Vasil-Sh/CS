@@ -34,8 +34,8 @@ function flush() {
   const endpoint = import.meta.env.VITE_ERROR_REPORT_URL;
   if (endpoint) {
     fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(batch),
       keepalive: true,
     }).catch(() => {
@@ -43,7 +43,7 @@ function flush() {
     });
   }
   if (import.meta.env.DEV && batch.length > 0) {
-    console.warn('[ErrorMonitor]', batch.length, 'errors flushed');
+    console.warn("[ErrorMonitor]", batch.length, "errors flushed");
   }
 }
 
@@ -51,15 +51,18 @@ function flush() {
 export function initErrorMonitoring() {
   if (timer) return;
 
-  window.addEventListener('error', (event) => {
+  window.addEventListener("error", (event) => {
     if (event.error) {
       queue.push(createReport(event.error));
       if (queue.length >= MAX_BATCH) flush();
     }
   });
 
-  window.addEventListener('unhandledrejection', (event) => {
-    const error = event.reason instanceof Error ? event.reason : new Error(String(event.reason));
+  window.addEventListener("unhandledrejection", (event) => {
+    const error =
+      event.reason instanceof Error
+        ? event.reason
+        : new Error(String(event.reason));
     queue.push(createReport(error));
     if (queue.length >= MAX_BATCH) flush();
   });
@@ -67,6 +70,6 @@ export function initErrorMonitoring() {
   timer = setInterval(flush, FLUSH_INTERVAL);
 
   if (import.meta.env.DEV) {
-    console.log('[ErrorMonitor] Initialized');
+    console.log("[ErrorMonitor] Initialized");
   }
 }

@@ -102,9 +102,39 @@ const TOURNAMENT_KEYWORDS = new Set([
   "international",
   "riyadh",
   "eslone",
+  // Betting-sponsored events / streams
+  "stake",
+  "pulse",
+  "beat",
 ]);
 
 const YEAR_REGEX = /^(19|20)\d{2}$/;
+
+/**
+ * Roman-numeral editions (II, III, IV…) that trail a tournament name.
+ * Kept as a standalone set to avoid matching single-letter team words.
+ */
+const ROMAN_EDITION = new Set([
+  "ii",
+  "iii",
+  "iv",
+  "v",
+  "vi",
+  "vii",
+  "viii",
+  "ix",
+  "x",
+  "xi",
+  "xii",
+  "xiii",
+  "xiv",
+  "xv",
+  "xvi",
+  "xvii",
+  "xviii",
+  "xix",
+  "xx",
+]);
 
 /**
  * Strip query string and hash from a URL, return clean path segments
@@ -165,7 +195,11 @@ function splitAfterVs(afterVs: string[]): {
   let boundary = -1;
   for (let i = 0; i < afterVs.length; i++) {
     const word = afterVs[i].toLowerCase();
-    if (TOURNAMENT_KEYWORDS.has(word) || YEAR_REGEX.test(word)) {
+    if (
+      TOURNAMENT_KEYWORDS.has(word) ||
+      YEAR_REGEX.test(word) ||
+      ROMAN_EDITION.has(word)
+    ) {
       boundary = i;
       break;
     }
@@ -211,6 +245,7 @@ function formatTournament(parts: string[]): string {
         return lower.toUpperCase();
       }
       if (YEAR_REGEX.test(lower)) return lower; // keep year digits as-is
+      if (ROMAN_EDITION.has(lower)) return lower.toUpperCase(); // II, III, IV…
       return lower.charAt(0).toUpperCase() + lower.slice(1);
     })
     .join(" ");

@@ -16,7 +16,7 @@ const mkBet = (overrides: Partial<Bet> = {}): Bet =>
     odds: 2,
     amount: 100,
     ...overrides,
-  } as unknown as Bet);
+  }) as unknown as Bet;
 
 describe("useRiskMetrics", () => {
   // ── Empty bets ──
@@ -88,7 +88,10 @@ describe("useRiskMetrics", () => {
   // ── WinRate ──
 
   it("100% winRate", () => {
-    const bets = [mkBet({ result: "Win", profit: 100, stake: 100 }), mkBet({ result: "Win", profit: 200, stake: 100 })];
+    const bets = [
+      mkBet({ result: "Win", profit: 100, stake: 100 }),
+      mkBet({ result: "Win", profit: 200, stake: 100 }),
+    ];
     const { result } = renderHook(() => useRiskMetrics(bets));
     // 100% win rate: riskOfRuin = 0; Kelly = 0 (cannot compute without any loss)
     expect(result.current.riskMetrics.riskOfRuin).toBe(0);
@@ -96,7 +99,10 @@ describe("useRiskMetrics", () => {
   });
 
   it("0% winRate (all losses)", () => {
-    const bets = [mkBet({ result: "Loss", profit: -100, stake: 100 }), mkBet({ result: "Loss", profit: -200, stake: 100 })];
+    const bets = [
+      mkBet({ result: "Loss", profit: -100, stake: 100 }),
+      mkBet({ result: "Loss", profit: -200, stake: 100 }),
+    ];
     const { result } = renderHook(() => useRiskMetrics(bets));
     expect(result.current.riskMetrics.riskOfRuin).toBeGreaterThan(0);
   });

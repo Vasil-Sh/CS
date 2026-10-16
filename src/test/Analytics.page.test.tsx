@@ -1,24 +1,38 @@
 /**
  * Page-level smoke tests: Analytics
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
-import Analytics from '@/pages/Analytics';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render } from "@testing-library/react";
+import { BrowserRouter } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
+import Analytics from "@/pages/Analytics";
 
 // Mock all data services
-vi.mock('@/lib/userDataService', () => ({
+vi.mock("@/lib/userDataService", () => ({
   UserDataService: {
     fetchBets: vi.fn(() => Promise.resolve([])),
-    fetchBetStats: vi.fn(() => Promise.resolve({ totalBets: 0, winRate: 0, totalProfit: 0, averageROI: 0 })),
+    fetchBetStats: vi.fn(() =>
+      Promise.resolve({
+        totalBets: 0,
+        winRate: 0,
+        totalProfit: 0,
+        averageROI: 0,
+      }),
+    ),
     getUserData: vi.fn(() => []),
   },
 }));
 
-vi.mock('@/lib/bankrollService', () => ({
+vi.mock("@/lib/bankrollService", () => ({
   BankrollService: {
-    fetchBankroll: vi.fn(() => Promise.resolve({ initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 })),
+    fetchBankroll: vi.fn(() =>
+      Promise.resolve({
+        initialBank: 0,
+        currentBank: 0,
+        totalProfit: 0,
+        roi: 0,
+      }),
+    ),
     isInitialized: vi.fn(() => false),
     getBankrollStatsDual: vi.fn(() => ({
       uah: { initialBank: 0, currentBank: 0, totalProfit: 0, roi: 0 },
@@ -27,17 +41,24 @@ vi.mock('@/lib/bankrollService', () => ({
   },
 }));
 
-vi.mock('@/lib/devLogger', () => ({
+vi.mock("@/lib/devLogger", () => ({
   logRender: vi.fn(),
 }));
 
-vi.mock('@/hooks/useRiskMetrics', () => ({
-  useRiskMetrics: vi.fn(() => ({ completedBets: [], riskMetrics: {}, drawdownPeriods: [] })),
+vi.mock("@/hooks/useRiskMetrics", () => ({
+  useRiskMetrics: vi.fn(() => ({
+    completedBets: [],
+    riskMetrics: {},
+    drawdownPeriods: [],
+  })),
 }));
 
 // Mock auth context
-vi.mock('@/contexts/AuthContext', () => ({
-  useAuth: vi.fn(() => ({ user: { username: 'test', role: 'user' }, isAuthenticated: true })),
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: vi.fn(() => ({
+    user: { username: "test", role: "user" },
+    isAuthenticated: true,
+  })),
 }));
 
 // Mock app store — must return STABLE values. Analytics reads
@@ -48,18 +69,18 @@ const storeState = vi.hoisted(() => ({
   bankrollVersion: 0,
   strategyVersion: 0,
   betsVersion: 0,
-  primaryStrategyId: '',
+  primaryStrategyId: "",
 }));
 
-vi.mock('@/stores/appStore', () => ({
+vi.mock("@/stores/appStore", () => ({
   useAppStore: vi.fn((selector?: (s: typeof storeState) => unknown) =>
-    typeof selector === 'function' ? selector(storeState) : storeState,
+    typeof selector === "function" ? selector(storeState) : storeState,
   ),
 }));
 
 // Mock theme
-vi.mock('@/hooks/useTheme', () => ({
-  useTheme: vi.fn(() => ({ theme: 'light', toggleTheme: vi.fn() })),
+vi.mock("@/hooks/useTheme", () => ({
+  useTheme: vi.fn(() => ({ theme: "light", toggleTheme: vi.fn() })),
 }));
 
 function renderPage() {
@@ -68,22 +89,24 @@ function renderPage() {
       <BrowserRouter>
         <Analytics />
       </BrowserRouter>
-    </HelmetProvider>
+    </HelmetProvider>,
   );
 }
 
-describe('Analytics Page', () => {
+describe("Analytics Page", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders without crashing', () => {
+  it("renders without crashing", () => {
     renderPage();
     // Smoke test: page mounts without throwing
-    expect(document.querySelector('[data-testid]') || document.body).toBeDefined();
+    expect(
+      document.querySelector("[data-testid]") || document.body,
+    ).toBeDefined();
   });
 
-  it('shows loading state on mount', () => {
+  it("shows loading state on mount", () => {
     renderPage();
     // Page should render without errors
     expect(document.body).toBeDefined();

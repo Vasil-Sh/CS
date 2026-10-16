@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 /**
  * App-wide event bus using zustand.
@@ -25,7 +25,7 @@ export const useAppStore = create<AppStore>((set) => ({
   bankrollVersion: 0,
   strategyVersion: 0,
   betsVersion: 0,
-  primaryStrategyId: '',
+  primaryStrategyId: "",
 
   bumpBankroll: () => set((s) => ({ bankrollVersion: s.bankrollVersion + 1 })),
   bumpStrategy: () => set((s) => ({ strategyVersion: s.strategyVersion + 1 })),

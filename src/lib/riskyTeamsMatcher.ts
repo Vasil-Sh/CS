@@ -87,20 +87,27 @@ export function findRiskyTeams(
   const normalizedTeam1 = normalizeTeamName(team1);
   const normalizedTeam2 = normalizeTeamName(team2);
   // Use a Map keyed by normalized name to handle duplicates — keep the best match
-  const foundMap = new Map<string, { record: RiskyTeamRecord; index: number; matchT1: boolean }>();
+  const foundMap = new Map<
+    string,
+    { record: RiskyTeamRecord; index: number; matchT1: boolean }
+  >();
 
   for (let i = 0; i < riskyTeams.length; i++) {
     const rt = riskyTeams[i];
     const normalizedRT = normalizeTeamName(rt.name);
     if (gameFilter) {
       const rtGameNorm = (rt.game || "").toLowerCase().trim();
-      if (!rtGameNorm) { /* match all */ }
-      else {
+      if (!rtGameNorm) {
+        /* match all */
+      } else {
         const filterNorm = gameFilter.toLowerCase();
-        const rtIsDota = rtGameNorm.includes("дота") || rtGameNorm.includes("dota");
-        const filterIsDota = filterNorm.includes("дота") || filterNorm.includes("dota");
+        const rtIsDota =
+          rtGameNorm.includes("дота") || rtGameNorm.includes("dota");
+        const filterIsDota =
+          filterNorm.includes("дота") || filterNorm.includes("dota");
         const rtIsCs = rtGameNorm.includes("cs") || rtGameNorm.includes("кс");
-        const filterIsCs = filterNorm.includes("cs") || filterNorm.includes("кс");
+        const filterIsCs =
+          filterNorm.includes("cs") || filterNorm.includes("кс");
         if (!((rtIsDota && filterIsDota) || (rtIsCs && filterIsCs))) continue;
       }
     }
@@ -111,8 +118,16 @@ export function findRiskyTeams(
     if (matchesT1 || matchesT2) {
       const existing = foundMap.get(normalizedRT);
       // Keep the most specific match: prefer longer name, then later in array (most recent)
-      if (!existing || (rt.name?.length ?? 0) > (existing.record.name?.length ?? 0) || i > existing.index) {
-        foundMap.set(normalizedRT, { record: rt, index: i, matchT1: matchesT1 });
+      if (
+        !existing ||
+        (rt.name?.length ?? 0) > (existing.record.name?.length ?? 0) ||
+        i > existing.index
+      ) {
+        foundMap.set(normalizedRT, {
+          record: rt,
+          index: i,
+          matchT1: matchesT1,
+        });
       }
     }
   }

@@ -47,8 +47,18 @@ describe("getGameFilterValue", () => {
 
 describe("findRiskyTeams", () => {
   const riskyTeams: RiskyTeamRecord[] = [
-    { name: "FaZe Clan", game: "CS", status: "Ризиковані", notes: "Слаба форма" },
-    { name: "Team Spirit", game: "Dota", status: "Під питанням", notes: "Новий ростер" },
+    {
+      name: "FaZe Clan",
+      game: "CS",
+      status: "Ризиковані",
+      notes: "Слаба форма",
+    },
+    {
+      name: "Team Spirit",
+      game: "Dota",
+      status: "Під питанням",
+      notes: "Новий ростер",
+    },
     { name: "Navi", game: "CS", status: "Ризиковані", notes: "Часті заміни" },
     { name: "G2", game: "CS", status: "Під питанням", notes: "" },
   ];

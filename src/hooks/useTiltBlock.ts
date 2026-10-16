@@ -68,7 +68,8 @@ export function useTiltBlock(
       }
     }
 
-    const limits = primaryStrategy?.activityLimits as StrategyLimits | undefined;
+    const limits = primaryStrategy?.activityLimits as
+      StrategyLimits | undefined;
     const blockAfter = limits?.enabled ? (limits.blockAfterLosses ?? 3) : null;
 
     if (!blockAfter || blockAfter < 1)

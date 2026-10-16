@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async';
+import { Helmet } from "react-helmet-async";
 
 interface SEOProps {
   /** Page title. Appended to " | MatchIQ" */
@@ -10,7 +10,7 @@ interface SEOProps {
   /** OG image URL (full absolute URL, recommended 1200×630) */
   ogImage?: string;
   /** Page type: 'website' | 'article' */
-  ogType?: 'website' | 'article';
+  ogType?: "website" | "article";
   /** Ukrainian alternate URL for hreflang */
   ukHref?: string;
   /** English alternate URL for hreflang */
@@ -19,10 +19,10 @@ interface SEOProps {
   noIndex?: boolean;
 }
 
-const SITE_NAME = 'MatchIQ';
-const BASE_URL = 'https://matchiq.pro';
+const SITE_NAME = "MatchIQ";
+const BASE_URL = "https://matchiq.pro";
 const DEFAULT_DESCRIPTION =
-  'MatchIQ — професійна аналітика ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу та AI-рекомендації. Контролюйте ризики та збільшуйте ROI.';
+  "MatchIQ — професійна аналітика ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу та AI-рекомендації. Контролюйте ризики та збільшуйте ROI.";
 const DEFAULT_OG_IMAGE = `${BASE_URL}/assets/og-image.png`;
 
 export function SEO({
@@ -30,12 +30,14 @@ export function SEO({
   description = DEFAULT_DESCRIPTION,
   canonical,
   ogImage = DEFAULT_OG_IMAGE,
-  ogType = 'website',
+  ogType = "website",
   ukHref,
   enHref,
   noIndex = false,
 }: SEOProps) {
-  const pageTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} — Аналітика ставок на CS2`;
+  const pageTitle = title
+    ? `${title} | ${SITE_NAME}`
+    : `${SITE_NAME} — Аналітика ставок на CS2`;
   const canonicalUrl = canonical ?? BASE_URL;
 
   return (
@@ -49,7 +51,10 @@ export function SEO({
       {noIndex ? (
         <meta name="robots" content="noindex, nofollow" />
       ) : (
-        <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+        <meta
+          name="robots"
+          content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
+        />
       )}
 
       {/* ── Open Graph ── */}
@@ -75,12 +80,17 @@ export function SEO({
       {/* ── hreflang ── */}
       {ukHref && <link rel="alternate" hrefLang="uk" href={ukHref} />}
       {enHref && <link rel="alternate" hrefLang="en" href={enHref} />}
-      {(ukHref || enHref) && <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />}
+      {(ukHref || enHref) && (
+        <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
+      )}
 
       {/* ── Mobile / PWA ── */}
       <meta name="mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      <meta
+        name="apple-mobile-web-app-status-bar-style"
+        content="black-translucent"
+      />
       <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
     </Helmet>
   );

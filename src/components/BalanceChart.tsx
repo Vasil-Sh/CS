@@ -12,11 +12,7 @@ import {
   ReferenceLine,
   Area,
 } from "recharts";
-import {
-  Wallet,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
+import { Wallet, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import type { BalanceData } from "@/types/betting";
 

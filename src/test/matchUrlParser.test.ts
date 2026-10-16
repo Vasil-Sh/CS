@@ -118,6 +118,16 @@ describe("parseCS2MatchFromUrl", () => {
     expect(r!.team2).toBe("Team Spirit");
     expect(r!.tournament).toBe("IEM Katowice 2025");
   });
+
+  it("strips betting-sponsored event name (Stake Pulse Beat III)", () => {
+    const r = parseCS2MatchFromUrl(
+      "https://www.hltv.org/matches/2399263/fnatic-vs-heroic-stake-pulse-beat-iii",
+    );
+    expect(r).not.toBeNull();
+    expect(r!.team1).toBe("fnatic");
+    expect(r!.team2).toBe("HEROIC");
+    expect(r!.tournament).toContain("Stake");
+  });
 });
 
 describe("extractDota2Slug", () => {

@@ -2,10 +2,10 @@
  * Environment variable validation using Zod.
  * Validates at app startup that all required env vars are present.
  */
-import { z } from 'zod';
+import { z } from "zod";
 
 const envSchema = z.object({
-  VITE_CS_API_URL: z.string().default('https://api.cstest.pp.ua'),
+  VITE_CS_API_URL: z.string().default("https://api.cstest.pp.ua"),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

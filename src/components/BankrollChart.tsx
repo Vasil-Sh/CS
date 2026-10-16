@@ -40,8 +40,7 @@ const BankrollChart = memo(function BankrollChart({
     const d = new Date(v);
     return d.toLocaleDateString("uk-UA", { day: "2-digit", month: "2-digit" });
   };
-  const fmtCurrency = (v: number) =>
-    Math.round(v).toLocaleString("uk-UA");
+  const fmtCurrency = (v: number) => Math.round(v).toLocaleString("uk-UA");
 
   return (
     <Card className="analytics-chart-card w-full overflow-hidden">
@@ -66,10 +65,7 @@ const BankrollChart = memo(function BankrollChart({
               </linearGradient>
             </defs>
 
-            <CartesianGrid
-              stroke="#e4e6e0"
-              opacity={1}
-            />
+            <CartesianGrid stroke="#e4e6e0" opacity={1} />
 
             <XAxis
               dataKey="date"
@@ -111,14 +107,18 @@ const BankrollChart = memo(function BankrollChart({
                         <>
                           <p className="text-orange-600 font-medium">
                             Баланс:{" "}
-                            {Math.round(d.balance).toLocaleString("uk-UA")} {currency === "USD" ? "$" : "₴"}
+                            {Math.round(d.balance).toLocaleString("uk-UA")}{" "}
+                            {currency === "USD" ? "$" : "₴"}
                           </p>
                           {d.profit !== 0 && (
                             <p
                               className={`font-medium ${d.profit >= 0 ? "text-emerald-600" : "text-red-500"}`}
                             >
                               {d.profit >= 0 ? "+" : ""}
-                              {Math.round(d.profit).toLocaleString("uk-UA")} {currency === "USD" ? "$" : "₴"}
+                              {Math.round(d.profit).toLocaleString(
+                                "uk-UA",
+                              )}{" "}
+                              {currency === "USD" ? "$" : "₴"}
                             </p>
                           )}
                         </>
@@ -166,7 +166,6 @@ const BankrollChart = memo(function BankrollChart({
                 strokeWidth: 2,
               }}
             />
-
           </ComposedChart>
         </ResponsiveContainer>
       </CardContent>

@@ -1,5 +1,5 @@
 import { Fragment, useState, type ReactNode } from "react";
-import { Plus, Users, X, Target } from "lucide-react";
+import { Plus, Users, X, Target, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,6 +41,7 @@ interface BettingFormMatchSectionProps {
   mode?: "all" | "match" | "prediction";
   hideOdds?: boolean;
   hideHeading?: boolean;
+  teamOptions?: string[];
   extraPredictionSlot?: ReactNode;
   teamNotes?: ReactNode;
   isParsing: boolean;
@@ -67,6 +68,7 @@ export default function BettingFormMatchSection({
   mode = "all",
   hideOdds = false,
   hideHeading = false,
+  teamOptions = [],
   extraPredictionSlot,
   teamNotes,
   isParsing,
@@ -307,7 +309,7 @@ export default function BettingFormMatchSection({
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="record-match-fields space-y-4">
         {mode !== "prediction" && (
           <>
             {!hideHeading && (
@@ -318,7 +320,7 @@ export default function BettingFormMatchSection({
             )}
 
             {/* Match URL */}
-            <div className="space-y-1.5">
+            <div className="record-url-field space-y-1.5">
               <Label
                 htmlFor="matchUrl"
                 className={`${classes.label} flex items-center gap-2`}
@@ -352,15 +354,15 @@ export default function BettingFormMatchSection({
               </div>
             </div>
 
-            <div className="border-t border-gray-100 -mx-6" />
+            <div className="record-form-divider border-t border-gray-100 -mx-6" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="record-team-fields grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1.5" id="team1-wrapper">
                 <Label htmlFor="team1" className={classes.label}>
                   Команда 1{" "}
                   {showRequired && <span className="text-red-500">*</span>}
                 </Label>
-                <div className="flex items-center gap-2">
+                <div className="record-team-control flex items-center gap-2">
                   <img
                     src={
                       data.logoTeam1 ||
@@ -391,6 +393,7 @@ export default function BettingFormMatchSection({
                   />
                   <Input
                     id="team1"
+                    list="record-team-options"
                     value={data.team1}
                     onChange={(e) => onFieldChange("team1", e.target.value)}
                     placeholder={data.game === "CS2" ? "NAVI" : "Team Spirit"}
@@ -407,7 +410,7 @@ export default function BettingFormMatchSection({
                   Команда 2{" "}
                   {showRequired && <span className="text-red-500">*</span>}
                 </Label>
-                <div className="flex items-center gap-2">
+                <div className="record-team-control flex items-center gap-2">
                   <img
                     src={
                       data.logoTeam2 ||
@@ -438,6 +441,7 @@ export default function BettingFormMatchSection({
                   />
                   <Input
                     id="team2"
+                    list="record-team-options"
                     value={data.team2}
                     onChange={(e) => onFieldChange("team2", e.target.value)}
                     placeholder={data.game === "CS2" ? "G2" : "OG"}
@@ -450,7 +454,12 @@ export default function BettingFormMatchSection({
               </div>
             </div>
 
-            <div className="border-t border-gray-100 -mx-6" />
+            <datalist id="record-team-options">
+              {[...new Set(teamOptions)].map((name) => (
+                <option key={name} value={name} />
+              ))}
+            </datalist>
+            <div className="record-form-divider border-t border-gray-100 -mx-6" />
           </>
         )}
         {teamNotes}
@@ -460,8 +469,8 @@ export default function BettingFormMatchSection({
           <div
             className={`entry-prediction-row ${hideOdds ? "wizard-prediction-fields" : ""}`}
           >
-            <div className="flex-[2] space-y-1.5">
-              <Label className={classes.label}>
+            <div className="record-selection-field flex-[2] space-y-1.5">
+              <Label htmlFor="record-selection" className={classes.label}>
                 Вибір команди{" "}
                 {showRequired && <span className="text-red-500">*</span>}
               </Label>
@@ -471,13 +480,25 @@ export default function BettingFormMatchSection({
                 disabled={!data.team1 || !data.team2}
               >
                 <SelectTrigger
+                  id="record-selection"
                   className={`${classes.selectTrigger} ${err("selection")}`}
                 >
+                  {data.selection && (
+                    <img
+                      className="record-selection-logo"
+                      src={
+                        data.selection === data.team1
+                          ? data.logoTeam1 || "/assets/team-placeholder.svg"
+                          : data.logoTeam2 || "/assets/team-placeholder.svg"
+                      }
+                      alt=""
+                    />
+                  )}
                   <SelectValue
                     placeholder={
                       data.team1 && data.team2
                         ? "Хто переможе?"
-                        : "Спочатку оберіть команду"
+                        : "Оберіть команду"
                     }
                   />
                 </SelectTrigger>
@@ -491,8 +512,8 @@ export default function BettingFormMatchSection({
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex-[2] space-y-1.5">
-              <Label className={classes.label}>
+            <div className="record-market-field flex-[2] space-y-1.5">
+              <Label htmlFor="record-market" className={classes.label}>
                 Тип прогнозу{" "}
                 {showRequired && <span className="text-red-500">*</span>}
               </Label>
@@ -500,7 +521,15 @@ export default function BettingFormMatchSection({
                 type="button"
                 disabled={!data.selection}
                 onClick={openBetModal}
-                className={`w-full h-11 rounded-2xl border font-medium text-sm transition-colors text-center px-4 ${
+                id="record-market"
+                title={
+                  !data.selection
+                    ? "Спочатку оберіть команду"
+                    : data.betType
+                      ? getBetTypeLabel(data.betType, data.format)
+                      : "Оберіть тип прогнозу"
+                }
+                className={`record-market-trigger w-full h-11 rounded-2xl border font-medium text-sm transition-colors text-center px-4 ${
                   !data.selection
                     ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
                     : data.betType
@@ -508,15 +537,16 @@ export default function BettingFormMatchSection({
                       : `border-primary bg-primary text-white hover:bg-blue-700 ${submitErrors.betType ? "bg-red-500 border-red-500" : ""}`
                 }`}
               >
-                {!data.selection
-                  ? "Спочатку оберіть команду"
-                  : data.betType
+                <span>
+                  {data.betType
                     ? getBetTypeLabel(data.betType, data.format)
-                    : "Оберіть тип прогнозу"}
+                    : "Оберіть прогноз"}
+                </span>
+                <ChevronDown size={16} aria-hidden="true" />
               </button>
             </div>
             {!hideOdds && (
-              <div className="flex-1 space-y-1.5">
+              <div className="record-odds-field flex-1 space-y-1.5">
                 <Label htmlFor="odds" className={classes.label}>
                   Коефіцієнт{" "}
                   {showRequired && <span className="text-red-500">*</span>}
@@ -537,7 +567,9 @@ export default function BettingFormMatchSection({
               </div>
             )}
             {extraPredictionSlot && (
-              <div className="flex-1">{extraPredictionSlot}</div>
+              <div className="record-extra-prediction-field flex-1">
+                {extraPredictionSlot}
+              </div>
             )}
           </div>
         )}

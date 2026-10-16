@@ -62,7 +62,7 @@ const columns = [
   ["match", "Матч і вибір"],
   ["amount", "Сума"],
   ["odds", "Коеф."],
-  ["profit", "Профіт"],
+  ["profit", "Прибуток"],
   ["goal", "Ціль"],
   ["status", "Статус"],
 ] as const;
@@ -334,8 +334,8 @@ export default function JournalTable(p: Props) {
         aria-label={`Поділитися: ${bet.match}`}
         title="Поділитися записом"
       >
-        <Share2 size={16} />
-        <span>Поділитися</span>
+        <Share2 size={18} />
+        <span className="sr-only">Поділитися</span>
       </button>
       {menu(bet)}
     </div>
@@ -425,17 +425,23 @@ export default function JournalTable(p: Props) {
                 Вибір: <span>{journalSelection(bet)}</span>
               </span>
             )}
-            <small>
-              {!journalExpress(bet) && <>{journalMarket(bet)} · </>}
-              {bet.game || "CS2"} · {bet.format || "—"}
-            </small>
-            {journalExpress(bet) && (
-              <span className="journal-expand-label">
-                {selectedKey === journalKey(bet)
-                  ? "Згорнути події"
-                  : "Показати події"}
+            <span className="journal-match-meta">
+              <span className="journal-meta-chip">
+                {bet.game === "Dota2" ? "Dota 2" : bet.game || "CS2"} ·{" "}
+                {bet.format || "—"}
               </span>
-            )}
+              {!journalExpress(bet) && (
+                <span className="journal-meta-chip">{journalMarket(bet)}</span>
+              )}
+              {journalExpress(bet) && (
+                <span className="journal-expand-label">
+                  {selectedKey === journalKey(bet)
+                    ? "Згорнути події"
+                    : "Показати події"}
+                  <ChevronDown size={14} aria-hidden="true" />
+                </span>
+              )}
+            </span>
           </button>
         );
       }
@@ -478,6 +484,7 @@ export default function JournalTable(p: Props) {
   }));
   return (
     <section className="journal-workspace" aria-label="Журнал записів">
+      <h2 className="journal-title">Історія записів</h2>
       <div className="journal-tools">
         <label className="journal-search">
           <Search size={17} />
@@ -535,7 +542,7 @@ export default function JournalTable(p: Props) {
           </DropdownMenuContent>
         </DropdownMenu>
         <button className="journal-compact" onClick={() => setCompact(true)}>
-          <FileText size={15} />
+          <ListChecks size={18} />
           Стислий список
         </button>
       </div>
@@ -763,8 +770,8 @@ export default function JournalTable(p: Props) {
         <p className="journal-footnote">
           <Info size={15} />{" "}
           <span>
-            Суми показано у валюті запису — ₴ і $ не підсумовуються. Сортування
-            профіту — за UAH.
+            Суми у валюті запису. ₴ та $ не підсумовуються; фінансова статистика
+            вгорі — у вибраній валюті. Сортування прибутку — за UAH.
           </span>
         </p>
       </div>

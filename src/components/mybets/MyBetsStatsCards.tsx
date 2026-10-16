@@ -1,7 +1,16 @@
 import { useMemo, type ReactNode } from "react";
 import {
-  Wallet, DollarSign, BarChart3, Target, Clock, Trophy,
-  AlertTriangle, TrendingUp, ArrowUpRight, ArrowDownRight, Pencil,
+  Wallet,
+  DollarSign,
+  BarChart3,
+  Target,
+  Clock,
+  Trophy,
+  AlertTriangle,
+  TrendingUp,
+  ArrowUpRight,
+  ArrowDownRight,
+  Pencil,
 } from "lucide-react";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
@@ -21,11 +30,21 @@ interface MyBetsStatsCardsProps {
 }
 
 export default function MyBetsStatsCards({
-  recentBets, stats, dualBank, currencyMode, activeBets, winningBets, losingBets, onEditBank,
+  recentBets,
+  stats,
+  dualBank,
+  currencyMode,
+  activeBets,
+  winningBets,
+  losingBets,
+  onEditBank,
 }: MyBetsStatsCardsProps) {
   const profitByCurrency = useMemo(() => {
-    const completed = recentBets.filter(b => b.result === "Win" || b.result === "Loss");
-    let profitUAH = 0, profitUSD = 0;
+    const completed = recentBets.filter(
+      (b) => b.result === "Win" || b.result === "Loss",
+    );
+    let profitUAH = 0,
+      profitUSD = 0;
     for (const b of completed) {
       const profit = b.profit || 0;
       if (b.currency === "USD" && b.exchangeRate) {
@@ -37,7 +56,10 @@ export default function MyBetsStatsCards({
     return { profitUAH, profitUSD };
   }, [recentBets]);
 
-  const profit = currencyMode === "USD" ? profitByCurrency.profitUSD : profitByCurrency.profitUAH;
+  const profit =
+    currencyMode === "USD"
+      ? profitByCurrency.profitUSD
+      : profitByCurrency.profitUAH;
   const bank = currencyMode === "USD" ? dualBank.usd : dualBank.uah;
   const isUp = profit >= 0;
   const bankUp = bank.totalProfit >= 0;
@@ -56,11 +78,16 @@ export default function MyBetsStatsCards({
               <Wallet className="h-5 w-5 text-blue-500" strokeWidth={1.5} />
             </div>
             <span className="text-lg font-semibold text-gray-900">
-              {currencyMode === "USD" ? "Поточний банк (USDT)" : "Поточний банк"}
+              {currencyMode === "USD"
+                ? "Поточний банк (USDT)"
+                : "Поточний банк"}
             </span>
             {onEditBank && (
               <button
-                onClick={(e) => { e.stopPropagation(); onEditBank(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEditBank();
+                }}
                 className="ml-auto flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500 hover:bg-blue-600 text-white shadow-[0_2px_8px_rgba(68,122,252,0.3)] transition-all duration-200"
                 title="Редагувати банк"
               >
@@ -75,11 +102,23 @@ export default function MyBetsStatsCards({
           </div>
           <div className="flex items-center gap-2 text-sm">
             {bankUp ? (
-              <ArrowUpRight className="h-4 w-4 text-green-500" strokeWidth={2.5} />
+              <ArrowUpRight
+                className="h-4 w-4 text-green-500"
+                strokeWidth={2.5}
+              />
             ) : (
-              <ArrowDownRight className="h-4 w-4 text-red-500" strokeWidth={2.5} />
+              <ArrowDownRight
+                className="h-4 w-4 text-red-500"
+                strokeWidth={2.5}
+              />
             )}
-            <span className={bankUp ? "text-green-500 font-medium" : "text-red-500 font-medium"}>
+            <span
+              className={
+                bankUp
+                  ? "text-green-500 font-medium"
+                  : "text-red-500 font-medium"
+              }
+            >
               {currencyMode === "USD"
                 ? `${Number(bank.totalProfit) >= 0 ? "+" : ""}$${Number(bank.totalProfit).toFixed(2)}`
                 : `${Number(bank.totalProfit) >= 0 ? "+" : ""}${Number(bank.totalProfit).toFixed(2)} ₴`}
@@ -89,26 +128,70 @@ export default function MyBetsStatsCards({
         </div>
 
         <StatCard
-          icon={<IconBox><DollarSign className="h-5 w-5 text-primary" strokeWidth={1.5} /></IconBox>}
+          icon={
+            <IconBox>
+              <DollarSign className="h-5 w-5 text-primary" strokeWidth={1.5} />
+            </IconBox>
+          }
           label="Профіт"
-          value={<>{isUp ? "+" : ""}{currencyMode === "USD" ? "$" : ""}<NumberTicker value={Math.abs(Math.round(profit * 100) / 100)} decimalPlaces={2} />{currencyMode !== "USD" && " ₴"}</>}
-          valueColor={isUp ? (currencyMode === "USD" ? "text-green-500" : "text-gray-900") : "text-red-500"}
+          value={
+            <>
+              {isUp ? "+" : ""}
+              {currencyMode === "USD" ? "$" : ""}
+              <NumberTicker
+                value={Math.abs(Math.round(profit * 100) / 100)}
+                decimalPlaces={2}
+              />
+              {currencyMode !== "USD" && " ₴"}
+            </>
+          }
+          valueColor={
+            isUp
+              ? currencyMode === "USD"
+                ? "text-green-500"
+                : "text-gray-900"
+              : "text-red-500"
+          }
           subtext={isUp ? "Позитивна динаміка" : "Негативна динаміка"}
-          subIcon={isUp ? <ArrowUpRight className="h-4 w-4 text-green-500" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-red-500" strokeWidth={2.5} />}
+          subIcon={
+            isUp ? (
+              <ArrowUpRight
+                className="h-4 w-4 text-green-500"
+                strokeWidth={2.5}
+              />
+            ) : (
+              <ArrowDownRight
+                className="h-4 w-4 text-red-500"
+                strokeWidth={2.5}
+              />
+            )
+          }
           trend={isUp ? "up" : "down"}
         />
         <StatCard
-          icon={<IconBox><BarChart3 className="h-5 w-5 text-primary" strokeWidth={1.5} /></IconBox>}
+          icon={
+            <IconBox>
+              <BarChart3 className="h-5 w-5 text-primary" strokeWidth={1.5} />
+            </IconBox>
+          }
           label="Всього записів"
           value={<NumberTicker value={stats.totalBets} />}
-          subtext={activeBets.length > 0 ? `${activeBets.length} активних` : "Немає активних"}
+          subtext={
+            activeBets.length > 0
+              ? `${activeBets.length} активних`
+              : "Немає активних"
+          }
         />
         {/* Winrate card — large donut filling the card */}
         <div
           className="relative bg-white border border-gray-100 rounded-3xl px-5 py-4 transition-all duration-300 ease-out cursor-default overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)] hover:border-gray-300"
           style={{ transform: "translateY(0)" }}
-          onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-3px)")}
-          onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.transform = "translateY(-3px)")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.transform = "translateY(0)")
+          }
         >
           <div className="flex items-center gap-2 mb-2">
             <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50">
@@ -127,7 +210,9 @@ export default function MyBetsStatsCards({
             />
           </div>
           <div className="text-center mt-1">
-            <span className="text-xs text-gray-400">{winningBets.length}W / {losingBets.length}L</span>
+            <span className="text-xs text-gray-400">
+              {winningBets.length}W / {losingBets.length}L
+            </span>
           </div>
         </div>
       </div>
@@ -135,27 +220,71 @@ export default function MyBetsStatsCards({
       {/* Row 2 */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
         <StatCard
-          icon={<IconBox><Clock className="h-5 w-5 text-primary" strokeWidth={1.5} /></IconBox>}
-          label="Активні" value={<NumberTicker value={activeBets.length} />} valueColor="text-blue-500"
+          icon={
+            <IconBox>
+              <Clock className="h-5 w-5 text-primary" strokeWidth={1.5} />
+            </IconBox>
+          }
+          label="Активні"
+          value={<NumberTicker value={activeBets.length} />}
+          valueColor="text-blue-500"
           subtext="Очікують результату"
         />
         <StatCard
-          icon={<IconBox><Trophy className="h-5 w-5 text-primary" strokeWidth={1.5} /></IconBox>}
-          label="Виграші" value={<NumberTicker value={winningBets.length} />} valueColor="text-green-500"
-          subtext="Успішних записів" trend="up"
+          icon={
+            <IconBox>
+              <Trophy className="h-5 w-5 text-primary" strokeWidth={1.5} />
+            </IconBox>
+          }
+          label="Виграші"
+          value={<NumberTicker value={winningBets.length} />}
+          valueColor="text-green-500"
+          subtext="Успішних записів"
+          trend="up"
         />
         <StatCard
-          icon={<IconBox><AlertTriangle className="h-5 w-5 text-primary" strokeWidth={1.5} /></IconBox>}
-          label="Програші" value={<NumberTicker value={losingBets.length} />} valueColor="text-red-500"
-          subtext="Невдалих записів" trend="down"
+          icon={
+            <IconBox>
+              <AlertTriangle
+                className="h-5 w-5 text-primary"
+                strokeWidth={1.5}
+              />
+            </IconBox>
+          }
+          label="Програші"
+          value={<NumberTicker value={losingBets.length} />}
+          valueColor="text-red-500"
+          subtext="Невдалих записів"
+          trend="down"
         />
         <StatCard
-          icon={<IconBox><TrendingUp className="h-5 w-5 text-primary" strokeWidth={1.5} /></IconBox>}
+          icon={
+            <IconBox>
+              <TrendingUp className="h-5 w-5 text-primary" strokeWidth={1.5} />
+            </IconBox>
+          }
           label="Середній ROI"
-          value={<>{stats.averageROI >= 0 ? "+" : ""}<NumberTicker value={Math.abs(stats.averageROI)} />%</>}
+          value={
+            <>
+              {stats.averageROI >= 0 ? "+" : ""}
+              <NumberTicker value={Math.abs(stats.averageROI)} />%
+            </>
+          }
           valueColor={stats.averageROI >= 0 ? "text-gray-900" : "text-red-500"}
           subtext={stats.averageROI >= 0 ? "Позитивний" : "Негативний"}
-          subIcon={stats.averageROI >= 0 ? <ArrowUpRight className="h-4 w-4 text-green-500" strokeWidth={2.5} /> : <ArrowDownRight className="h-4 w-4 text-red-500" strokeWidth={2.5} />}
+          subIcon={
+            stats.averageROI >= 0 ? (
+              <ArrowUpRight
+                className="h-4 w-4 text-green-500"
+                strokeWidth={2.5}
+              />
+            ) : (
+              <ArrowDownRight
+                className="h-4 w-4 text-red-500"
+                strokeWidth={2.5}
+              />
+            )
+          }
           trend={stats.averageROI >= 0 ? "up" : "down"}
         />
       </div>

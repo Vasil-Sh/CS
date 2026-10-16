@@ -135,13 +135,11 @@ describe("authService", () => {
     });
 
     it("returns empty on 401/403 (non-admin)", async () => {
-      globalThis.fetch = vi
-        .fn()
-        .mockResolvedValue({
-          ok: false,
-          status: 401,
-          json: () => Promise.resolve({ error: "Unauthorized" }),
-        });
+      globalThis.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 401,
+        json: () => Promise.resolve({ error: "Unauthorized" }),
+      });
       const users = await authService.fetchUsers();
       expect(users).toEqual([]);
     });

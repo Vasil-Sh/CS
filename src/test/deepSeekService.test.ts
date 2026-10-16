@@ -27,26 +27,66 @@ function buildCacheKey(data: MatchData): string {
 
 describe("DeepSeekService: cache key", () => {
   it("generates deterministic key", () => {
-    const k1 = buildCacheKey({ team1: "NaVi", team2: "FaZe", format: "Bo3", tier: "TIER1" });
-    const k2 = buildCacheKey({ team1: "NaVi", team2: "FaZe", format: "Bo3", tier: "TIER1" });
+    const k1 = buildCacheKey({
+      team1: "NaVi",
+      team2: "FaZe",
+      format: "Bo3",
+      tier: "TIER1",
+    });
+    const k2 = buildCacheKey({
+      team1: "NaVi",
+      team2: "FaZe",
+      format: "Bo3",
+      tier: "TIER1",
+    });
     expect(k1).toBe(k2);
   });
 
   it("different tier → different key", () => {
-    const k1 = buildCacheKey({ team1: "NaVi", team2: "FaZe", format: "Bo3", tier: "TIER1" });
-    const k2 = buildCacheKey({ team1: "NaVi", team2: "FaZe", format: "Bo3", tier: "TIER2" });
+    const k1 = buildCacheKey({
+      team1: "NaVi",
+      team2: "FaZe",
+      format: "Bo3",
+      tier: "TIER1",
+    });
+    const k2 = buildCacheKey({
+      team1: "NaVi",
+      team2: "FaZe",
+      format: "Bo3",
+      tier: "TIER2",
+    });
     expect(k1).not.toBe(k2);
   });
 
   it("different format → different key", () => {
-    const k1 = buildCacheKey({ team1: "NaVi", team2: "FaZe", format: "Bo3", tier: "TIER1" });
-    const k2 = buildCacheKey({ team1: "NaVi", team2: "FaZe", format: "Bo5", tier: "TIER1" });
+    const k1 = buildCacheKey({
+      team1: "NaVi",
+      team2: "FaZe",
+      format: "Bo3",
+      tier: "TIER1",
+    });
+    const k2 = buildCacheKey({
+      team1: "NaVi",
+      team2: "FaZe",
+      format: "Bo5",
+      tier: "TIER1",
+    });
     expect(k1).not.toBe(k2);
   });
 
   it("swapped teams → different key", () => {
-    const k1 = buildCacheKey({ team1: "NaVi", team2: "FaZe", format: "Bo3", tier: "TIER1" });
-    const k2 = buildCacheKey({ team1: "FaZe", team2: "NaVi", format: "Bo3", tier: "TIER1" });
+    const k1 = buildCacheKey({
+      team1: "NaVi",
+      team2: "FaZe",
+      format: "Bo3",
+      tier: "TIER1",
+    });
+    const k2 = buildCacheKey({
+      team1: "FaZe",
+      team2: "NaVi",
+      format: "Bo3",
+      tier: "TIER1",
+    });
     expect(k1).not.toBe(k2);
   });
 });
@@ -54,7 +94,10 @@ describe("DeepSeekService: cache key", () => {
 // ── In-memory LRU cache with TTL ──
 
 describe("DeepSeekService: TTL cache", () => {
-  const store = new Map<string, { recommendation: AIRecommendation; timestamp: number }>();
+  const store = new Map<
+    string,
+    { recommendation: AIRecommendation; timestamp: number }
+  >();
 
   function get(key: string): AIRecommendation | null {
     const entry = store.get(key);
@@ -71,8 +114,11 @@ describe("DeepSeekService: TTL cache", () => {
   }
 
   const mockRec: AIRecommendation = {
-    prediction: "NaVi", confidence: 72, riskLevel: "low",
-    reasoning: "Based on analysis", source: "DeepSeek",
+    prediction: "NaVi",
+    confidence: 72,
+    riskLevel: "low",
+    reasoning: "Based on analysis",
+    source: "DeepSeek",
   };
 
   beforeEach(() => store.clear());
@@ -87,13 +133,19 @@ describe("DeepSeekService: TTL cache", () => {
   });
 
   it("expired entry returns null", () => {
-    store.set("key1", { recommendation: mockRec, timestamp: Date.now() - CACHE_TTL_MS - 1000 });
+    store.set("key1", {
+      recommendation: mockRec,
+      timestamp: Date.now() - CACHE_TTL_MS - 1000,
+    });
     expect(get("key1")).toBeNull();
     expect(store.has("key1")).toBe(false); // cleaned up
   });
 
   it("fresh entry returns value", () => {
-    store.set("key1", { recommendation: mockRec, timestamp: Date.now() - CACHE_TTL_MS + 60000 });
+    store.set("key1", {
+      recommendation: mockRec,
+      timestamp: Date.now() - CACHE_TTL_MS + 60000,
+    });
     expect(get("key1")).toEqual(mockRec);
   });
 });
@@ -111,7 +163,13 @@ describe("DeepSeekService: request deduplication", () => {
       const promise = new Promise<AIRecommendation>((resolve) => {
         setTimeout(() => {
           completed.push(key);
-          resolve({ prediction: "TeamX", confidence: 60, riskLevel: "medium", reasoning: "ok", source: "mock" });
+          resolve({
+            prediction: "TeamX",
+            confidence: 60,
+            riskLevel: "medium",
+            reasoning: "ok",
+            source: "mock",
+          });
         }, 10);
       });
       pending.set(key, promise);
@@ -137,10 +195,23 @@ describe("DeepSeekService: request deduplication", () => {
     async function fetchRecommendation(key: string): Promise<AIRecommendation> {
       if (pending.has(key)) return pending.get(key)!;
       const promise = new Promise<AIRecommendation>((resolve) => {
-        setTimeout(() => { completed.push(key); resolve({ prediction: "X", confidence: 50, riskLevel: "medium", reasoning: "", source: "mock" }); }, 10);
+        setTimeout(() => {
+          completed.push(key);
+          resolve({
+            prediction: "X",
+            confidence: 50,
+            riskLevel: "medium",
+            reasoning: "",
+            source: "mock",
+          });
+        }, 10);
       });
       pending.set(key, promise);
-      try { return await promise; } finally { pending.delete(key); }
+      try {
+        return await promise;
+      } finally {
+        pending.delete(key);
+      }
     }
 
     await Promise.all([fetchRecommendation("k1"), fetchRecommendation("k2")]);

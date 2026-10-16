@@ -33,25 +33,30 @@ export default function OddsVsProfitScatterCard({
         <CardTitle className="analytics-scatter-title text-gray-900">
           Коефіцієнт і результат
         </CardTitle>
-
       </CardHeader>
 
       {/* ── Chart ── */}
       <CardContent className="analytics-scatter-content p-0 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 6, right: 20, left: 14, bottom: 10 }}>
-            <CartesianGrid
-              stroke="#E5E7EB"
-              opacity={1}
-            />
+            <CartesianGrid stroke="#E5E7EB" opacity={1} />
 
             <XAxis
               dataKey="odds"
               type="number"
-              domain={[(min: number) => Math.min(1, min), (max: number) => Math.max(3.5, Math.ceil(max * 2) / 2)]}
+              domain={[
+                (min: number) => Math.min(1, min),
+                (max: number) => Math.max(3.5, Math.ceil(max * 2) / 2),
+              ]}
               tickCount={6}
               height={42}
-              label={{ value: "Коефіцієнт", position: "insideBottom", offset: -2, fill: "#747a71", fontSize: 12 }}
+              label={{
+                value: "Коефіцієнт",
+                position: "insideBottom",
+                offset: -2,
+                fill: "#747a71",
+                fontSize: 12,
+              }}
               name="Коефіцієнт"
               axisLine={false}
               tickLine={false}
@@ -92,7 +97,8 @@ export default function OddsVsProfitScatterCard({
                         className={`font-medium ${Number(p.profit) >= 0 ? "text-emerald-600" : "text-red-500"}`}
                       >
                         {Number(p.profit) >= 0 ? "+" : ""}
-                        {Number(p.profit).toFixed(0)} {currency === "USD" ? "$" : "₴"}
+                        {Number(p.profit).toFixed(0)}{" "}
+                        {currency === "USD" ? "$" : "₴"}
                       </p>
                     </div>
                   );

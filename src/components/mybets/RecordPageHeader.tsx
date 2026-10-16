@@ -67,7 +67,7 @@ interface Props {
   extraAction?: ReactNode;
   hideCurrency?: boolean;
   hideEditBank?: boolean;
-  variant?: "entry" | "default";
+  variant?: "entry" | "journal" | "default";
 }
 export default function RecordPageHeader({
   bets,
@@ -86,42 +86,53 @@ export default function RecordPageHeader({
   const money = (value: number) =>
     new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 2 }).format(value) +
     (currency === "USD" ? " $" : " ₴");
-  if (variant === "entry") {
+  if (variant === "entry" || variant === "journal") {
+    const journal = variant === "journal";
+    // Financial amounts follow the currency toggle; record counts cover the journal.
+    const counts = journal
+      ? {
+          total: bets.length,
+          wins: bets.filter((bet) => bet.result === "Win").length,
+          losses: bets.filter((bet) => bet.result === "Loss").length,
+          activeCount: bets.filter((bet) => bet.result === "Pending").length,
+        }
+      : stats;
+    const currencyHint = currency === "UAH" ? "У гривні" : "У доларах";
     const metrics = [
       {
         label: "Поточний банк",
         value: money(bank),
-        hint: "Баланс у вибраній валюті",
+        hint: journal ? currencyHint : "Баланс у вибраній валюті",
         Icon: Wallet,
         color: "bank",
       },
       {
         label: "Чистий результат",
         value: (stats.profit > 0 ? "+" : "") + money(stats.profit),
-        hint: "За весь час",
+        hint: journal ? currencyHint : "За весь час",
         Icon: BarChart3,
         color:
           stats.profit < 0 ? "negative" : stats.profit > 0 ? "positive" : "",
       },
       {
         label: "Всього записів",
-        value: stats.total,
-        hint: stats.activeCount
-          ? `Активних: ${stats.activeCount}`
+        value: counts.total,
+        hint: counts.activeCount
+          ? `Активних: ${counts.activeCount}`
           : "Немає активних",
         Icon: FileText,
         color: "total",
       },
       {
         label: "Виграші",
-        value: stats.wins,
+        value: counts.wins,
         hint: "Успішні записи",
         Icon: Trophy,
         color: "positive",
       },
       {
         label: "Програші",
-        value: stats.losses,
+        value: counts.losses,
         hint: "Невдалі записи",
         Icon: ThumbsDown,
         color: "negative",
@@ -135,27 +146,36 @@ export default function RecordPageHeader({
       },
     ];
     return (
-      <header className="record-entry-header">
+      <header
+        className={`record-entry-header${journal ? " journal-header" : ""}`}
+      >
         <div className="record-entry-hero">
           <div className="record-entry-intro">
             <span className="record-entry-eyebrow">
-              RECORD ENTRY <i />
+              {journal ? "RECORD JOURNAL" : "RECORD ENTRY"} <i />
             </span>
-            <h1>Додати запис</h1>
-            <p>Збережіть матч, прогноз і власні аргументи.</p>
+            <h1>{journal ? title : "Додати запис"}</h1>
+            <p>
+              {journal
+                ? subtitle
+                : "Збережіть матч, прогноз і власні аргументи."}
+            </p>
           </div>
-          <div className="record-currency" aria-label="Валюта статистики">
-            {(["UAH", "USD"] as const).map((value) => (
-              <button
-                key={value}
-                type="button"
-                aria-pressed={currency === value}
-                onClick={() => onCurrencyChange(value)}
-              >
-                {value === "UAH" ? "₴ UAH" : "$ USD"}
-              </button>
-            ))}
-          </div>
+          {journal && <div className="journal-hero-action">{extraAction}</div>}
+          {!hideCurrency && (
+            <div className="record-currency" aria-label="Валюта статистики">
+              {(["UAH", "USD"] as const).map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={currency === value}
+                  onClick={() => onCurrencyChange(value)}
+                >
+                  {value === "UAH" ? "₴ UAH" : "$ USD"}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div className="record-entry-stats">
           {metrics.map(({ label, value, hint, Icon, color }, index) => (

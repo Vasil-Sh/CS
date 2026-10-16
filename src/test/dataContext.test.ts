@@ -5,14 +5,31 @@ import { describe, it, expect } from "vitest";
 // ═══════════════════════════════════════════
 
 /** Builds the same fingerprint as DataContext's backfill dedup */
-function buildFingerprint(bet: { match?: string; amount?: number | string; profit?: number | string; date?: string }) {
+function buildFingerprint(bet: {
+  match?: string;
+  amount?: number | string;
+  profit?: number | string;
+  date?: string;
+}) {
   return `${String(bet.match || "").trim()}|${parseFloat(String(bet.amount || 0)).toFixed(2)}|${parseFloat(String(bet.profit || 0)).toFixed(2)}|${String(bet.date || "").substring(0, 10)}`;
 }
 
 /** Extract pure dedup logic: filter local-only bets, dedupe by ID or fingerprint */
 function dedupeLocalBets(
-  localBets: Array<{ id?: string; match?: string; amount?: number; profit?: number; date?: string }>,
-  serverBets: Array<{ id: number | string; match?: string; amount?: number; profit?: number; date?: string }>,
+  localBets: Array<{
+    id?: string;
+    match?: string;
+    amount?: number;
+    profit?: number;
+    date?: string;
+  }>,
+  serverBets: Array<{
+    id: number | string;
+    match?: string;
+    amount?: number;
+    profit?: number;
+    date?: string;
+  }>,
 ): { cleanedBets: typeof localBets; toBackfill: typeof localBets } {
   const serverIds = new Set(serverBets.map((b) => String(b.id)));
   const serverFingerprints = new Set(serverBets.map(buildFingerprint));
@@ -40,26 +57,66 @@ function dedupeLocalBets(
 
 describe("buildFingerprint (DataContext dedup)", () => {
   it("generates same fingerprint for identical bets", () => {
-    const fp1 = buildFingerprint({ match: "NaVi vs FaZe", amount: 100, profit: 50, date: "2026-07-21" });
-    const fp2 = buildFingerprint({ match: "NaVi vs FaZe", amount: 100, profit: 50, date: "2026-07-21" });
+    const fp1 = buildFingerprint({
+      match: "NaVi vs FaZe",
+      amount: 100,
+      profit: 50,
+      date: "2026-07-21",
+    });
+    const fp2 = buildFingerprint({
+      match: "NaVi vs FaZe",
+      amount: 100,
+      profit: 50,
+      date: "2026-07-21",
+    });
     expect(fp1).toBe(fp2);
   });
 
   it("generates different fingerprint for different amounts", () => {
-    const fp1 = buildFingerprint({ match: "A vs B", amount: 100, profit: 0, date: "2026-07-21" });
-    const fp2 = buildFingerprint({ match: "A vs B", amount: 200, profit: 0, date: "2026-07-21" });
+    const fp1 = buildFingerprint({
+      match: "A vs B",
+      amount: 100,
+      profit: 0,
+      date: "2026-07-21",
+    });
+    const fp2 = buildFingerprint({
+      match: "A vs B",
+      amount: 200,
+      profit: 0,
+      date: "2026-07-21",
+    });
     expect(fp1).not.toBe(fp2);
   });
 
   it("generates different fingerprint for different profit", () => {
-    const fp1 = buildFingerprint({ match: "A vs B", amount: 100, profit: 50, date: "2026-07-21" });
-    const fp2 = buildFingerprint({ match: "A vs B", amount: 100, profit: -50, date: "2026-07-21" });
+    const fp1 = buildFingerprint({
+      match: "A vs B",
+      amount: 100,
+      profit: 50,
+      date: "2026-07-21",
+    });
+    const fp2 = buildFingerprint({
+      match: "A vs B",
+      amount: 100,
+      profit: -50,
+      date: "2026-07-21",
+    });
     expect(fp1).not.toBe(fp2);
   });
 
   it("generates different fingerprint for different date substring", () => {
-    const fp1 = buildFingerprint({ match: "A vs B", amount: 100, profit: 0, date: "2026-07-21T10:00:00" });
-    const fp2 = buildFingerprint({ match: "A vs B", amount: 100, profit: 0, date: "2026-07-22T10:00:00" });
+    const fp1 = buildFingerprint({
+      match: "A vs B",
+      amount: 100,
+      profit: 0,
+      date: "2026-07-21T10:00:00",
+    });
+    const fp2 = buildFingerprint({
+      match: "A vs B",
+      amount: 100,
+      profit: 0,
+      date: "2026-07-22T10:00:00",
+    });
     expect(fp1).not.toBe(fp2);
   });
 
@@ -85,10 +142,28 @@ describe("buildFingerprint (DataContext dedup)", () => {
 describe("dedupeLocalBets (backfill dedup)", () => {
   it("passes through non-local bets unchanged", () => {
     const local = [
-      { id: "abc-123", match: "A vs B", amount: 100, profit: 50, date: "2026-07-21" },
-      { id: "def-456", match: "C vs D", amount: 200, profit: -30, date: "2026-07-20" },
+      {
+        id: "abc-123",
+        match: "A vs B",
+        amount: 100,
+        profit: 50,
+        date: "2026-07-21",
+      },
+      {
+        id: "def-456",
+        match: "C vs D",
+        amount: 200,
+        profit: -30,
+        date: "2026-07-20",
+      },
     ];
-    const server: Array<{ id: number; match: string; amount: number; profit: number; date: string }> = [];
+    const server: Array<{
+      id: number;
+      match: string;
+      amount: number;
+      profit: number;
+      date: string;
+    }> = [];
     const { cleanedBets, toBackfill } = dedupeLocalBets(local, server);
     expect(cleanedBets).toEqual(local);
     expect(toBackfill).toHaveLength(0); // non-local, no backfill
@@ -96,10 +171,30 @@ describe("dedupeLocalBets (backfill dedup)", () => {
 
   it("removes local_xxx bets already on server by ID", () => {
     const local = [
-      { id: "local_001", match: "A vs B", amount: 100, profit: 50, date: "2026-07-21" },
-      { id: "local_002", match: "C vs D", amount: 200, profit: -30, date: "2026-07-20" },
+      {
+        id: "local_001",
+        match: "A vs B",
+        amount: 100,
+        profit: 50,
+        date: "2026-07-21",
+      },
+      {
+        id: "local_002",
+        match: "C vs D",
+        amount: 200,
+        profit: -30,
+        date: "2026-07-20",
+      },
     ];
-    const server = [{ id: "local_001", match: "A vs B", amount: 100, profit: 50, date: "2026-07-21" }];
+    const server = [
+      {
+        id: "local_001",
+        match: "A vs B",
+        amount: 100,
+        profit: 50,
+        date: "2026-07-21",
+      },
+    ];
     const { cleanedBets, toBackfill } = dedupeLocalBets(local, server);
     expect(cleanedBets).toHaveLength(1);
     expect(cleanedBets[0].id).toBe("local_002");
@@ -108,9 +203,17 @@ describe("dedupeLocalBets (backfill dedup)", () => {
 
   it("removes local bets already on server by fingerprint", () => {
     const local = [
-      { id: "local_003", match: "A vs B", amount: 100, profit: 50, date: "2026-07-21" },
+      {
+        id: "local_003",
+        match: "A vs B",
+        amount: 100,
+        profit: 50,
+        date: "2026-07-21",
+      },
     ];
-    const server = [{ id: 999, match: "A vs B", amount: 100, profit: 50, date: "2026-07-21" }];
+    const server = [
+      { id: 999, match: "A vs B", amount: 100, profit: 50, date: "2026-07-21" },
+    ];
     const { cleanedBets, toBackfill } = dedupeLocalBets(local, server);
     expect(cleanedBets).toHaveLength(0);
     expect(toBackfill).toHaveLength(0);
@@ -118,7 +221,13 @@ describe("dedupeLocalBets (backfill dedup)", () => {
 
   it("keeps unique local bets for backfill", () => {
     const local = [
-      { id: "local_004", match: "Unique Match", amount: 500, profit: 200, date: "2026-07-21" },
+      {
+        id: "local_004",
+        match: "Unique Match",
+        amount: 500,
+        profit: 200,
+        date: "2026-07-21",
+      },
     ];
     const server: Array<{ id: number }> = [];
     const { cleanedBets, toBackfill } = dedupeLocalBets(local, server);
@@ -129,10 +238,34 @@ describe("dedupeLocalBets (backfill dedup)", () => {
 
   it("mixed: removes duplicates, keeps unique", () => {
     const local = [
-      { id: "local_dup_id", match: "Match 1", amount: 100, profit: 0, date: "2026-07-21" },
-      { id: "local_dup_fp", match: "Match 2", amount: 200, profit: 0, date: "2026-07-20" },
-      { id: "local_unique", match: "Match 3", amount: 300, profit: 50, date: "2026-07-19" },
-      { id: "normal-id", match: "Match 4", amount: 400, profit: -10, date: "2026-07-18" },
+      {
+        id: "local_dup_id",
+        match: "Match 1",
+        amount: 100,
+        profit: 0,
+        date: "2026-07-21",
+      },
+      {
+        id: "local_dup_fp",
+        match: "Match 2",
+        amount: 200,
+        profit: 0,
+        date: "2026-07-20",
+      },
+      {
+        id: "local_unique",
+        match: "Match 3",
+        amount: 300,
+        profit: 50,
+        date: "2026-07-19",
+      },
+      {
+        id: "normal-id",
+        match: "Match 4",
+        amount: 400,
+        profit: -10,
+        date: "2026-07-18",
+      },
     ];
     const server = [
       { id: "local_dup_id" },
@@ -155,13 +288,22 @@ describe("dedupeLocalBets (backfill dedup)", () => {
 
   it("all local bets already on server → all removed", () => {
     const local = [
-      { id: "local_a", match: "A vs B", amount: 100, profit: 0, date: "2026-07-21" },
-      { id: "local_b", match: "C vs D", amount: 200, profit: 0, date: "2026-07-20" },
+      {
+        id: "local_a",
+        match: "A vs B",
+        amount: 100,
+        profit: 0,
+        date: "2026-07-21",
+      },
+      {
+        id: "local_b",
+        match: "C vs D",
+        amount: 200,
+        profit: 0,
+        date: "2026-07-20",
+      },
     ];
-    const server = [
-      { id: "local_a" },
-      { id: "local_b" },
-    ];
+    const server = [{ id: "local_a" }, { id: "local_b" }];
     const { cleanedBets, toBackfill } = dedupeLocalBets(local, server);
     expect(cleanedBets).toHaveLength(0);
     expect(toBackfill).toHaveLength(0);

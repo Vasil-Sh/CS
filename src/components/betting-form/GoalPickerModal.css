@@ -1,0 +1,416 @@
+@font-face {
+  font-family: "Goal Picker Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/assets/fonts/inter-latin.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Goal Picker Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/assets/fonts/inter-cyrillic.woff2") format("woff2");
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: "Goal Picker Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/assets/fonts/inter-cyrillic-ext.woff2") format("woff2");
+  unicode-range:
+    U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* The repeated class overrides the shared Dialog padding/grid utilities. */
+.gpm-dialog.gpm-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  width: min(560px, calc(100% - 28px));
+  max-width: 560px;
+  max-height: calc(100dvh - 32px);
+  overflow: hidden;
+  border: 1px solid #d8dfea;
+  border-radius: 11px;
+  background: #fff;
+  color: #111a31;
+  font:
+    400 14px/1.5 "Goal Picker Inter",
+    sans-serif;
+  box-shadow: 0 24px 100px #0006;
+}
+.gpm-dialog :is(button, input) {
+  font: inherit;
+}
+.gpm-dialog button {
+  cursor: pointer;
+}
+.gpm-dialog :is(button, input):focus-visible {
+  outline: 2px solid #ff633b;
+  outline-offset: 3px;
+}
+.gpm-dialog .gpm-header {
+  position: relative;
+  flex-shrink: 0;
+  padding: 26px 64px 25px 32px;
+  gap: 0;
+  text-align: left;
+  background: #10191d url("/assets/profile/contours.svg") center / cover
+    no-repeat;
+}
+.gpm-header::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  right: 86px;
+  top: 28px;
+  width: 5px;
+  height: 5px;
+  background: #ff633b;
+  box-shadow:
+    -68px 49px 0 #ff633b,
+    -32px 87px 0 #ff633b;
+  opacity: 0.8;
+}
+.gpm-dialog .gpm-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0 0 12px;
+  color: #b9c8db;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+.gpm-eyebrow i {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  background: #ff633b;
+}
+.gpm-dialog .gpm-header h2 {
+  color: #fff;
+  font:
+    750 32px/1.2 "Goal Picker Inter",
+    sans-serif;
+  letter-spacing: -0.035em;
+  text-transform: none;
+  margin: 0 0 10px;
+}
+.gpm-dialog .gpm-header p {
+  margin: 0;
+  color: #bdc9da;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.gpm-dialog .gpm-close {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  top: 15px;
+  right: 15px;
+  width: 36px;
+  height: 36px;
+  margin: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #c3cfdf;
+}
+.gpm-dialog .gpm-close:hover {
+  background: #ffffff14;
+  color: white;
+}
+.gpm-body {
+  padding: 24px 26px 22px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+  background: #fff;
+}
+.gpm-search {
+  display: flex;
+  position: relative;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.gpm-search > svg {
+  position: absolute;
+  left: 13px;
+  color: #8a98af;
+  pointer-events: none;
+}
+.gpm-dialog .gpm-search input {
+  width: 100%;
+  min-width: 0;
+  height: 44px;
+  padding: 0 40px;
+  border: 1px solid #d7dfed;
+  border-radius: 6px;
+  background: #fff;
+  color: #111a31;
+  font-size: 14px;
+}
+.gpm-search input::placeholder {
+  color: #8b98ad;
+}
+.gpm-dialog .gpm-search-clear {
+  position: absolute;
+  right: 5px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  color: #75859d;
+  border-radius: 4px;
+}
+.gpm-search-clear:hover {
+  background: #f1f4f8;
+}
+.gpm-list {
+  display: grid;
+  gap: 10px;
+  padding: 2px;
+}
+.gpm-dialog .gpm-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) 24px;
+  gap: 14px;
+  align-items: start;
+  width: 100%;
+  padding: 16px;
+  border: 1px solid #dfe5ef;
+  border-radius: 7px;
+  background: #fff;
+  text-align: left;
+  color: #111a31;
+  transition:
+    border-color 140ms,
+    background 140ms;
+}
+.gpm-dialog .gpm-item:hover {
+  border-color: #b4c0d2;
+  background: #fafbfd;
+}
+.gpm-dialog .gpm-item[aria-pressed="true"] {
+  border-color: #ff633b;
+  background: #fff7f3;
+  box-shadow: inset 0 0 0 0.5px #ff633b;
+}
+.gpm-dialog .gpm-none {
+  align-items: center;
+  min-height: 88px;
+}
+.gpm-item-icon {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 8px;
+  background: #f0f3f7;
+  color: #586a83;
+}
+.gpm-item[aria-pressed="true"] .gpm-item-icon {
+  color: #152039;
+  background: #ffe5d9;
+}
+.gpm-item-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 4px;
+}
+.gpm-item-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 10px;
+}
+.gpm-item-name {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.gpm-item-meta {
+  display: block;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #7988a0;
+  overflow-wrap: anywhere;
+}
+.gpm-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border: 1px solid #ffad8d;
+  border-radius: 4px;
+  color: #f25328;
+  background: #fffaf7;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+.gpm-indicator {
+  display: grid;
+  place-items: center;
+  height: 24px;
+  width: 24px;
+  margin-top: 3px;
+  border: 1.5px solid #94a1b7;
+  border-radius: 50%;
+  color: white;
+}
+.gpm-item[aria-pressed="true"] .gpm-indicator {
+  background: #ff633b;
+  border-color: #ff633b;
+}
+.gpm-progress {
+  display: block;
+  height: 7px;
+  border-radius: 9px;
+  background: #dfe5ee;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.gpm-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #8098ae;
+}
+.gpm-progress-caption {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #70819c;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+.gpm-progress-caption > span:last-child {
+  flex-shrink: 0;
+}
+.gpm-empty {
+  margin: 0;
+  padding: 20px 12px;
+  color: #76859b;
+  text-align: center;
+  font-size: 13px;
+}
+.gpm-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 18px 26px 22px;
+  border-top: 1px solid #e4e9f1;
+  background: #fff;
+}
+.gpm-selected {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 12px;
+  color: #7a889e;
+}
+.gpm-selected strong {
+  color: #111a31;
+  font-weight: 650;
+  font-size: 14px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.gpm-footer-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+}
+.gpm-dialog :is(.gpm-cancel, .gpm-confirm) {
+  min-height: 42px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #d0d9e7;
+  background: #fff;
+  color: #27354c;
+  white-space: nowrap;
+}
+.gpm-dialog .gpm-confirm {
+  background: #ff572b;
+  border-color: #ff572b;
+  color: #fff;
+}
+.gpm-cancel:hover {
+  background: #f3f6fa;
+}
+.gpm-dialog .gpm-confirm:hover:not(:disabled) {
+  background: #e94a20;
+}
+.gpm-dialog .gpm-confirm:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+@media (max-width: 480px) {
+  .gpm-dialog.gpm-dialog {
+    width: calc(100% - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+  .gpm-dialog .gpm-header {
+    padding: 22px 52px 22px 22px;
+  }
+  .gpm-dialog .gpm-header h2 {
+    font-size: 28px;
+  }
+  .gpm-body {
+    padding: 18px 14px;
+  }
+  .gpm-dialog .gpm-item {
+    grid-template-columns: 40px minmax(0, 1fr) 22px;
+    padding: 13px 10px;
+    gap: 10px;
+  }
+  .gpm-item-icon {
+    width: 40px;
+    height: 44px;
+  }
+  .gpm-item-name {
+    font-size: 14px;
+  }
+  .gpm-item-meta {
+    font-size: 12px;
+  }
+  .gpm-indicator {
+    width: 22px;
+    height: 22px;
+  }
+  .gpm-footer {
+    padding: 14px 16px 18px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .gpm-selected {
+    width: 100%;
+  }
+  .gpm-footer-actions {
+    width: 100%;
+  }
+  .gpm-footer-actions button {
+    flex: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gpm-item {
+    transition: none;
+  }
+}

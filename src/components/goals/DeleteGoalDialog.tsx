@@ -54,16 +54,10 @@ export default function DeleteGoalDialog({
         </div>
 
         <DialogFooter className="gmd-delete-footer">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Скасувати
           </Button>
-          <Button
-            onClick={onDelete}
-            className="gmd-delete-submit"
-          >
+          <Button onClick={onDelete} className="gmd-delete-submit">
             <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
             Видалити
           </Button>

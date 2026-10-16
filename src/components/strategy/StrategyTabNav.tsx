@@ -65,10 +65,12 @@ export default function StrategyTabNav({
             </button>
           ))}
         </div>
-        {!hideCreate && <button type="button" className="sw-create" onClick={onCreateClick}>
-          <Plus size={17} />
-          Створити стратегію
-        </button>}
+        {!hideCreate && (
+          <button type="button" className="sw-create" onClick={onCreateClick}>
+            <Plus size={17} />
+            Створити стратегію
+          </button>
+        )}
       </div>
     );
 

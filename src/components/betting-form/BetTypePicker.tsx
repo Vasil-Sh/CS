@@ -44,13 +44,7 @@ export default function BetTypePicker({
 
   const grouped = getGroupedBetTypeOptions(format);
   const maxMaps =
-    format === "BO5"
-      ? 5
-      : format === "BO3"
-        ? 3
-        : format === "BO1"
-          ? 1
-          : 3;
+    format === "BO5" ? 5 : format === "BO3" ? 3 : format === "BO1" ? 1 : 3;
 
   const openModal = () => {
     setTemp(value);
@@ -72,8 +66,7 @@ export default function BetTypePicker({
     const safeValue = group.options.some((o) => o.value === temp)
       ? temp
       : undefined;
-    const isGroupSelected =
-      temp && group.options.some((o) => o.value === temp);
+    const isGroupSelected = temp && group.options.some((o) => o.value === temp);
     const selectedBorder = "border-green-500 bg-green-50";
     const defaultBorder = "border-gray-200/80 bg-white";
     if (group.category.includes("Фора")) {

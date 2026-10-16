@@ -736,10 +736,9 @@
 }
 .entry-prediction-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) minmax(
-      90px,
-      0.6fr
-    ) minmax(120px, 0.9fr);
+  grid-template-columns:
+    minmax(0, 1.1fr) minmax(0, 1.4fr) minmax(90px, 0.6fr)
+    minmax(120px, 0.9fr);
   gap: 12px;
   align-items: end;
 }

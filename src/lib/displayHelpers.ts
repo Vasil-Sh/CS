@@ -7,10 +7,10 @@
  *   - getBetType*    → @/lib/utils/betTypeOptions
  */
 
-export { getStatusBadge } from './utils/badgeStyles';
-export { getGameEmoji } from './utils/gameIcons';
+export { getStatusBadge } from "./utils/badgeStyles";
+export { getGameEmoji } from "./utils/gameIcons";
 export {
   getBetTypeOptions,
   getGroupedBetTypeOptions,
   getBetTypeLabel,
-} from './utils/betTypeOptions';
+} from "./utils/betTypeOptions";

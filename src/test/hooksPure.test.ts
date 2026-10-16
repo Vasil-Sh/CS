@@ -2,11 +2,15 @@ import { describe, it, expect } from "vitest";
 
 // ── useLogin: form state validation ──
 
-function validateLoginForm(username: string, password: string): { valid: boolean; errors: string[] } {
+function validateLoginForm(
+  username: string,
+  password: string,
+): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
   if (!username.trim()) errors.push("Username required");
   if (!password) errors.push("Password required");
-  if (password.length > 0 && password.length < 3) errors.push("Password too short");
+  if (password.length > 0 && password.length < 3)
+    errors.push("Password too short");
   return { valid: errors.length === 0, errors };
 }
 
@@ -46,14 +50,22 @@ interface ExpressEvent {
 
 function addEvent(events: ExpressEvent[], max: number): ExpressEvent[] {
   if (events.length >= max) return events;
-  return [...events, { match: "New vs New", betType: "П1", selection: "New", odds: "2.00" }];
+  return [
+    ...events,
+    { match: "New vs New", betType: "П1", selection: "New", odds: "2.00" },
+  ];
 }
 
 function removeEvent(events: ExpressEvent[], index: number): ExpressEvent[] {
   return events.filter((_, i) => i !== index);
 }
 
-function updateEvent(events: ExpressEvent[], index: number, field: keyof ExpressEvent, value: string): ExpressEvent[] {
+function updateEvent(
+  events: ExpressEvent[],
+  index: number,
+  field: keyof ExpressEvent,
+  value: string,
+): ExpressEvent[] {
   return events.map((e, i) => (i === index ? { ...e, [field]: value } : e));
 }
 
@@ -64,7 +76,12 @@ describe("useExpressBuilder event logic", () => {
   });
 
   it("caps at max", () => {
-    const full = Array.from({ length: 10 }, (_, i) => ({ match: `M${i}`, betType: "П1", selection: "X", odds: "2.00" }));
+    const full = Array.from({ length: 10 }, (_, i) => ({
+      match: `M${i}`,
+      betType: "П1",
+      selection: "X",
+      odds: "2.00",
+    }));
     expect(addEvent(full, 10)).toHaveLength(10);
   });
 
@@ -78,14 +95,18 @@ describe("useExpressBuilder event logic", () => {
   });
 
   it("updates event field", () => {
-    const events = [{ match: "A vs B", betType: "П1", selection: "A", odds: "2.00" }];
+    const events = [
+      { match: "A vs B", betType: "П1", selection: "A", odds: "2.00" },
+    ];
     const updated = updateEvent(events, 0, "odds", "3.50");
     expect(updated[0].odds).toBe("3.50");
     expect(updated[0].match).toBe("A vs B"); // unchanged
   });
 
   it("handles multiple updates", () => {
-    let events: ExpressEvent[] = [{ match: "A vs B", betType: "П1", selection: "A", odds: "2.00" }];
+    let events: ExpressEvent[] = [
+      { match: "A vs B", betType: "П1", selection: "A", odds: "2.00" },
+    ];
     events = updateEvent(events, 0, "selection", "B");
     events = updateEvent(events, 0, "odds", "1.50");
     expect(events[0].selection).toBe("B");
@@ -150,7 +171,10 @@ describe("useBetForm defaults", () => {
 
 // ── Form validation for CS2BettingForm ──
 
-function validateBetForm(data: ReturnType<typeof getDefaultFormData>): { valid: boolean; errors: string[] } {
+function validateBetForm(data: ReturnType<typeof getDefaultFormData>): {
+  valid: boolean;
+  errors: string[];
+} {
   const errs: string[] = [];
   if (!data.team1.trim()) errs.push("Team1 required");
   if (!data.team2.trim()) errs.push("Team2 required");
@@ -169,37 +193,93 @@ describe("validateBetForm", () => {
   });
 
   it("rejects odds <= 1", () => {
-    const data = { ...getDefaultFormData(), team1: "A", team2: "B", betType: "П1", selection: "A", odds: "1.0", stake: "100" };
+    const data = {
+      ...getDefaultFormData(),
+      team1: "A",
+      team2: "B",
+      betType: "П1",
+      selection: "A",
+      odds: "1.0",
+      stake: "100",
+    };
     expect(validateBetForm(data).valid).toBe(false);
   });
 
   it("rejects negative stake", () => {
-    const data = { ...getDefaultFormData(), team1: "A", team2: "B", betType: "П1", selection: "A", odds: "2.0", stake: "-100" };
+    const data = {
+      ...getDefaultFormData(),
+      team1: "A",
+      team2: "B",
+      betType: "П1",
+      selection: "A",
+      odds: "2.0",
+      stake: "-100",
+    };
     expect(validateBetForm(data).valid).toBe(false);
   });
 
   it("rejects zero stake", () => {
-    const data = { ...getDefaultFormData(), team1: "A", team2: "B", betType: "П1", selection: "A", odds: "2.0", stake: "0" };
+    const data = {
+      ...getDefaultFormData(),
+      team1: "A",
+      team2: "B",
+      betType: "П1",
+      selection: "A",
+      odds: "2.0",
+      stake: "0",
+    };
     expect(validateBetForm(data).valid).toBe(false);
   });
 
   it("accepts valid form", () => {
-    const data = { ...getDefaultFormData(), team1: "NaVi", team2: "FaZe", betType: "П1", selection: "NaVi", odds: "2.50", stake: "100" };
+    const data = {
+      ...getDefaultFormData(),
+      team1: "NaVi",
+      team2: "FaZe",
+      betType: "П1",
+      selection: "NaVi",
+      odds: "2.50",
+      stake: "100",
+    };
     expect(validateBetForm(data).valid).toBe(true);
   });
 
   it("requires selection", () => {
-    const data = { ...getDefaultFormData(), team1: "A", team2: "B", betType: "П1", selection: "", odds: "2.0", stake: "100" };
+    const data = {
+      ...getDefaultFormData(),
+      team1: "A",
+      team2: "B",
+      betType: "П1",
+      selection: "",
+      odds: "2.0",
+      stake: "100",
+    };
     expect(validateBetForm(data).valid).toBe(false);
   });
 
   it("accepts high odds", () => {
-    const data = { ...getDefaultFormData(), team1: "A", team2: "B", betType: "П1", selection: "A", odds: "100.0", stake: "50" };
+    const data = {
+      ...getDefaultFormData(),
+      team1: "A",
+      team2: "B",
+      betType: "П1",
+      selection: "A",
+      odds: "100.0",
+      stake: "50",
+    };
     expect(validateBetForm(data).valid).toBe(true);
   });
 
   it("accepts large stake", () => {
-    const data = { ...getDefaultFormData(), team1: "A", team2: "B", betType: "П1", selection: "A", odds: "2.0", stake: "50000" };
+    const data = {
+      ...getDefaultFormData(),
+      team1: "A",
+      team2: "B",
+      betType: "П1",
+      selection: "A",
+      odds: "2.0",
+      stake: "50000",
+    };
     expect(validateBetForm(data).valid).toBe(true);
   });
 });

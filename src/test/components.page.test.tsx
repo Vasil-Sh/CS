@@ -1,11 +1,11 @@
 /** Smoke tests: StrategyOverview, GoalsManager, RiskManagement */
-import { describe, it, expect, vi } from 'vitest';
-import { render } from '@testing-library/react';
-import { BrowserRouter } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
+import { describe, it, expect, vi } from "vitest";
+import { render } from "@testing-library/react";
+import { BrowserRouter } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 
 // Mocks
-vi.mock('@/lib/userDataService', () => ({
+vi.mock("@/lib/userDataService", () => ({
   UserDataService: {
     fetchBets: vi.fn(() => Promise.resolve([])),
     fetchBetStats: vi.fn(() => Promise.resolve({})),
@@ -25,7 +25,7 @@ vi.mock('@/lib/userDataService', () => ({
   },
 }));
 
-vi.mock('@/lib/apiClient', () => ({
+vi.mock("@/lib/apiClient", () => ({
   api: {
     get: vi.fn(() => Promise.resolve([])),
     post: vi.fn(() => Promise.resolve({})),
@@ -33,16 +33,27 @@ vi.mock('@/lib/apiClient', () => ({
   },
 }));
 
-vi.mock('@/lib/bankrollService', () => ({
-  BankrollService: { fetchBankroll: vi.fn(() => Promise.resolve({})), isInitialized: vi.fn(() => false) },
+vi.mock("@/lib/bankrollService", () => ({
+  BankrollService: {
+    fetchBankroll: vi.fn(() => Promise.resolve({})),
+    isInitialized: vi.fn(() => false),
+  },
 }));
 
-vi.mock('@/lib/devLogger', () => ({ logRender: vi.fn() }));
-vi.mock('@/hooks/useRiskMetrics', () => ({ useRiskMetrics: vi.fn(() => ({ completedBets: [], riskMetrics: {}, drawdownPeriods: [] })) }));
-vi.mock('@/contexts/AuthContext', () => ({ useAuth: vi.fn(() => ({ user: { username: 'test' } })) }));
-vi.mock('@/stores/appStore', () => {
+vi.mock("@/lib/devLogger", () => ({ logRender: vi.fn() }));
+vi.mock("@/hooks/useRiskMetrics", () => ({
+  useRiskMetrics: vi.fn(() => ({
+    completedBets: [],
+    riskMetrics: {},
+    drawdownPeriods: [],
+  })),
+}));
+vi.mock("@/contexts/AuthContext", () => ({
+  useAuth: vi.fn(() => ({ user: { username: "test" } })),
+}));
+vi.mock("@/stores/appStore", () => {
   const getState = vi.fn(() => ({
-    primaryStrategyId: '',
+    primaryStrategyId: "",
     bumpStrategy: vi.fn(),
     setPrimaryStrategyId: vi.fn(),
     bumpBets: vi.fn(),
@@ -55,32 +66,46 @@ vi.mock('@/stores/appStore', () => {
   useAppStore.getState = getState;
   return { useAppStore };
 });
-vi.mock('@/hooks/useTheme', () => ({ useTheme: vi.fn(() => ({ theme: 'light' })) }));
-vi.mock('@/lib/googleSheetsRiskyTeams', () => ({ googleSheetsRiskyTeamsService: { fetchRiskyTeams: vi.fn(() => Promise.resolve([])), addTeam: vi.fn(() => Promise.resolve({})), removeTeam: vi.fn(() => Promise.resolve()) } }));
+vi.mock("@/hooks/useTheme", () => ({
+  useTheme: vi.fn(() => ({ theme: "light" })),
+}));
+vi.mock("@/lib/googleSheetsRiskyTeams", () => ({
+  googleSheetsRiskyTeamsService: {
+    fetchRiskyTeams: vi.fn(() => Promise.resolve([])),
+    addTeam: vi.fn(() => Promise.resolve({})),
+    removeTeam: vi.fn(() => Promise.resolve()),
+  },
+}));
 
 function renderWithProviders(ui: React.ReactElement) {
-  return render(<HelmetProvider><BrowserRouter>{ui}</BrowserRouter></HelmetProvider>);
+  return render(
+    <HelmetProvider>
+      <BrowserRouter>{ui}</BrowserRouter>
+    </HelmetProvider>,
+  );
 }
 
-describe('StrategyOverview', () => {
-  it('renders without crashing', async () => {
-    const { default: StrategyOverview } = await import('@/components/StrategyOverview');
+describe("StrategyOverview", () => {
+  it("renders without crashing", async () => {
+    const { default: StrategyOverview } =
+      await import("@/components/StrategyOverview");
     renderWithProviders(<StrategyOverview />);
     expect(document.body).toBeDefined();
   });
 });
 
-describe('GoalsManager', () => {
-  it('renders without crashing', async () => {
-    const { default: GoalsManager } = await import('@/components/GoalsManager');
+describe("GoalsManager", () => {
+  it("renders without crashing", async () => {
+    const { default: GoalsManager } = await import("@/components/GoalsManager");
     renderWithProviders(<GoalsManager />);
     expect(document.body).toBeDefined();
   });
 });
 
-describe('RiskManagement', () => {
-  it('renders without crashing', async () => {
-    const { default: RiskManagement } = await import('@/components/RiskManagement');
+describe("RiskManagement", () => {
+  it("renders without crashing", async () => {
+    const { default: RiskManagement } =
+      await import("@/components/RiskManagement");
     renderWithProviders(<RiskManagement />);
     expect(document.body).toBeDefined();
   });

@@ -13,9 +13,18 @@ function calculateRemainingSteps(
   targetAmount: number,
   minOdds: number,
 ): number {
-  if (!minOdds || minOdds <= 1 || !isFinite(minOdds) || !currentBank || currentBank <= 0 || !targetAmount || targetAmount <= 0)
+  if (
+    !minOdds ||
+    minOdds <= 1 ||
+    !isFinite(minOdds) ||
+    !currentBank ||
+    currentBank <= 0 ||
+    !targetAmount ||
+    targetAmount <= 0
+  )
     return 0;
-  let steps = 0, amount = currentBank;
+  let steps = 0,
+    amount = currentBank;
   while (amount < targetAmount && steps < MAX_LADDER_STEPS) {
     amount *= minOdds;
     steps++;
@@ -99,7 +108,8 @@ function computeAmountGoalProgress(
 ): { currentAmount: number; isCompleted: boolean } {
   const goalBets = bets.filter((b) => b.goalId === goalId);
   const totalProfit = goalBets.reduce((sum, b) => {
-    if (b.result === "Win") return sum + (b.profit || (b.odds - 1) * (b.amount || 100));
+    if (b.result === "Win")
+      return sum + (b.profit || (b.odds - 1) * (b.amount || 100));
     if (b.result === "Loss") return sum - (b.amount || 100);
     return sum;
   }, 0);
@@ -111,14 +121,25 @@ function computeAmountGoalProgress(
 
 describe("computeAmountGoalProgress", () => {
   it("empty bets → 0 progress", () => {
-    const { currentAmount, isCompleted } = computeAmountGoalProgress("g1", 1000, []);
+    const { currentAmount, isCompleted } = computeAmountGoalProgress(
+      "g1",
+      1000,
+      [],
+    );
     expect(currentAmount).toBe(0);
     expect(isCompleted).toBe(false);
   });
 
   it("Win: profit = bet profit", () => {
     const bets: GoalBet[] = [
-      { goalId: "g1", result: "Win", profit: 500, amount: 100, odds: 6, date: "2026-07-21" },
+      {
+        goalId: "g1",
+        result: "Win",
+        profit: 500,
+        amount: 100,
+        odds: 6,
+        date: "2026-07-21",
+      },
     ];
     const { currentAmount } = computeAmountGoalProgress("g1", 1000, bets);
     expect(currentAmount).toBe(500);
@@ -126,7 +147,14 @@ describe("computeAmountGoalProgress", () => {
 
   it("Loss: profit = -stake", () => {
     const bets: GoalBet[] = [
-      { goalId: "g1", result: "Loss", profit: -200, amount: 200, odds: 2, date: "2026-07-21" },
+      {
+        goalId: "g1",
+        result: "Loss",
+        profit: -200,
+        amount: 200,
+        odds: 2,
+        date: "2026-07-21",
+      },
     ];
     const { currentAmount } = computeAmountGoalProgress("g1", 1000, bets);
     expect(currentAmount).toBe(-200);
@@ -134,28 +162,78 @@ describe("computeAmountGoalProgress", () => {
 
   it("completed when currentAmount >= target", () => {
     const bets: GoalBet[] = [
-      { goalId: "g1", result: "Win", profit: 600, amount: 200, odds: 4, date: "2026-07-21" },
-      { goalId: "g1", result: "Win", profit: 500, amount: 100, odds: 6, date: "2026-07-20" },
+      {
+        goalId: "g1",
+        result: "Win",
+        profit: 600,
+        amount: 200,
+        odds: 4,
+        date: "2026-07-21",
+      },
+      {
+        goalId: "g1",
+        result: "Win",
+        profit: 500,
+        amount: 100,
+        odds: 6,
+        date: "2026-07-20",
+      },
     ];
-    const { currentAmount, isCompleted } = computeAmountGoalProgress("g1", 1000, bets);
+    const { currentAmount, isCompleted } = computeAmountGoalProgress(
+      "g1",
+      1000,
+      bets,
+    );
     expect(currentAmount).toBe(1100);
     expect(isCompleted).toBe(true);
   });
 
   it("not completed when below target", () => {
     const bets: GoalBet[] = [
-      { goalId: "g1", result: "Win", profit: 300, amount: 100, odds: 4, date: "2026-07-21" },
-      { goalId: "g1", result: "Loss", profit: -100, amount: 100, odds: 2, date: "2026-07-20" },
+      {
+        goalId: "g1",
+        result: "Win",
+        profit: 300,
+        amount: 100,
+        odds: 4,
+        date: "2026-07-21",
+      },
+      {
+        goalId: "g1",
+        result: "Loss",
+        profit: -100,
+        amount: 100,
+        odds: 2,
+        date: "2026-07-20",
+      },
     ];
-    const { currentAmount, isCompleted } = computeAmountGoalProgress("g1", 1000, bets);
+    const { currentAmount, isCompleted } = computeAmountGoalProgress(
+      "g1",
+      1000,
+      bets,
+    );
     expect(currentAmount).toBe(200);
     expect(isCompleted).toBe(false);
   });
 
   it("only matches bets for the specific goal ID", () => {
     const bets: GoalBet[] = [
-      { goalId: "g1", result: "Win", profit: 500, amount: 100, odds: 6, date: "2026-07-21" },
-      { goalId: "g2", result: "Win", profit: 9999, amount: 100, odds: 100, date: "2026-07-20" },
+      {
+        goalId: "g1",
+        result: "Win",
+        profit: 500,
+        amount: 100,
+        odds: 6,
+        date: "2026-07-21",
+      },
+      {
+        goalId: "g2",
+        result: "Win",
+        profit: 9999,
+        amount: 100,
+        odds: 100,
+        date: "2026-07-20",
+      },
     ];
     const { currentAmount } = computeAmountGoalProgress("g1", 1000, bets);
     expect(currentAmount).toBe(500);
@@ -163,8 +241,22 @@ describe("computeAmountGoalProgress", () => {
 
   it("Pending bets do not affect progress", () => {
     const bets: GoalBet[] = [
-      { goalId: "g1", result: "Win", profit: 200, amount: 100, odds: 3, date: "2026-07-21" },
-      { goalId: "g1", result: "Pending", profit: 0, amount: 500, odds: 2, date: "2026-07-20" },
+      {
+        goalId: "g1",
+        result: "Win",
+        profit: 200,
+        amount: 100,
+        odds: 3,
+        date: "2026-07-21",
+      },
+      {
+        goalId: "g1",
+        result: "Pending",
+        profit: 0,
+        amount: 500,
+        odds: 2,
+        date: "2026-07-20",
+      },
     ];
     const { currentAmount } = computeAmountGoalProgress("g1", 1000, bets);
     expect(currentAmount).toBe(200);
@@ -172,7 +264,14 @@ describe("computeAmountGoalProgress", () => {
 
   it("exactly at target → completed", () => {
     const bets: GoalBet[] = [
-      { goalId: "g1", result: "Win", profit: 1000, amount: 100, odds: 11, date: "2026-07-21" },
+      {
+        goalId: "g1",
+        result: "Win",
+        profit: 1000,
+        amount: 100,
+        odds: 11,
+        date: "2026-07-21",
+      },
     ];
     const { isCompleted } = computeAmountGoalProgress("g1", 1000, bets);
     expect(isCompleted).toBe(true);
@@ -197,7 +296,11 @@ function computeLadderSteps(
   targetAmount: number,
   maxSteps: number = 50,
 ): Array<{ index: number; startAmount: number; targetAmount: number }> {
-  const steps: Array<{ index: number; startAmount: number; targetAmount: number }> = [];
+  const steps: Array<{
+    index: number;
+    startAmount: number;
+    targetAmount: number;
+  }> = [];
   let current = startAmount;
   let idx = 0;
   const remaining = calculateRemainingSteps(startAmount, targetAmount, minOdds);
@@ -258,8 +361,11 @@ function computeRoiGoalProgress(
   targetRoi: number,
   bets: GoalBet[],
 ): { currentRoi: number; isCompleted: boolean; totalBets: number } {
-  const goalBets = bets.filter((b) => b.goalId === goalId && b.result !== "Pending");
-  if (goalBets.length === 0) return { currentRoi: 0, isCompleted: false, totalBets: 0 };
+  const goalBets = bets.filter(
+    (b) => b.goalId === goalId && b.result !== "Pending",
+  );
+  if (goalBets.length === 0)
+    return { currentRoi: 0, isCompleted: false, totalBets: 0 };
 
   const totalProfit = goalBets.reduce((sum, b) => sum + (b.profit || 0), 0);
   const totalStake = goalBets.reduce((sum, b) => sum + (b.amount || 0), 0);
@@ -281,7 +387,14 @@ describe("computeRoiGoalProgress", () => {
 
   it("100% ROI: profit=100, stake=100", () => {
     const bets: GoalBet[] = [
-      { goalId: "g1", result: "Win", profit: 100, amount: 100, odds: 2, date: "2026-07-21" },
+      {
+        goalId: "g1",
+        result: "Win",
+        profit: 100,
+        amount: 100,
+        odds: 2,
+        date: "2026-07-21",
+      },
     ];
     expect(computeRoiGoalProgress("g1", 50, bets).isCompleted).toBe(true);
     expect(computeRoiGoalProgress("g1", 50, bets).currentRoi).toBe(100);
@@ -289,7 +402,14 @@ describe("computeRoiGoalProgress", () => {
 
   it("25% ROI → not completed at 50% target", () => {
     const bets: GoalBet[] = [
-      { goalId: "g1", result: "Win", profit: 50, amount: 200, odds: 1.25, date: "2026-07-21" },
+      {
+        goalId: "g1",
+        result: "Win",
+        profit: 50,
+        amount: 200,
+        odds: 1.25,
+        date: "2026-07-21",
+      },
     ];
     expect(computeRoiGoalProgress("g1", 50, bets).isCompleted).toBe(false);
     expect(computeRoiGoalProgress("g1", 50, bets).currentRoi).toBe(25);
@@ -297,8 +417,22 @@ describe("computeRoiGoalProgress", () => {
 
   it("ignores Pending", () => {
     const bets: GoalBet[] = [
-      { goalId: "g1", result: "Win", profit: 100, amount: 100, odds: 2, date: "2026-07-21" },
-      { goalId: "g1", result: "Pending", profit: 0, amount: 500, odds: 2, date: "2026-07-20" },
+      {
+        goalId: "g1",
+        result: "Win",
+        profit: 100,
+        amount: 100,
+        odds: 2,
+        date: "2026-07-21",
+      },
+      {
+        goalId: "g1",
+        result: "Pending",
+        profit: 0,
+        amount: 500,
+        odds: 2,
+        date: "2026-07-20",
+      },
     ];
     const { currentRoi } = computeRoiGoalProgress("g1", 50, bets);
     expect(currentRoi).toBe(100);
@@ -312,8 +446,11 @@ function computeWinRateGoalProgress(
   targetWinRate: number,
   bets: GoalBet[],
 ): { currentWinRate: number; isCompleted: boolean; totalBets: number } {
-  const goalBets = bets.filter((b) => b.goalId === goalId && b.result !== "Pending");
-  if (goalBets.length === 0) return { currentWinRate: 0, isCompleted: false, totalBets: 0 };
+  const goalBets = bets.filter(
+    (b) => b.goalId === goalId && b.result !== "Pending",
+  );
+  if (goalBets.length === 0)
+    return { currentWinRate: 0, isCompleted: false, totalBets: 0 };
 
   const wins = goalBets.filter((b) => b.result === "Win").length;
   const winRate = (wins / goalBets.length) * 100;
@@ -333,13 +470,17 @@ describe("computeWinRateGoalProgress", () => {
   it("5W/5L = 50% → not completed at 65% target", () => {
     const bets: GoalBet[] = Array.from({ length: 10 }, (_, i) => ({
       goalId: "g1",
-      result: i < 5 ? "Win" as const : "Loss" as const,
+      result: i < 5 ? ("Win" as const) : ("Loss" as const),
       profit: i < 5 ? 100 : -100,
       amount: 100,
       odds: 2,
       date: `2026-07-${String(21 - i).padStart(2, "0")}`,
     }));
-    const { currentWinRate, isCompleted } = computeWinRateGoalProgress("g1", 65, bets);
+    const { currentWinRate, isCompleted } = computeWinRateGoalProgress(
+      "g1",
+      65,
+      bets,
+    );
     expect(currentWinRate).toBe(50);
     expect(isCompleted).toBe(false);
   });
@@ -347,13 +488,17 @@ describe("computeWinRateGoalProgress", () => {
   it("7W/3L = 70% → completed at 65% target (with ≥10 bets)", () => {
     const bets: GoalBet[] = Array.from({ length: 10 }, (_, i) => ({
       goalId: "g1",
-      result: i < 7 ? "Win" as const : "Loss" as const,
+      result: i < 7 ? ("Win" as const) : ("Loss" as const),
       profit: i < 7 ? 100 : -100,
       amount: 100,
       odds: 2,
       date: `2026-07-${String(21 - i).padStart(2, "0")}`,
     }));
-    const { currentWinRate, isCompleted } = computeWinRateGoalProgress("g1", 65, bets);
+    const { currentWinRate, isCompleted } = computeWinRateGoalProgress(
+      "g1",
+      65,
+      bets,
+    );
     expect(currentWinRate).toBe(70);
     expect(isCompleted).toBe(true);
   });
@@ -367,7 +512,11 @@ describe("computeWinRateGoalProgress", () => {
       odds: 2,
       date: `2026-07-${String(21 - i).padStart(2, "0")}`,
     }));
-    const { currentWinRate, isCompleted } = computeWinRateGoalProgress("g1", 65, bets);
+    const { currentWinRate, isCompleted } = computeWinRateGoalProgress(
+      "g1",
+      65,
+      bets,
+    );
     expect(currentWinRate).toBe(100);
     expect(isCompleted).toBe(false); // < 10 bets
   });

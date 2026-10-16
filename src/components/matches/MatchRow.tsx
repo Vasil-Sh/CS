@@ -298,8 +298,13 @@ const PredictionBar = ({
 };
 
 /** Compact status badge for inside the match column (left sidebar) */
-const getFormInfo = (form: string): { icon: React.ReactNode; label: string; color: string; tooltip: string } => {
-  const map: Record<string, { icon: React.ReactNode; label: string; color: string; tooltip: string }> = {
+const getFormInfo = (
+  form: string,
+): { icon: React.ReactNode; label: string; color: string; tooltip: string } => {
+  const map: Record<
+    string,
+    { icon: React.ReactNode; label: string; color: string; tooltip: string }
+  > = {
     hot_streak: {
       icon: <Flame className="h-3.5 w-3.5" strokeWidth={1.5} />,
       label: "Серія перемог",
@@ -339,12 +344,14 @@ const getFormInfo = (form: string): { icon: React.ReactNode; label: string; colo
       tooltip: "⚡ Непередбачувана",
     },
   };
-  return map[form] || {
-    icon: <Info className="h-3.5 w-3.5" strokeWidth={1.5} />,
-    label: "Нема даних",
-    color: "bg-gray-200 text-gray-500 border-0",
-    tooltip: "❓ Недостатньо даних для оцінки форми",
-  };
+  return (
+    map[form] || {
+      icon: <Info className="h-3.5 w-3.5" strokeWidth={1.5} />,
+      label: "Нема даних",
+      color: "bg-gray-200 text-gray-500 border-0",
+      tooltip: "❓ Недостатньо даних для оцінки форми",
+    }
+  );
 };
 
 /** Build a compact "W-L (W3)" + last-5 results dots string from form stats */
@@ -353,14 +360,15 @@ const formatFormStats = (
   losses: number,
   streak: number,
   lastResults: string,
-): { record: string; streakLabel: string; dots: { r: string; won: boolean }[] } | null => {
+): {
+  record: string;
+  streakLabel: string;
+  dots: { r: string; won: boolean }[];
+} | null => {
   if (!wins && !losses && !lastResults) return null;
   const record = `${wins}-${losses}`;
-  const streakLabel = streak > 0
-    ? `W${streak}`
-    : streak < 0
-      ? `L${Math.abs(streak)}`
-      : "";
+  const streakLabel =
+    streak > 0 ? `W${streak}` : streak < 0 ? `L${Math.abs(streak)}` : "";
   const dots = (lastResults || "")
     .split("")
     .slice(0, 5)
@@ -403,8 +411,18 @@ function MatchRowInner({
 }: Props) {
   const formInfo1 = getFormInfo(match.formStabilityTeam1 || "");
   const formInfo2 = getFormInfo(match.formStabilityTeam2 || "");
-  const formStats1 = formatFormStats(match.formWins1, match.formLosses1, match.formStreak1, match.formLast1);
-  const formStats2 = formatFormStats(match.formWins2, match.formLosses2, match.formStreak2, match.formLast2);
+  const formStats1 = formatFormStats(
+    match.formWins1,
+    match.formLosses1,
+    match.formStreak1,
+    match.formLast1,
+  );
+  const formStats2 = formatFormStats(
+    match.formWins2,
+    match.formLosses2,
+    match.formStreak2,
+    match.formLast2,
+  );
   const isFinished = match.matchStatus === "finished";
   // Ongoing: match has started (date ≤ now) but not yet finished.
   // Assumes CS2 BO3 lasts ~3h max. No server call needed.
@@ -598,13 +616,17 @@ function MatchRowInner({
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs bg-gray-900 text-white p-3 rounded-xl">
                     <p className="text-sm font-semibold mb-1">
-                      {match.team1} <span className="font-normal text-gray-300">{formInfo1.tooltip}</span>
+                      {match.team1}{" "}
+                      <span className="font-normal text-gray-300">
+                        {formInfo1.tooltip}
+                      </span>
                     </p>
                     {formStats1 && (
                       <div className="mt-2 pt-2 border-t border-white/15 space-y-1">
                         <p className="text-xs text-gray-300">
                           Рекорд: {formStats1.record}
-                          {formStats1.streakLabel && ` · Стрік: ${formStats1.streakLabel}`}
+                          {formStats1.streakLabel &&
+                            ` · Стрік: ${formStats1.streakLabel}`}
                         </p>
                         {formStats1.dots.length > 0 && (
                           <div className="flex items-center gap-1">
@@ -612,7 +634,9 @@ function MatchRowInner({
                               <span
                                 key={i}
                                 className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${
-                                  d.won ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                                  d.won
+                                    ? "bg-green-500 text-white"
+                                    : "bg-red-500 text-white"
                                 }`}
                               >
                                 {d.won ? "W" : "L"}
@@ -635,13 +659,17 @@ function MatchRowInner({
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs bg-gray-900 text-white p-3 rounded-xl">
                     <p className="text-sm font-semibold mb-1">
-                      {match.team2} <span className="font-normal text-gray-300">{formInfo2.tooltip}</span>
+                      {match.team2}{" "}
+                      <span className="font-normal text-gray-300">
+                        {formInfo2.tooltip}
+                      </span>
                     </p>
                     {formStats2 && (
                       <div className="mt-2 pt-2 border-t border-white/15 space-y-1">
                         <p className="text-xs text-gray-300">
                           Рекорд: {formStats2.record}
-                          {formStats2.streakLabel && ` · Стрік: ${formStats2.streakLabel}`}
+                          {formStats2.streakLabel &&
+                            ` · Стрік: ${formStats2.streakLabel}`}
                         </p>
                         {formStats2.dots.length > 0 && (
                           <div className="flex items-center gap-1">
@@ -649,7 +677,9 @@ function MatchRowInner({
                               <span
                                 key={i}
                                 className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${
-                                  d.won ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                                  d.won
+                                    ? "bg-green-500 text-white"
+                                    : "bg-red-500 text-white"
                                 }`}
                               >
                                 {d.won ? "W" : "L"}
@@ -686,17 +716,19 @@ function MatchRowInner({
             const s1 = typeof match.score1 === "number" ? match.score1 : 0;
             const s2 = typeof match.score2 === "number" ? match.score2 : 0;
             const maxWins =
-              match.matchType === "Bo5" ? 3 :
-              match.matchType === "Bo3" ? 2 :
-              match.matchType === "Bo2" ? 2 : 1;
+              match.matchType === "Bo5"
+                ? 3
+                : match.matchType === "Bo3"
+                  ? 2
+                  : match.matchType === "Bo2"
+                    ? 2
+                    : 1;
             const scoreComplete = Math.max(s1, s2) >= maxWins;
             return isFinished && (s1 > 0 || s2 > 0) && scoreComplete ? (
               <div className="flex items-center justify-center gap-0.5">
                 <span
                   className={`text-base font-bold ${
-                    s1 > s2
-                      ? "text-green-500"
-                      : "text-red-500"
+                    s1 > s2 ? "text-green-500" : "text-red-500"
                   }`}
                 >
                   {s1}
@@ -704,9 +736,7 @@ function MatchRowInner({
                 <span className="text-base font-medium text-gray-400">:</span>
                 <span
                   className={`text-base font-bold ${
-                    s2 > s1
-                      ? "text-green-500"
-                      : "text-red-500"
+                    s2 > s1 ? "text-green-500" : "text-red-500"
                   }`}
                 >
                   {s2}

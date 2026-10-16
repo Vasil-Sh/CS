@@ -11,7 +11,8 @@ function computeBalanceStats(data: BalanceData[]) {
   const currentBalance = data[data.length - 1]?.balance || initialBalance;
   const totalChange = currentBalance - initialBalance;
   const isUp = totalChange >= 0;
-  const roi = initialBalance > 0 ? Math.round((totalChange / initialBalance) * 100) : 0;
+  const roi =
+    initialBalance > 0 ? Math.round((totalChange / initialBalance) * 100) : 0;
   let peak = -Infinity;
   let lowest = Infinity;
   let totalProfit = 0;
@@ -22,7 +23,16 @@ function computeBalanceStats(data: BalanceData[]) {
   }
   if (peak === -Infinity) peak = initialBalance;
   if (lowest === Infinity) lowest = initialBalance;
-  return { initialBalance, currentBalance, totalChange, isUp, roi, peak, lowest, totalProfit };
+  return {
+    initialBalance,
+    currentBalance,
+    totalChange,
+    isUp,
+    roi,
+    peak,
+    lowest,
+    totalProfit,
+  };
 }
 
 describe("BalanceChart stats computation", () => {
@@ -96,7 +106,9 @@ describe("BalanceChart stats computation", () => {
   });
 
   it("handles single data point", () => {
-    const data: BalanceData[] = [{ date: "2026-07-21", balance: 5000, profit: 0 }];
+    const data: BalanceData[] = [
+      { date: "2026-07-21", balance: 5000, profit: 0 },
+    ];
     const stats = computeBalanceStats(data);
     expect(stats!.initialBalance).toBe(5000);
     expect(stats!.currentBalance).toBe(5000);

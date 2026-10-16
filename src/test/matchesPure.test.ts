@@ -7,12 +7,18 @@ import { describe, it, expect } from "vitest";
 // ── getStatusPriority ──
 
 describe("getStatusPriority", () => {
-  const getStatusPriority = (status?: "upcoming" | "live" | "finished"): number => {
+  const getStatusPriority = (
+    status?: "upcoming" | "live" | "finished",
+  ): number => {
     switch (status) {
-      case "live": return 0;
-      case "upcoming": return 1;
-      case "finished": return 2;
-      default: return 3;
+      case "live":
+        return 0;
+      case "upcoming":
+        return 1;
+      case "finished":
+        return 2;
+      default:
+        return 3;
     }
   };
 
@@ -39,7 +45,9 @@ describe("getStatusPriority", () => {
       { status: "live" as const },
       { status: "upcoming" as const },
     ];
-    items.sort((a, b) => getStatusPriority(a.status) - getStatusPriority(b.status));
+    items.sort(
+      (a, b) => getStatusPriority(a.status) - getStatusPriority(b.status),
+    );
     expect(items[0].status).toBe("live");
     expect(items[1].status).toBe("upcoming");
     expect(items[2].status).toBe("finished");
@@ -85,14 +93,32 @@ describe("getDateKey", () => {
 // ── formatFullDateTitle ──
 
 describe("formatFullDateTitle", () => {
-  const formatFullDateTitle = (dateKey: string, gameFilter: "all" | "CS2" | "Dota2"): string => {
+  const formatFullDateTitle = (
+    dateKey: string,
+    gameFilter: "all" | "CS2" | "Dota2",
+  ): string => {
     const d = new Date(dateKey + "T12:00:00");
-    const dayNames = ["Неділя", "Понеділок", "Вівторок", "Середа", "Четвер", "П'ятниця", "Субота"];
+    const dayNames = [
+      "Неділя",
+      "Понеділок",
+      "Вівторок",
+      "Середа",
+      "Четвер",
+      "П'ятниця",
+      "Субота",
+    ];
     const dayFull = dayNames[d.getDay()];
-    const formatted = d.toLocaleDateString("uk-UA", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const formatted = d.toLocaleDateString("uk-UA", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
     const prefix =
-      gameFilter === "CS2" ? "CS2 матчі" :
-      gameFilter === "Dota2" ? "Dota 2 матчі" : "Матчі";
+      gameFilter === "CS2"
+        ? "CS2 матчі"
+        : gameFilter === "Dota2"
+          ? "Dota 2 матчі"
+          : "Матчі";
     return `${prefix} (${dayFull}, ${formatted})`;
   };
 
@@ -125,7 +151,8 @@ describe("formatFullDateTitle", () => {
 
 // ── Form stability derivation ──
 
-type FormStability = "hot_streak" | "stable" | "momentum" | "falling" | "slump" | "inconsistent";
+type FormStability =
+  "hot_streak" | "stable" | "momentum" | "falling" | "slump" | "inconsistent";
 
 describe("formStability derivation", () => {
   /** Pure function replicating the Match-prediction → form stability logic */
@@ -155,61 +182,89 @@ describe("formStability derivation", () => {
   }
 
   it("favorite with 80% prediction → hot_streak", () => {
-    expect(deriveFormStability(80, 20, "TeamA", "TeamA", "TeamB")).toBe("hot_streak");
+    expect(deriveFormStability(80, 20, "TeamA", "TeamA", "TeamB")).toBe(
+      "hot_streak",
+    );
   });
 
   it("favorite with 70% prediction → momentum", () => {
-    expect(deriveFormStability(70, 30, "TeamA", "TeamA", "TeamB")).toBe("momentum");
+    expect(deriveFormStability(70, 30, "TeamA", "TeamA", "TeamB")).toBe(
+      "momentum",
+    );
   });
 
   it("favorite with 65% prediction → momentum (boundary)", () => {
-    expect(deriveFormStability(65, 35, "TeamA", "TeamA", "TeamB")).toBe("momentum");
+    expect(deriveFormStability(65, 35, "TeamA", "TeamA", "TeamB")).toBe(
+      "momentum",
+    );
   });
 
   it("favorite with 60% prediction → stable", () => {
-    expect(deriveFormStability(60, 40, "TeamA", "TeamA", "TeamB")).toBe("stable");
+    expect(deriveFormStability(60, 40, "TeamA", "TeamA", "TeamB")).toBe(
+      "stable",
+    );
   });
 
   it("favorite with 55% prediction → stable (boundary)", () => {
-    expect(deriveFormStability(55, 45, "TeamA", "TeamA", "TeamB")).toBe("stable");
+    expect(deriveFormStability(55, 45, "TeamA", "TeamA", "TeamB")).toBe(
+      "stable",
+    );
   });
 
   it("favorite with 51% prediction → inconsistent", () => {
-    expect(deriveFormStability(51, 49, "TeamA", "TeamA", "TeamB")).toBe("inconsistent");
+    expect(deriveFormStability(51, 49, "TeamA", "TeamA", "TeamB")).toBe(
+      "inconsistent",
+    );
   });
 
   it("underdog with 10% prediction → slump", () => {
     // TeamA 90%, TeamB 10% — favorite is TeamA, underdog is TeamB
     // But we set favorite = TeamB, so underdog perspective
-    expect(deriveFormStability(90, 10, "TeamB", "TeamA", "TeamB")).toBe("slump");
+    expect(deriveFormStability(90, 10, "TeamB", "TeamA", "TeamB")).toBe(
+      "slump",
+    );
   });
 
   it("underdog with 25% prediction → slump (boundary)", () => {
-    expect(deriveFormStability(75, 25, "TeamB", "TeamA", "TeamB")).toBe("slump");
+    expect(deriveFormStability(75, 25, "TeamB", "TeamA", "TeamB")).toBe(
+      "slump",
+    );
   });
 
   it("underdog with 30% prediction → falling", () => {
-    expect(deriveFormStability(70, 30, "TeamB", "TeamA", "TeamB")).toBe("falling");
+    expect(deriveFormStability(70, 30, "TeamB", "TeamA", "TeamB")).toBe(
+      "falling",
+    );
   });
 
   it("underdog with 35% prediction → falling (boundary)", () => {
-    expect(deriveFormStability(65, 35, "TeamB", "TeamA", "TeamB")).toBe("falling");
+    expect(deriveFormStability(65, 35, "TeamB", "TeamA", "TeamB")).toBe(
+      "falling",
+    );
   });
 
   it("underdog with 40% prediction → inconsistent", () => {
-    expect(deriveFormStability(60, 40, "TeamB", "TeamA", "TeamB")).toBe("inconsistent");
+    expect(deriveFormStability(60, 40, "TeamB", "TeamA", "TeamB")).toBe(
+      "inconsistent",
+    );
   });
 
   it("underdog with 45% prediction → inconsistent (boundary)", () => {
-    expect(deriveFormStability(55, 45, "TeamB", "TeamA", "TeamB")).toBe("inconsistent");
+    expect(deriveFormStability(55, 45, "TeamB", "TeamA", "TeamB")).toBe(
+      "inconsistent",
+    );
   });
 
   it("underdog with 49% prediction → stable", () => {
-    expect(deriveFormStability(51, 49, "TeamB", "TeamA", "TeamB")).toBe("stable");
+    expect(deriveFormStability(51, 49, "TeamB", "TeamA", "TeamB")).toBe(
+      "stable",
+    );
   });
 
   it("favorite is team2 with high pred", () => {
-    expect(deriveFormStability(20, 80, "TeamB", "TeamA", "TeamB")).toBe("hot_streak");
+    expect(deriveFormStability(20, 80, "TeamB", "TeamA", "TeamB")).toBe(
+      "hot_streak",
+    );
   });
 });
 
@@ -232,20 +287,28 @@ describe("scoreBasedStabilityOverride", () => {
   }
 
   it("favorite wins BO3 2-0 → hot_streak", () => {
-    expect(overrideByScore(true, 2, 0, "TeamA", "TeamA", "TeamB")).toBe("hot_streak");
+    expect(overrideByScore(true, 2, 0, "TeamA", "TeamA", "TeamB")).toBe(
+      "hot_streak",
+    );
   });
 
   it("favorite loses BO3 1-2 → slump", () => {
-    expect(overrideByScore(true, 1, 2, "TeamA", "TeamA", "TeamB")).toBe("slump");
+    expect(overrideByScore(true, 1, 2, "TeamA", "TeamA", "TeamB")).toBe(
+      "slump",
+    );
   });
 
   it("underdog wins → stable (favorite perspective)", () => {
     // TeamA is favorite, but TeamB wins — from TeamA perspective: slump
-    expect(overrideByScore(true, 0, 2, "TeamA", "TeamA", "TeamB")).toBe("slump");
+    expect(overrideByScore(true, 0, 2, "TeamA", "TeamA", "TeamB")).toBe(
+      "slump",
+    );
   });
 
   it("favorite=team2, team2 wins → hot_streak", () => {
-    expect(overrideByScore(false, 1, 2, "TeamB", "TeamA", "TeamB")).toBe("hot_streak");
+    expect(overrideByScore(false, 1, 2, "TeamB", "TeamA", "TeamB")).toBe(
+      "hot_streak",
+    );
   });
 });
 
@@ -321,7 +384,9 @@ describe("match filter helpers", () => {
 
   it("filter by status", () => {
     expect(mkMatch({ matchStatus: "live" }).matchStatus === "live").toBe(true);
-    expect(mkMatch({ matchStatus: "finished" }).matchStatus === "live").toBe(false);
+    expect(mkMatch({ matchStatus: "finished" }).matchStatus === "live").toBe(
+      false,
+    );
   });
 
   it("filter by game", () => {
@@ -335,7 +400,13 @@ describe("match filter helpers", () => {
 
 describe("dayOfWeek filter", () => {
   const dayMap: Record<string, number> = {
-    sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6,
+    sun: 0,
+    mon: 1,
+    tue: 2,
+    wed: 3,
+    thu: 4,
+    fri: 5,
+    sat: 6,
   };
 
   it("2026-07-22 is Wednesday (3)", () => {

@@ -1,17 +1,24 @@
-import { useState } from 'react';
-import { Target, Search, X, Check } from 'lucide-react';
+import { useEffect, useState } from "react";
+import {
+  Search,
+  X,
+  Check,
+  Ban,
+  Banknote,
+  TrendingUp,
+  Percent,
+  Layers,
+} from "lucide-react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import type { Goal } from './types';
+} from "@/components/ui/dialog";
+import type { Goal } from "./types";
+import "./GoalPickerModal.css";
 
 interface GoalPickerModalProps {
   open: boolean;
@@ -19,6 +26,59 @@ interface GoalPickerModalProps {
   goals: Goal[];
   selectedGoalId: string;
   onSelect: (goalId: string) => void;
+}
+const icons = {
+  amount: Banknote,
+  roi: TrendingUp,
+  winrate: Percent,
+  ladder: Layers,
+};
+const labels = {
+  amount: "Фінансова ціль",
+  roi: "Рентабельність · ROI",
+  winrate: "Відсоток перемог",
+  ladder: "Драбина",
+};
+const number = (value: number) =>
+  new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 2 }).format(value);
+const finite = (value: number | undefined) =>
+  value != null && Number.isFinite(value) ? value : null;
+
+export function goalPickerProgress(goal: Goal) {
+  const current =
+    finite(
+      goal.type === "amount"
+        ? goal.currentAmount
+        : goal.type === "ladder"
+          ? goal.currentStep
+          : goal.type === "roi"
+            ? goal.currentROI
+            : goal.currentWinRate,
+    ) ?? 0;
+  const target = finite(
+    goal.type === "amount"
+      ? goal.targetAmount
+      : goal.type === "ladder"
+        ? goal.totalSteps
+        : goal.type === "roi"
+          ? goal.targetROI
+          : goal.targetWinRate,
+  );
+  const percent =
+    target != null && target > 0
+      ? Math.min(100, Math.max(0, (current / target) * 100))
+      : null;
+  const unit =
+    goal.type === "amount" ? " ₴" : goal.type === "ladder" ? "" : "%";
+  const text =
+    target != null && target > 0
+      ? `${number(current)}${unit} із ${number(target)}${unit}`
+      : "Цільове значення не задано";
+  return { percent, text, current, target };
+}
+function goalCount(count: number) {
+  const mod = count % 100;
+  return `${count} ${mod >= 11 && mod <= 14 ? "активних цілей" : count % 10 === 1 ? "активна ціль" : count % 10 >= 2 && count % 10 <= 4 ? "активні цілі" : "активних цілей"}`;
 }
 
 export default function GoalPickerModal({
@@ -28,157 +88,162 @@ export default function GoalPickerModal({
   selectedGoalId,
   onSelect,
 }: GoalPickerModalProps) {
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
+  const [draftId, setDraftId] = useState(selectedGoalId || "all");
+  useEffect(() => {
+    if (open) {
+      setDraftId(selectedGoalId || "all");
+      setSearch("");
+    }
+  }, [open, selectedGoalId]);
 
-  const filteredGoals = (search.trim()
-    ? goals.filter((g) => g.name.toLowerCase().includes(search.toLowerCase()))
-    : goals
-  ).sort((a, b) => {
-    if (a.isPrimary && !b.isPrimary) return -1;
-    if (!a.isPrimary && b.isPrimary) return 1;
-    return 0;
-  });
-
-  const selectedGoal = goals.find((g) => g.id === selectedGoalId);
-
-  const typeLabels: Record<string, string> = {
-    amount: 'Сума',
-    ladder: 'Драбина',
-    roi: 'ROI',
-    winrate: 'Win Rate',
-  };
+  const activeGoals = goals.filter((goal) => goal.status === "active");
+  const query = search.trim().toLocaleLowerCase("uk-UA");
+  const filteredGoals = activeGoals
+    .filter((goal) => goal.name.toLocaleLowerCase("uk-UA").includes(query))
+    .sort((a, b) => Number(!!b.isPrimary) - Number(!!a.isPrimary));
+  const selectedGoal = activeGoals.find((goal) => goal.id === draftId);
+  const noneSelected = draftId === "all";
+  const canConfirm = noneSelected || !!selectedGoal;
+  const indicator = (selected: boolean) => (
+    <span className="gpm-indicator" aria-hidden="true">
+      {selected && <Check size={16} />}
+    </span>
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-3xl max-w-lg w-[95vw] max-h-[85vh] overflow-hidden flex flex-col border border-gray-200 p-0 gap-0">
-        <DialogHeader className="px-6 pt-6 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-blue-100 flex-shrink-0">
-              <Target className="h-5 w-5 text-blue-600" strokeWidth={1.5} />
-            </div>
-            <div>
-              <DialogTitle className="text-xl font-semibold text-gray-900">
-                Оберіть ціль
-              </DialogTitle>
-              <DialogDescription className="text-gray-500 mt-0.5">
-                {goals.length} активних цілей
-              </DialogDescription>
-            </div>
-          </div>
+      <DialogContent className="gpm-dialog" hideCloseButton>
+        <DialogHeader className="gpm-header">
+          <span className="gpm-eyebrow">
+            <i aria-hidden="true" />
+            GOALS
+          </span>
+          <DialogTitle>Оберіть ціль</DialogTitle>
+          <DialogDescription>{goalCount(activeGoals.length)}</DialogDescription>
+          <DialogClose className="gpm-close" aria-label="Закрити вибір цілі">
+            <X size={23} />
+          </DialogClose>
         </DialogHeader>
-
-        <div className="border-t border-gray-200" />
-
-        <div className="bg-gray-100 px-5 py-4 space-y-3 flex-1 overflow-y-auto min-h-0">
-          {/* Search */}
-          <div className="relative flex-shrink-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" strokeWidth={1.5} />
-            <Input
+        <div className="gpm-body">
+          <div className="gpm-search">
+            <Search size={19} aria-hidden="true" />
+            <input
+              aria-label="Пошук цілі за назвою"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Пошук за назвою..."
-              className="pl-10 rounded-xl border-gray-200 bg-white h-10 text-sm"
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Пошук за назвою…"
               autoFocus
             />
             {search && (
               <button
-                onClick={() => setSearch('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                type="button"
+                className="gpm-search-clear"
+                aria-label="Очистити пошук"
+                onClick={() => setSearch("")}
               >
-                <X className="h-4 w-4" strokeWidth={1.5} />
+                <X size={16} />
               </button>
             )}
           </div>
-
-          {/* Goals list */}
-          <div className="space-y-1.5 pr-3">
-            {/* No goal option */}
+          <div className="gpm-list" role="group" aria-label="Доступні цілі">
             <button
-              onClick={() => { onSelect('all'); onOpenChange(false); }}
-              className={`w-full text-left p-3 rounded-xl border transition-all flex items-center gap-3 ${
-                selectedGoalId === 'all' || !selectedGoalId
-                  ? 'border-blue-600 bg-blue-50'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
-              }`}
+              type="button"
+              className="gpm-item gpm-none"
+              aria-pressed={noneSelected}
+              onClick={() => setDraftId("all")}
             >
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100">
-                <X className="h-4 w-4 text-gray-400" strokeWidth={1.5} />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">Без цілі</p>
-              </div>
-              {(selectedGoalId === 'all' || !selectedGoalId) && (
-                <Check className="h-4 w-4 text-blue-600" strokeWidth={2.5} />
-              )}
+              <span className="gpm-item-icon">
+                <Ban size={24} aria-hidden="true" />
+              </span>
+              <span className="gpm-item-copy">
+                <span className="gpm-item-name">Без цілі</span>
+                <span className="gpm-item-meta">
+                  Не прив’язувати запис до цілі
+                </span>
+              </span>
+              {indicator(noneSelected)}
             </button>
-
             {filteredGoals.map((goal) => {
-              const isSelected = goal.id === selectedGoalId;
+              const Icon = icons[goal.type] ?? Layers;
+              const progress = goalPickerProgress(goal);
               return (
                 <button
+                  type="button"
                   key={goal.id}
-                  onClick={() => { onSelect(goal.id); onOpenChange(false); }}
-                  className={`w-full text-left p-3 rounded-xl border transition-all flex items-center gap-3 ${
-                    isSelected
-                      ? 'border-blue-600 bg-blue-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}
+                  className="gpm-item"
+                  aria-pressed={goal.id === draftId}
+                  onClick={() => setDraftId(goal.id)}
                 >
-                  <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${
-                    goal.status === 'completed' ? 'bg-green-50' : 'bg-blue-50'
-                  }`}>
-                    <Target className={`h-4 w-4 ${
-                      goal.status === 'completed' ? 'text-green-600' : 'text-blue-500'
-                    }`} strokeWidth={1.5} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">{goal.name}</p>
-                    <p className="text-xs text-gray-400">
-                      {typeLabels[goal.type] || goal.type}
-                      {goal.type === 'amount' && goal.currentAmount !== undefined && ` · ${goal.currentAmount} / ${goal.targetAmount}`}
-                      {goal.type === 'ladder' && ` · крок ${goal.currentStep ?? 0} / ${goal.totalSteps ?? 0}`}
-                      {goal.type === 'roi' && goal.currentROI !== undefined && ` · ${goal.currentROI}% / ${goal.targetROI}%`}
-                      {goal.type === 'winrate' && goal.currentWinRate !== undefined && ` · ${goal.currentWinRate}% / ${goal.targetWinRate}%`}
-                    </p>
-                  </div>
-                  {isSelected && (
-                    <Check className="h-4 w-4 text-blue-600 flex-shrink-0" strokeWidth={2.5} />
-                  )}
-                  {goal.isPrimary && (
-                    <Badge className="bg-amber-50 text-amber-600 border border-amber-200 rounded-lg font-medium text-[10px] px-1.5 py-0.5">
-                      Основна
-                    </Badge>
-                  )}
+                  <span className="gpm-item-icon">
+                    <Icon size={25} aria-hidden="true" />
+                  </span>
+                  <span className="gpm-item-copy">
+                    <span className="gpm-item-heading">
+                      <span className="gpm-item-name">{goal.name}</span>
+                      {goal.isPrimary && (
+                        <span className="gpm-badge">Основна</span>
+                      )}
+                    </span>
+                    <span className="gpm-item-meta">
+                      {labels[goal.type]}
+                      {goal.type === "ladder" &&
+                      progress.target != null &&
+                      progress.target > 0
+                        ? ` · крок ${progress.current} із ${progress.target}`
+                        : ""}
+                    </span>
+                    <span className="gpm-progress" aria-hidden="true">
+                      <span style={{ width: `${progress.percent ?? 0}%` }} />
+                    </span>
+                    <span className="gpm-progress-caption">
+                      <span>{progress.text}</span>
+                      <span>
+                        {progress.percent == null
+                          ? "—"
+                          : `${Math.round(progress.percent)}%`}
+                      </span>
+                    </span>
+                  </span>
+                  {indicator(goal.id === draftId)}
                 </button>
               );
             })}
-
-            {filteredGoals.length === 0 && search && (
-              <div className="text-center py-8 text-gray-400 text-sm">
-                Нічого не знайдено
-              </div>
+            {!filteredGoals.length && (
+              <p className="gpm-empty" role="status">
+                {query
+                  ? "Нічого не знайдено. Спробуйте іншу назву."
+                  : "Поки немає активних цілей. Можна зберегти запис без прив’язки."}
+              </p>
             )}
           </div>
         </div>
-
-        <div className="border-t border-gray-200 px-5 py-3">
-          <DialogFooter className="gap-2 sm:gap-3 flex items-center">
-            {selectedGoal && (
-              <div className="text-xs text-gray-500 mr-auto self-center bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
-                <Target className="h-3.5 w-3.5 text-blue-600" strokeWidth={1.5} />
-                <span>Обрано:</span>
-                <span className="font-medium text-gray-900">{selectedGoal.name}</span>
-              </div>
-            )}
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="rounded-xl border-gray-200 font-medium"
+        <footer className="gpm-footer">
+          <span className="gpm-selected" aria-live="polite">
+            <span>Обрано</span>
+            <strong title={selectedGoal?.name}>
+              {noneSelected
+                ? "Без цілі"
+                : selectedGoal?.name || "Ціль недоступна"}
+            </strong>
+          </span>
+          <div className="gpm-footer-actions">
+            <DialogClose className="gpm-cancel">Скасувати</DialogClose>
+            <button
+              type="button"
+              className="gpm-confirm"
+              disabled={!canConfirm}
+              onClick={() => {
+                if (canConfirm) {
+                  onSelect(draftId);
+                  onOpenChange(false);
+                }
+              }}
             >
-              Скасувати
-            </Button>
-          </DialogFooter>
-        </div>
+              Обрати ціль
+            </button>
+          </div>
+        </footer>
       </DialogContent>
     </Dialog>
   );

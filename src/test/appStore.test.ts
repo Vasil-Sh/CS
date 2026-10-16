@@ -41,28 +41,28 @@
  *   - `beforeEach` скидає стан між тестами → гарантує ізоляцію.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
-import { useAppStore } from '@/stores/appStore';
+import { describe, it, expect, beforeEach } from "vitest";
+import { useAppStore } from "@/stores/appStore";
 
-describe('appStore (zustand store)', () => {
+describe("appStore (zustand store)", () => {
   /** Скидаємо стан перед кожним тестом для чистої ізоляції */
   beforeEach(() => {
     useAppStore.setState({ bankrollVersion: 0, strategyVersion: 0 });
   });
 
-  it('[1] початковий стан: bankrollVersion = 0, strategyVersion = 0', () => {
+  it("[1] початковий стан: bankrollVersion = 0, strategyVersion = 0", () => {
     expect(useAppStore.getState().bankrollVersion).toBe(0);
     expect(useAppStore.getState().strategyVersion).toBe(0);
   });
 
-  it('[2] bumpBankroll() інкрементує bankrollVersion на 1', () => {
+  it("[2] bumpBankroll() інкрементує bankrollVersion на 1", () => {
     useAppStore.getState().bumpBankroll();
     expect(useAppStore.getState().bankrollVersion).toBe(1);
     // strategyVersion не повинен змінитись
     expect(useAppStore.getState().strategyVersion).toBe(0);
   });
 
-  it('[3] bumpStrategy() інкрементує strategyVersion (2 виклики → 2)', () => {
+  it("[3] bumpStrategy() інкрементує strategyVersion (2 виклики → 2)", () => {
     useAppStore.getState().bumpStrategy();
     useAppStore.getState().bumpStrategy();
     expect(useAppStore.getState().strategyVersion).toBe(2);
@@ -70,7 +70,7 @@ describe('appStore (zustand store)', () => {
     expect(useAppStore.getState().bankrollVersion).toBe(0);
   });
 
-  it('[4] bankrollVersion і strategyVersion незалежні', () => {
+  it("[4] bankrollVersion і strategyVersion незалежні", () => {
     useAppStore.getState().bumpBankroll();
     useAppStore.getState().bumpStrategy();
     expect(useAppStore.getState().bankrollVersion).toBe(1);

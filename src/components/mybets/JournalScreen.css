@@ -1,0 +1,468 @@
+/* Journal-only skin. Form styles and existing table interactions stay independent. */
+.record-page.journal-page {
+  --record-line: #dfe5ef;
+  --record-muted: #74829f;
+  --record-ink: #101a31;
+  background: #f5f7fa;
+  color: var(--record-ink);
+  font-family: "Record Inter", Inter, sans-serif;
+}
+.journal-header .record-entry-hero {
+  min-height: 244px;
+  padding: 64px 3.4% 40px;
+  background-image:
+    linear-gradient(90deg, #0b131733, transparent 65%),
+    url("/assets/records/journal-hero.jpg");
+  background-position:
+    center,
+    center 48%;
+  background-size: cover;
+}
+.journal-header .record-entry-intro {
+  max-width: 58%;
+}
+.journal-header .record-entry-hero h1 {
+  font-size: clamp(40px, 4.6vw, 66px);
+  margin: 16px 0 10px;
+}
+.journal-header .record-entry-hero p {
+  font-size: clamp(15px, 1.5vw, 21px);
+}
+.journal-header .record-entry-hero .record-currency {
+  top: 26px;
+  right: 2.2%;
+}
+.journal-hero-action {
+  position: absolute;
+  top: 26px;
+  right: calc(2.2% + 176px);
+}
+.journal-hero-action .record-header-add {
+  min-height: 46px;
+  background: #ff572b;
+  font-weight: 600;
+}
+.journal-header .record-currency {
+  padding: 4px;
+  gap: 3px;
+}
+.journal-header .record-currency button {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 4px;
+}
+.journal-header .record-entry-stats {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  width: calc(100% - 48px);
+  margin-top: -16px;
+  padding: 12px 6px 0;
+  background: #f5f7fa;
+}
+.journal-header .record-metric {
+  padding: 16px 18px;
+  gap: 14px;
+  min-height: 128px;
+}
+.journal-header .record-metric > svg {
+  width: 26px;
+  height: 26px;
+}
+.journal-header .record-metric span {
+  font-size: 13px;
+  padding-right: 0;
+}
+.journal-header .record-metric strong {
+  font:
+    600 clamp(26px, 2.5vw, 36px)/1.2 Oswald,
+    sans-serif;
+  margin: 12px 0 4px;
+  letter-spacing: -0.025em;
+}
+.journal-header .record-metric small {
+  font-size: 12px;
+}
+.journal-page .record-workspace {
+  max-width: 1580px;
+  margin: auto;
+  padding: 22px 30px 32px;
+}
+.journal-page .record-tabs {
+  border-color: var(--record-line);
+}
+.journal-page .record-tab {
+  font:
+    600 21px/1.4 Oswald,
+    sans-serif;
+  padding: 5px 6px 12px;
+  color: #7a8499;
+}
+.journal-page .record-tab.is-active {
+  color: #ff572b;
+  border-color: #ff572b;
+}
+.journal-page .journal-workspace {
+  --journal-border: #dfe5ef;
+  --journal-muted: #7583a0;
+  --journal-orange: #ff572b;
+  border-radius: 9px;
+  padding: 18px 22px 14px;
+  color: var(--record-ink);
+}
+.journal-title {
+  margin: 0 0 12px;
+  font:
+    750 23px/1.3 "Record Inter",
+    sans-serif;
+  letter-spacing: -0.035em;
+}
+.journal-page .journal-tools {
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.journal-page .journal-search {
+  border-color: var(--journal-border);
+  border-radius: 6px;
+  gap: 12px;
+}
+.journal-page .journal-search svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.journal-page .journal-search input {
+  height: 48px;
+  font:
+    400 14px "Record Inter",
+    sans-serif;
+}
+.journal-page .journal-search input::placeholder {
+  color: #919bad;
+}
+.journal-page :is(.journal-outline, .journal-compact) {
+  border: 1px solid var(--journal-border);
+  border-radius: 6px;
+  min-height: 50px;
+  background: white;
+  color: var(--record-ink);
+  font-weight: 500;
+  font-size: 14px;
+  padding: 10px 16px;
+  gap: 10px;
+}
+.journal-page :is(.journal-outline, .journal-compact):hover {
+  background: #f4f6fa;
+  border-color: #bfcadd;
+}
+.journal-page .journal-outline[aria-expanded="true"] {
+  border-color: #ff572b;
+  background: #fff4ef;
+}
+.journal-page .journal-status-bar {
+  margin-bottom: 16px;
+}
+.journal-page .journal-statuses {
+  gap: 28px;
+}
+.journal-page .journal-statuses button {
+  color: #68758e;
+  font-size: 14px;
+  padding: 12px 0 14px;
+}
+.journal-page .journal-statuses [aria-pressed="true"] {
+  color: #ff572b;
+}
+.journal-page .journal-record-count {
+  font-size: 13px;
+}
+.journal-page .journal-table-wrap {
+  border-radius: 6px;
+}
+.journal-page .journal-records-table > thead > tr > th {
+  background: #f6f8fb;
+  border-right-color: #e9edf4;
+  padding: 14px 12px;
+  font-size: 13px;
+}
+.journal-page .journal-record-row > td {
+  border-color: #e9edf4;
+  padding: 16px 14px;
+  font-size: 14px;
+}
+.journal-page .journal-record-row:hover {
+  background: #f9fbff;
+}
+.journal-page .journal-record-row.is-selected {
+  background: #f0f5fb;
+}
+.journal-page .journal-records-table .col-date {
+  width: 118px;
+}
+.journal-page .journal-records-table .col-date small {
+  font-size: 13px;
+}
+.journal-page .journal-records-table .col-amount {
+  width: 94px;
+}
+.journal-page .journal-records-table .col-odds {
+  width: 82px;
+}
+.journal-page .journal-records-table .col-profit {
+  width: 114px;
+}
+.journal-page .journal-records-table .col-goal {
+  width: 106px;
+}
+.journal-page .journal-records-table .col-status {
+  width: 126px;
+}
+.journal-page .journal-records-table .col-actions-head {
+  width: 126px;
+}
+.journal-page .journal-match-title strong {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.journal-page .journal-match-inline {
+  gap: 10px;
+}
+.journal-page .journal-logo {
+  width: 30px;
+  height: 30px;
+}
+.journal-page .journal-initial {
+  background: #edf2f8;
+  color: #667892;
+}
+.journal-page .journal-selection {
+  padding-left: 40px;
+  margin-top: 1px;
+  font-size: 13px;
+  color: #7a87a1;
+}
+.journal-page .journal-selection > span {
+  color: #5d6d8b;
+}
+.journal-match-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  padding-left: 40px;
+  margin-top: 6px;
+}
+.journal-meta-chip {
+  display: inline-block;
+  border-radius: 4px;
+  padding: 2px 7px;
+  color: #657b9f;
+  background: #f0f4f9;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.journal-page .journal-match-meta .journal-expand-label {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  color: #2265ee;
+  font-size: 12px;
+}
+.journal-page
+  .journal-match-button[aria-expanded="true"]
+  .journal-expand-label
+  svg {
+  transform: rotate(180deg);
+}
+.journal-page .journal-disclosure-icon {
+  width: 12px;
+  color: #a4afc1;
+}
+.journal-page .journal-profit {
+  font-size: 17px;
+}
+.journal-page .journal-profit.positive {
+  color: #009b65;
+}
+.journal-page .journal-badge {
+  padding: 8px 10px;
+  font-size: 13px;
+  gap: 7px;
+  border-radius: 5px;
+}
+.journal-page .journal-badge svg {
+  width: 18px;
+  height: 18px;
+}
+.journal-page .status-Win {
+  color: #008d60;
+  background: #e0f6ec;
+}
+.journal-page .journal-muted {
+  color: #7d8ba5;
+  font-size: 12px;
+}
+.journal-page .journal-actions {
+  gap: 10px;
+}
+.journal-page :is(.journal-row-share, .journal-actions .journal-icon) {
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  padding: 0;
+  border-color: var(--journal-border);
+  border-radius: 6px;
+}
+.journal-page .journal-pagination {
+  font-size: 13px;
+  padding: 10px 16px;
+  gap: 14px;
+}
+.journal-page .journal-pagination select {
+  border-color: var(--journal-border);
+  color: var(--record-ink);
+}
+.journal-page .journal-footnote {
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 12px;
+  color: #7d8ba5;
+  gap: 12px;
+}
+.journal-page .journal-footnote svg {
+  width: 20px;
+  height: 20px;
+}
+.journal-page .journal-extra,
+.journal-page .journal-inline-details {
+  background: #f6f8fb;
+}
+.journal-page .journal-event-table th {
+  background: #edf2f8;
+  color: #6c7d98;
+}
+.journal-page .journal-empty h3 {
+  font-family: "Record Inter", sans-serif;
+  font-weight: 650;
+  font-size: 22px;
+}
+@media (max-width: 1150px) {
+  .journal-header .record-entry-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .journal-header .record-metric {
+    min-height: 112px;
+  }
+}
+@container journal (min-width: 941px) and (max-width: 1150px) {
+  .journal-page .journal-records-table .col-date {
+    width: 104px;
+  }
+  .journal-page .journal-records-table .col-amount {
+    width: 80px;
+  }
+  .journal-page .journal-records-table .col-odds {
+    width: 65px;
+  }
+  .journal-page .journal-records-table .col-profit {
+    width: 100px;
+  }
+  .journal-page .journal-records-table .col-goal {
+    width: 88px;
+  }
+  .journal-page .journal-records-table .col-status {
+    width: 110px;
+  }
+  .journal-page .journal-records-table .col-actions-head {
+    width: 108px;
+  }
+  .journal-page .journal-record-row > td {
+    padding: 14px 9px;
+  }
+}
+@container journal (max-width: 940px) {
+  .journal-page .journal-record-row > td {
+    padding: 0;
+  }
+  .journal-page .journal-match-meta {
+    gap: 6px;
+  }
+}
+@media (max-width: 600px) {
+  .journal-header .record-entry-hero {
+    padding: 98px 22px 42px;
+    background-position:
+      center,
+      60% center;
+  }
+  .journal-header .record-entry-intro {
+    max-width: 100%;
+    text-shadow: 0 2px 12px #000;
+  }
+  .journal-header .record-entry-hero .record-currency {
+    top: 20px;
+    right: 16px;
+  }
+  .journal-hero-action {
+    top: 20px;
+    left: 16px;
+    right: auto;
+  }
+  .journal-hero-action .record-header-add {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .journal-header .record-currency button {
+    padding: 8px 10px;
+  }
+  .journal-header .record-entry-stats {
+    width: calc(100% - 20px);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 8px 0 0;
+  }
+  .journal-header .record-metric {
+    padding: 14px 10px;
+    gap: 9px;
+  }
+  .journal-header .record-metric > svg {
+    width: 20px;
+    height: 20px;
+  }
+  .journal-header .record-metric span {
+    font-size: 11px;
+  }
+  .journal-header .record-metric strong {
+    font-size: 28px;
+  }
+  .journal-page .record-workspace {
+    padding: 18px 10px 28px;
+  }
+  .journal-page .journal-workspace {
+    padding: 16px 12px;
+  }
+  .journal-title {
+    font-size: 21px;
+  }
+  .journal-page .journal-tools {
+    gap: 6px;
+  }
+  .journal-page :is(.journal-outline, .journal-compact) {
+    padding: 8px;
+    min-height: 42px;
+    font-size: 11px;
+    gap: 6px;
+  }
+  .journal-page .journal-statuses {
+    gap: 18px;
+  }
+  .journal-page .journal-statuses button {
+    font-size: 12px;
+  }
+  .journal-page .journal-pagination {
+    padding: 10px;
+    gap: 8px;
+    font-size: 12px;
+  }
+}

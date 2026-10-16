@@ -24,6 +24,7 @@ import { logRender } from "@/lib/devLogger";
 import RecordPageHeader from "@/components/mybets/RecordPageHeader";
 import "@/components/mybets/RecordEntry.css";
 import "@/components/mybets/RecordScreen.css";
+import "@/components/mybets/JournalScreen.css";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import type { Bet } from "@/types/betting";
@@ -470,6 +471,7 @@ export default function MyBets() {
     >
       {activeTab === "records" ? (
         <RecordPageHeader
+          variant="journal"
           bets={recentBets}
           bank={
             (currencyMode === "USD" ? dualBank.usd : dualBank.uah).currentBank
@@ -477,9 +479,8 @@ export default function MyBets() {
           currency={currencyMode}
           onCurrencyChange={setCurrencyMode}
           onEditBank={() => setBankModalOpen(true)}
-          title="ЖУРНАЛ"
-          subtitle="Ваші рішення, результати та висновки"
-          hideCurrency
+          title="Журнал"
+          subtitle="Ваші рішення, результати та висновки."
           hideEditBank
           extraAction={
             <button

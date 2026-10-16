@@ -1,3 +1,3 @@
 /** AI / ML services */
-export { deepSeekService } from '../deepSeekService';
-export * from '../ai/shared';
+export { deepSeekService } from "../deepSeekService";
+export * from "../ai/shared";

@@ -89,19 +89,23 @@ export default function GoalsManager({
 
   return (
     <div className="space-y-6">
-      {focusLayout ? <GoalsFocus h={h} /> : <GoalsToolbar
-        activeTab={h.activeTab}
-        isUpdating={h.isUpdating}
-        activeGoalsCount={h.activeGoals.length}
-        maxGoals={25}
-        tabs={tabs}
-        onTabChange={(id) => h.setActiveTab(id as "active" | "completed")}
-        onUpdate={h.handleManualUpdate}
-        onCreateGoal={() => h.setShowCreateDialog(true)}
-        topTabs={topTabs}
-        topActiveTab={topActiveTab}
-        onTopTabChange={onTopTabChange}
-      />}
+      {focusLayout ? (
+        <GoalsFocus h={h} />
+      ) : (
+        <GoalsToolbar
+          activeTab={h.activeTab}
+          isUpdating={h.isUpdating}
+          activeGoalsCount={h.activeGoals.length}
+          maxGoals={25}
+          tabs={tabs}
+          onTabChange={(id) => h.setActiveTab(id as "active" | "completed")}
+          onUpdate={h.handleManualUpdate}
+          onCreateGoal={() => h.setShowCreateDialog(true)}
+          topTabs={topTabs}
+          topActiveTab={topActiveTab}
+          onTopTabChange={onTopTabChange}
+        />
+      )}
 
       {/* Active Tab */}
       {!focusLayout && h.activeTab === "active" && (
@@ -570,10 +574,15 @@ export default function GoalsManager({
         <DialogContent className="goal-create-dialog">
           <DialogHeader className="goal-create-header">
             <DialogTitle>Створити ціль</DialogTitle>
-            <DialogDescription>Оберіть показник, який хочете відстежувати.</DialogDescription>
+            <DialogDescription>
+              Оберіть показник, який хочете відстежувати.
+            </DialogDescription>
           </DialogHeader>
           <div className="goal-create-body">
-            <GoalTypeSelector value={h.newGoal.type} onChange={(type) => h.setNewGoal({ ...h.newGoal, type })} />
+            <GoalTypeSelector
+              value={h.newGoal.type}
+              onChange={(type) => h.setNewGoal({ ...h.newGoal, type })}
+            />
             <div>
               <Label
                 htmlFor="goalName"
@@ -601,22 +610,24 @@ export default function GoalsManager({
                   Цільова сума <span className="text-red-500">*</span>
                 </Label>
                 <div className="goal-create-amount">
-                <Input
-                  id="targetAmount"
-                  type="number"
-                  min="1"
-                  value={h.targetAmountStr}
-                  onChange={(e) => {
-                    h.setTargetAmountStr(e.target.value);
-                    const v = parseFloat(e.target.value);
-                    if (!isNaN(v))
-                      h.setNewGoal({ ...h.newGoal, targetAmount: v });
-                  }}
-                  className="rounded-2xl border border-gray-200 focus:border-primary mt-1.5 h-11 text-base"
-                />
-                <span aria-hidden="true">₴</span>
+                  <Input
+                    id="targetAmount"
+                    type="number"
+                    min="1"
+                    value={h.targetAmountStr}
+                    onChange={(e) => {
+                      h.setTargetAmountStr(e.target.value);
+                      const v = parseFloat(e.target.value);
+                      if (!isNaN(v))
+                        h.setNewGoal({ ...h.newGoal, targetAmount: v });
+                    }}
+                    className="rounded-2xl border border-gray-200 focus:border-primary mt-1.5 h-11 text-base"
+                  />
+                  <span aria-hidden="true">₴</span>
                 </div>
-                <p className="goal-create-help">Прогрес рахується за ставками, прив’язаними до цілі.</p>
+                <p className="goal-create-help">
+                  Прогрес рахується за ставками, прив’язаними до цілі.
+                </p>
               </div>
             )}
 
@@ -763,9 +774,15 @@ export default function GoalsManager({
             )}
 
             <details className="goal-create-rules" open>
-              <summary><ChevronDown size={16} />Додаткові правила<span>Необов’язково</span></summary>
+              <summary>
+                <ChevronDown size={16} />
+                Додаткові правила<span>Необов’язково</span>
+              </summary>
               <div>
-                <Label htmlFor="goalBetsPerDay" className="text-base font-medium text-gray-900">
+                <Label
+                  htmlFor="goalBetsPerDay"
+                  className="text-base font-medium text-gray-900"
+                >
                   Ліміт ставок на день
                 </Label>
                 <Input
@@ -785,7 +802,10 @@ export default function GoalsManager({
               </div>
             </details>
           </div>
-          <div className="goal-create-note"><Info size={18} />Створення цілі не додає ставок у журнал.</div>
+          <div className="goal-create-note">
+            <Info size={18} />
+            Створення цілі не додає ставок у журнал.
+          </div>
           <DialogFooter className="goal-create-footer">
             <Button
               variant="outline"
@@ -794,10 +814,7 @@ export default function GoalsManager({
             >
               Скасувати
             </Button>
-            <Button
-              onClick={h.createGoal}
-              className="goal-create-submit"
-            >
+            <Button onClick={h.createGoal} className="goal-create-submit">
               Створити ціль
             </Button>
           </DialogFooter>
@@ -812,7 +829,11 @@ export default function GoalsManager({
         onDelete={h.deleteGoal}
       />
 
-      <LadderDetailsDialog goal={h.selectedGoal} open={h.showDetailsDialog} onOpenChange={h.setShowDetailsDialog} />
+      <LadderDetailsDialog
+        goal={h.selectedGoal}
+        open={h.showDetailsDialog}
+        onOpenChange={h.setShowDetailsDialog}
+      />
 
       {/* Completed Goal Result Modal */}
       <CompletedGoalResultModal

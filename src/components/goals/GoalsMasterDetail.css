@@ -480,7 +480,9 @@
   text-align: left;
 }
 .gmd-delete-header h2 {
-  font: 600 32px/1.2 Oswald, sans-serif;
+  font:
+    600 32px/1.2 Oswald,
+    sans-serif;
   color: #f8f8f5;
   text-transform: uppercase;
   padding-right: 24px;

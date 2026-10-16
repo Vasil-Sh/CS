@@ -10,7 +10,10 @@ import type { BetRecord } from "@/hooks/useBettingForm";
 import type { CS2Strategy } from "@/types/strategy";
 
 // Helper: build strategy with activityLimits
-const mkStrategy = (blockAfterLosses?: number, blockDurationMinutes?: number): CS2Strategy =>
+const mkStrategy = (
+  blockAfterLosses?: number,
+  blockDurationMinutes?: number,
+): CS2Strategy =>
   ({
     id: "s1",
     name: "Test Strategy",
@@ -21,10 +24,14 @@ const mkStrategy = (blockAfterLosses?: number, blockDurationMinutes?: number): C
       blockDurationMinutes,
     },
     criteria: [],
-  } as unknown as CS2Strategy);
+  }) as unknown as CS2Strategy;
 
 // Helper: build a bet record
-const bet = (result: "Win" | "Loss" | "Pending", date: string, createdAt?: number): BetRecord =>
+const bet = (
+  result: "Win" | "Loss" | "Pending",
+  date: string,
+  createdAt?: number,
+): BetRecord =>
   ({
     result,
     date,
@@ -32,7 +39,7 @@ const bet = (result: "Win" | "Loss" | "Pending", date: string, createdAt?: numbe
     profit: result === "Win" ? 500 : -500,
     amount: 1000,
     odds: 2,
-  } as BetRecord);
+  }) as BetRecord;
 
 describe("useTiltBlock", () => {
   beforeEach(() => {
@@ -76,7 +83,9 @@ describe("useTiltBlock", () => {
       bet("Win", "2026-07-20", 900),
       bet("Loss", "2026-07-19", 800),
     ];
-    const { result } = renderHook(() => useTiltBlock("user", mkStrategy(3, 60), bets));
+    const { result } = renderHook(() =>
+      useTiltBlock("user", mkStrategy(3, 60), bets),
+    );
     expect(result.current.blocked).toBe(false);
   });
 
@@ -87,7 +96,9 @@ describe("useTiltBlock", () => {
       bet("Loss", "2026-07-19", 800),
       bet("Win", "2026-07-18", 700),
     ];
-    const { result } = renderHook(() => useTiltBlock("user", mkStrategy(3, 60), bets));
+    const { result } = renderHook(() =>
+      useTiltBlock("user", mkStrategy(3, 60), bets),
+    );
     expect(result.current.blocked).toBe(true);
     expect(result.current.reason).toContain("3 поспіль програшів");
     expect(result.current.minutesLeft).toBeGreaterThan(0);
@@ -102,7 +113,9 @@ describe("useTiltBlock", () => {
       bet("Loss", "2026-07-18"),
       bet("Loss", "2026-07-17"),
     ];
-    const { result } = renderHook(() => useTiltBlock("user", mkStrategy(5, 30), bets));
+    const { result } = renderHook(() =>
+      useTiltBlock("user", mkStrategy(5, 30), bets),
+    );
     expect(result.current.blocked).toBe(true);
     expect(result.current.minutesLeft).toBeLessThanOrEqual(30);
   });
@@ -113,7 +126,9 @@ describe("useTiltBlock", () => {
       bet("Loss", "2026-07-20", 2000),
       bet("Win", "2026-07-19", 1000),
     ];
-    const { result } = renderHook(() => useTiltBlock("user", mkStrategy(3, 60), bets));
+    const { result } = renderHook(() =>
+      useTiltBlock("user", mkStrategy(3, 60), bets),
+    );
     // Only 2 consecutive losses — should not block at threshold of 3
     expect(result.current.blocked).toBe(false);
   });
@@ -124,7 +139,9 @@ describe("useTiltBlock", () => {
       bet("Loss", "2026-07-20"),
       bet("Loss", "2026-07-19"),
     ];
-    const { result } = renderHook(() => useTiltBlock("user", mkStrategy(3, 15), bets));
+    const { result } = renderHook(() =>
+      useTiltBlock("user", mkStrategy(3, 15), bets),
+    );
     expect(result.current.blocked).toBe(true);
     expect(result.current.minutesLeft).toBeLessThanOrEqual(15);
   });
@@ -134,10 +151,12 @@ describe("useTiltBlock", () => {
     const bets = [
       bet("Loss", "2026-07-19", 1000), // most recent by createdAt
       bet("Loss", "2026-07-18", 900),
-      bet("Win", "2026-07-21", 500),  // Win breaks streak
+      bet("Win", "2026-07-21", 500), // Win breaks streak
       bet("Loss", "2026-07-20", 400),
     ];
-    const { result } = renderHook(() => useTiltBlock("user", mkStrategy(3, 60), bets));
+    const { result } = renderHook(() =>
+      useTiltBlock("user", mkStrategy(3, 60), bets),
+    );
     // Sorted by createdAt descending: Loss(1000), Loss(900), Win(500), Loss(400)
     // → 2 consecutive losses, not blocked
     expect(result.current.blocked).toBe(false);
@@ -150,7 +169,9 @@ describe("useTiltBlock", () => {
       bet("Loss", "2026-07-19"),
       bet("Loss", "2026-07-18"),
     ];
-    const { result } = renderHook(() => useTiltBlock("user", mkStrategy(3, 60), bets));
+    const { result } = renderHook(() =>
+      useTiltBlock("user", mkStrategy(3, 60), bets),
+    );
     // Pending skips, so: Loss(07-21), Loss(07-19), Loss(07-18) = 3 consecutive
     expect(result.current.blocked).toBe(true);
   });
@@ -158,9 +179,15 @@ describe("useTiltBlock", () => {
   it("rollback: expired block → not blocked", () => {
     localStorage.setItem(
       "tilt_block_user_exp",
-      JSON.stringify({ until: Date.now() - 1000, reason: "expired", strategyName: "Test" }),
+      JSON.stringify({
+        until: Date.now() - 1000,
+        reason: "expired",
+        strategyName: "Test",
+      }),
     );
-    const { result } = renderHook(() => useTiltBlock("user_exp", mkStrategy(3, 60), []));
+    const { result } = renderHook(() =>
+      useTiltBlock("user_exp", mkStrategy(3, 60), []),
+    );
     expect(result.current.blocked).toBe(false);
     // localStorage should be cleaned
     expect(localStorage.getItem("tilt_block_user_exp")).toBeNull();

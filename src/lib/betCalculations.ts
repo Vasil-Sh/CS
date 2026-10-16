@@ -4,11 +4,18 @@
  */
 
 /** Calculate total express odds from individual events */
-export function calcTotalExpressOdds(expressEvents: Array<{ odds: string }>): number {
+export function calcTotalExpressOdds(
+  expressEvents: Array<{ odds: string }>,
+): number {
   if (expressEvents.length === 0) return 1;
-  const validEvents = expressEvents.filter(e => e.odds && parseFloat(e.odds) > 0);
+  const validEvents = expressEvents.filter(
+    (e) => e.odds && parseFloat(e.odds) > 0,
+  );
   if (validEvents.length === 0) return 1;
-  return validEvents.reduce((total, event) => total * parseFloat(event.odds), 1);
+  return validEvents.reduce(
+    (total, event) => total * parseFloat(event.odds),
+    1,
+  );
 }
 
 /** Get effective odds — express total or single bet */
@@ -17,7 +24,7 @@ export function getEffectiveOdds(
   expressEvents: Array<{ odds: string }>,
   singleOdds: string,
 ): number {
-  if (betCategory === 'Експрес') {
+  if (betCategory === "Експрес") {
     return calcTotalExpressOdds(expressEvents);
   }
   return parseFloat(singleOdds) || 0;
@@ -33,10 +40,10 @@ export function calcExpectedValue(
   const odds = getEffectiveOdds(betCategory, expressEvents, singleOdds);
   const p = parseFloat(confidence);
   if (odds > 0 && p > 0) {
-    const ev = ((p / 100) * (odds - 1)) - ((1 - p / 100) * 1);
+    const ev = (p / 100) * (odds - 1) - (1 - p / 100) * 1;
     return (ev * 100).toFixed(2);
   }
-  return '0';
+  return "0";
 }
 
 /** Calculate potential profit: (odds - 1) × stake */
@@ -51,7 +58,7 @@ export function calcPotentialProfit(
   if (odds > 0 && s > 0) {
     return ((odds - 1) * s).toFixed(2);
   }
-  return '0';
+  return "0";
 }
 
 /** Bookmaker implied probability */
@@ -81,7 +88,11 @@ export function getValueBetAnalysis(
   confidence: string,
 ): ValueBetAnalysis | null {
   const c = parseFloat(confidence);
-  const bookmakerProb = calcBookmakerProbability(betCategory, expressEvents, singleOdds);
+  const bookmakerProb = calcBookmakerProbability(
+    betCategory,
+    expressEvents,
+    singleOdds,
+  );
   if (!c || !bookmakerProb) return null;
 
   const diff = c - bookmakerProb;
@@ -130,7 +141,7 @@ export interface KellyResult {
   uncappedHalfKellyAmount: number;
   currentBankroll: number;
   maxAllowedAmount: number;
-  riskLevel: 'low' | 'medium' | 'high';
+  riskLevel: "low" | "medium" | "high";
   recommendation: string;
   recommendedAmount: number;
   isNegative: boolean;
@@ -169,32 +180,34 @@ export function calcKellyCriterion(
   const cappedFullKellyAmount = Math.min(fullKellyAmount, maxAllowedAmount);
   const isCapped = halfKellyAmount > maxAllowedAmount;
 
-  const recommendedBankrollPercent = currentBankroll > 0
-    ? ((cappedHalfKellyAmount / currentBankroll) * 100).toFixed(1)
-    : '0';
+  const recommendedBankrollPercent =
+    currentBankroll > 0
+      ? ((cappedHalfKellyAmount / currentBankroll) * 100).toFixed(1)
+      : "0";
 
-  let riskLevel: 'low' | 'medium' | 'high';
+  let riskLevel: "low" | "medium" | "high";
   let recommendation: string;
   let recommendedAmount: number;
 
   if (kellyFraction <= 0) {
-    riskLevel = 'high';
-    recommendation = 'Критерій Келлі не рекомендує цю ставку. Математично невигідно.';
+    riskLevel = "high";
+    recommendation =
+      "Критерій Келлі не рекомендує цю ставку. Математично невигідно.";
     recommendedAmount = 0;
   } else if (isCapped) {
-    riskLevel = 'high';
+    riskLevel = "high";
     recommendation = `Келлі рекомендує ${Math.round(halfKellyAmount)} ₴ (${(halfKelly * 100).toFixed(1)}% банку), але ліміт ${maxStakePercent}% обмежує до ${Math.round(maxAllowedAmount)} ₴`;
     recommendedAmount = Math.round(maxAllowedAmount);
   } else if (fullKelly <= 0.05) {
-    riskLevel = 'low';
+    riskLevel = "low";
     recommendation = `Помірна впевненість → ${Math.round(cappedHalfKellyAmount)} ₴ (${recommendedBankrollPercent}% банку)`;
     recommendedAmount = Math.round(cappedHalfKellyAmount);
   } else if (fullKelly <= 0.15) {
-    riskLevel = 'medium';
+    riskLevel = "medium";
     recommendation = `Висока впевненість → ${Math.round(cappedHalfKellyAmount)} ₴ (${recommendedBankrollPercent}% банку)`;
     recommendedAmount = Math.round(cappedHalfKellyAmount);
   } else {
-    riskLevel = 'high';
+    riskLevel = "high";
     recommendation = `Ризик великий → рекомендовано ${Math.round(cappedHalfKellyAmount)} ₴ (${recommendedBankrollPercent}% банку) замість ${Math.round(cappedFullKellyAmount)} ₴`;
     recommendedAmount = Math.round(cappedHalfKellyAmount);
   }
@@ -218,14 +231,48 @@ export function calcKellyCriterion(
 
 /** Express risk level based on event count */
 export function getExpressRiskLevel(expressEventCount: number) {
-  if (expressEventCount <= 3) return { level: 'moderate' as const, color: 'green', text: 'Помірний ризик', progress: 33 };
-  if (expressEventCount <= 6) return { level: 'elevated' as const, color: 'orange', text: 'Підвищений ризик', progress: 66 };
-  return { level: 'high' as const, color: 'red', text: 'Високий ризик', progress: 100 };
+  if (expressEventCount <= 3)
+    return {
+      level: "moderate" as const,
+      color: "green",
+      text: "Помірний ризик",
+      progress: 33,
+    };
+  if (expressEventCount <= 6)
+    return {
+      level: "elevated" as const,
+      color: "orange",
+      text: "Підвищений ризик",
+      progress: 66,
+    };
+  return {
+    level: "high" as const,
+    color: "red",
+    text: "Високий ризик",
+    progress: 100,
+  };
 }
 
 /** EV verdict emoji/text */
 export function getEVVerdict(ev: number) {
-  if (ev > 5) return { icon: '✅', text: 'Позитивний прогноз', color: 'green', description: 'Математично вигідний прогноз з хорошим потенціалом' };
-  if (ev > 0) return { icon: '⚠️', text: 'Сумнівна ставка', color: 'yellow', description: 'Невелика позитивна вартість, потрібна висока впевненість' };
-  return { icon: '❌', text: 'Негативний прогноз', color: 'red', description: 'Математично невигідний прогноз, високий ризик втрат' };
+  if (ev > 5)
+    return {
+      icon: "✅",
+      text: "Позитивний прогноз",
+      color: "green",
+      description: "Математично вигідний прогноз з хорошим потенціалом",
+    };
+  if (ev > 0)
+    return {
+      icon: "⚠️",
+      text: "Сумнівна ставка",
+      color: "yellow",
+      description: "Невелика позитивна вартість, потрібна висока впевненість",
+    };
+  return {
+    icon: "❌",
+    text: "Негативний прогноз",
+    color: "red",
+    description: "Математично невигідний прогноз, високий ризик втрат",
+  };
 }

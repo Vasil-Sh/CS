@@ -145,7 +145,11 @@ export class UserDataService {
       const lastResetKey = this.getUserKey(username, "last_mybets_reset");
       const lastResetRaw = localStorage.getItem(lastResetKey);
       let lastReset: string | null = null;
-      try { lastReset = lastResetRaw ? JSON.parse(lastResetRaw) : null; } catch { lastReset = lastResetRaw; }
+      try {
+        lastReset = lastResetRaw ? JSON.parse(lastResetRaw) : null;
+      } catch {
+        lastReset = lastResetRaw;
+      }
       const today = new Date().toISOString().split("T")[0];
 
       if (lastReset !== today) {
@@ -239,8 +243,13 @@ export class UserDataService {
 
       // Build dedup fingerprint: match|amount|profit|date — prevents duplicates
       // when local bet IDs differ from API UUIDs (e.g. local_xxx vs real UUID)
-      const fingerprint = (b: { match?: unknown; amount?: unknown; profit?: unknown; date?: unknown }) =>
-        `${String(b.match || '').trim()}|${parseFloat(String(b.amount || 0)).toFixed(2)}|${parseFloat(String(b.profit || 0)).toFixed(2)}|${String(b.date || '').substring(0, 10)}`;
+      const fingerprint = (b: {
+        match?: unknown;
+        amount?: unknown;
+        profit?: unknown;
+        date?: unknown;
+      }) =>
+        `${String(b.match || "").trim()}|${parseFloat(String(b.amount || 0)).toFixed(2)}|${parseFloat(String(b.profit || 0)).toFixed(2)}|${String(b.date || "").substring(0, 10)}`;
       const localFingerprints = new Set(localBets.map(fingerprint));
 
       if (localBets.length > 0) {
@@ -253,7 +262,7 @@ export class UserDataService {
               local.createdAt = apiBet.createdAt;
             }
             // Keep local non-Pending result if newer; otherwise use API data
-            if (local.result && local.result !== 'Pending') {
+            if (local.result && local.result !== "Pending") {
               apiBet.result = local.result;
               apiBet.profit = local.profit;
               apiBet.roi = local.roi;

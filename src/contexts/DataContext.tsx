@@ -29,7 +29,13 @@ interface DataContextType {
   refresh: () => Promise<void>;
   /** Update bets optimistically (then sync to API in background) */
   addBet: (bet: Bet) => void;
-  updateBetResult: (betId: string, result: "Win" | "Loss", profit: number, roi: number, notes?: string) => void;
+  updateBetResult: (
+    betId: string,
+    result: "Win" | "Loss",
+    profit: number,
+    roi: number,
+    notes?: string,
+  ) => void;
   deleteBet: (betId: string) => void;
 }
 
@@ -50,9 +56,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const recalcBankroll = useCallback(
     (currentBets: Bet[]) => {
       try {
-        setBankroll(BankrollService.getBankrollStatsDual(currentUser, currentBets));
+        setBankroll(
+          BankrollService.getBankrollStatsDual(currentUser, currentBets),
+        );
       } catch (e) {
-        console.warn('[DataContext] Bankroll recalc failed:', e);
+        console.warn("[DataContext] Bankroll recalc failed:", e);
       }
     },
     [currentUser],
@@ -69,7 +77,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
       // Backfill: push localStorage-only bets (not yet on server) to the API
       try {
-        const localBets = UserDataService.getUserData<Bet[]>(currentUser, "mybets_data", []);
+        const localBets = UserDataService.getUserData<Bet[]>(
+          currentUser,
+          "mybets_data",
+          [],
+        );
         type RawBetRow = {
           id?: number | string;
           match?: unknown;
@@ -78,7 +90,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           date?: unknown;
         };
         const betFingerprint = (b: RawBetRow) =>
-          `${String(b.match || '').trim()}|${parseFloat(String(b.amount || 0)).toFixed(2)}|${parseFloat(String(b.profit || 0)).toFixed(2)}|${String(b.date || '').substring(0, 10)}`;
+          `${String(b.match || "").trim()}|${parseFloat(String(b.amount || 0)).toFixed(2)}|${parseFloat(String(b.profit || 0)).toFixed(2)}|${String(b.date || "").substring(0, 10)}`;
         const rawApiBets = await api
           .get<{ data?: RawBetRow[] } | RawBetRow[]>("/bets")
           .catch(() => [] as RawBetRow[]);
@@ -111,14 +123,24 @@ export function DataProvider({ children }: { children: ReactNode }) {
           }
           // Normalize riskyTeams: if array of objects → array of names
           const riskyTeams = Array.isArray(lb.riskyTeams)
-            ? (lb.riskyTeams as Array<string | { name?: string }>)
-                .map((t) => (typeof t === "string" ? t : t?.name || ""))
+            ? (lb.riskyTeams as Array<string | { name?: string }>).map((t) =>
+                typeof t === "string" ? t : t?.name || "",
+              )
             : [];
-          const cleanBet: Bet = { ...lb, id: undefined, createdAt: undefined, riskyTeams };
+          const cleanBet: Bet = {
+            ...lb,
+            id: undefined,
+            createdAt: undefined,
+            riskyTeams,
+          };
           backfillQueue.push(() =>
             api.post<void>("/bets", cleanBet).catch((e) => {
-              console.warn("[DataContext] Backfill failed for bet:", betId, (e as Error).message);
-            })
+              console.warn(
+                "[DataContext] Backfill failed for bet:",
+                betId,
+                (e as Error).message,
+              );
+            }),
           );
           // Keep the bet in localStorage (it's unique)
           cleanedBets.push(lb);
@@ -132,15 +154,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
             await backfillQueue[i]();
           }
         };
-        await Promise.all(Array.from({ length: Math.min(CONCURRENCY, backfillQueue.length) }, () => worker()));
+        await Promise.all(
+          Array.from(
+            { length: Math.min(CONCURRENCY, backfillQueue.length) },
+            () => worker(),
+          ),
+        );
         // Persist cleaned list (removes already-synced duplicates)
         if (cleaned) {
-          UserDataService.setUserDataSync(currentUser, "mybets_data", cleanedBets);
+          UserDataService.setUserDataSync(
+            currentUser,
+            "mybets_data",
+            cleanedBets,
+          );
         }
-      } catch { /* backfill is best-effort */ }
+      } catch {
+        /* backfill is best-effort */
+      }
     } catch {
       // Fallback to localStorage
-      const localBets = UserDataService.getUserData<Bet[]>(currentUser, "mybets_data", []);
+      const localBets = UserDataService.getUserData<Bet[]>(
+        currentUser,
+        "mybets_data",
+        [],
+      );
       setBets(localBets);
       recalcBankroll(localBets);
     } finally {
@@ -152,10 +189,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (currentUser) {
       refresh().catch((e) => {
-        console.error('[DataContext] Initial refresh failed:', e);
+        console.error("[DataContext] Initial refresh failed:", e);
         // Fallback to localStorage on any error
         try {
-          const localBets = UserDataService.getUserData<Bet[]>(currentUser, "mybets_data", []);
+          const localBets = UserDataService.getUserData<Bet[]>(
+            currentUser,
+            "mybets_data",
+            [],
+          );
           setBets(localBets);
           recalcBankroll(localBets);
         } catch {
@@ -174,24 +215,40 @@ export function DataProvider({ children }: { children: ReactNode }) {
       recalcBankroll(allBets);
       UserDataService.setUserDataSync(currentUser, "mybets_data", allBets);
       // Sync to backend (fire-and-forget)
-      api.post("/bets", bet).catch((e) => console.warn("[DataContext] Failed to sync bet to server:", e));
+      api
+        .post("/bets", bet)
+        .catch((e) =>
+          console.warn("[DataContext] Failed to sync bet to server:", e),
+        );
     },
     [bets, currentUser, recalcBankroll],
   );
 
   /** Update bet result + sync to backend */
   const updateBetResult = useCallback(
-    (betId: string, result: "Win" | "Loss", profit: number, roi: number, notes?: string) => {
+    (
+      betId: string,
+      result: "Win" | "Loss",
+      profit: number,
+      roi: number,
+      notes?: string,
+    ) => {
       setBets((prev) => {
         const updated = prev.map((b) =>
-          String(b.id) === betId ? { ...b, result, profit, roi, notes: notes || b.notes } : b,
+          String(b.id) === betId
+            ? { ...b, result, profit, roi, notes: notes || b.notes }
+            : b,
         );
         recalcBankroll(updated);
         UserDataService.setUserDataSync(currentUser, "mybets_data", updated);
         return updated;
       });
       // Sync to backend (fire-and-forget)
-      api.put(`/bets/${betId}`, { result, profit, roi, notes }).catch((e) => console.warn("[DataContext] Failed to sync bet result to server:", e));
+      api
+        .put(`/bets/${betId}`, { result, profit, roi, notes })
+        .catch((e) =>
+          console.warn("[DataContext] Failed to sync bet result to server:", e),
+        );
     },
     [currentUser, recalcBankroll],
   );
@@ -206,20 +263,33 @@ export function DataProvider({ children }: { children: ReactNode }) {
         return updated;
       });
       // Sync to backend (fire-and-forget)
-      api.delete(`/bets/${betId}`).catch((e) => console.warn("[DataContext] Failed to sync bet deletion to server:", e));
+      api
+        .delete(`/bets/${betId}`)
+        .catch((e) =>
+          console.warn(
+            "[DataContext] Failed to sync bet deletion to server:",
+            e,
+          ),
+        );
     },
     [currentUser, recalcBankroll],
   );
 
   const ctxValue = useMemo(
-    () => ({ bets, bankroll, isLoading, refresh, addBet, updateBetResult, deleteBet }),
+    () => ({
+      bets,
+      bankroll,
+      isLoading,
+      refresh,
+      addBet,
+      updateBetResult,
+      deleteBet,
+    }),
     [bets, bankroll, isLoading, refresh, addBet, updateBetResult, deleteBet],
   );
 
   return (
-    <DataContext.Provider value={ctxValue}>
-      {children}
-    </DataContext.Provider>
+    <DataContext.Provider value={ctxValue}>{children}</DataContext.Provider>
   );
 }
 

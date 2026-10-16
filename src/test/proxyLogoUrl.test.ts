@@ -166,7 +166,10 @@ function stringHash(s: string): number {
 function csTipsGgToApiMatch(m: Record<string, unknown>): BaseApiMatch {
   const link = String(m.link || "");
   const parts = link.replace(/\/$/, "").split("/").filter(Boolean);
-  const csSlug = parts.length >= 2 ? parts[parts.length - 2] : parts.pop() || String(m.id || "");
+  const csSlug =
+    parts.length >= 2
+      ? parts[parts.length - 2]
+      : parts.pop() || String(m.id || "");
 
   return {
     id: stringHash(String(m.id || m.link || "")),
@@ -202,7 +205,8 @@ describe("tipsGgToApiMatch — logo proxying end-to-end", () => {
       link: "/matches/cs2/23-07-2026/aurora-vs-fokus/",
       nameTeam1: "Aurora Gaming",
       nameTeam2: "FOKUS",
-      logoTeam1: "https://files.tips.gg/static/image/teams/aurora-gaming-csgo.png",
+      logoTeam1:
+        "https://files.tips.gg/static/image/teams/aurora-gaming-csgo.png",
       logoTeam2: "https://files.tips.gg/static/image/teams/fokus-csgo.png",
       tournament: "BLAST Bounty",
       pred1: 80,
@@ -216,9 +220,7 @@ describe("tipsGgToApiMatch — logo proxying end-to-end", () => {
     expect(result.logoTeam1).toBe(
       "/api/v1/cs2-matches/logo/aurora-gaming-csgo.png",
     );
-    expect(result.logoTeam2).toBe(
-      "/api/v1/cs2-matches/logo/fokus-csgo.png",
-    );
+    expect(result.logoTeam2).toBe("/api/v1/cs2-matches/logo/fokus-csgo.png");
     // CRITICAL: no "teams/" in the path
     expect(result.logoTeam1).not.toContain("teams/");
     expect(result.logoTeam2).not.toContain("teams/");
