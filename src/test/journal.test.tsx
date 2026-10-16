@@ -280,13 +280,37 @@ describe("full-width journal", () => {
     const details = screen.getByRole("region", { name: "Деталі запису" });
     expect(within(details).getByText("Обережна стратегія")).toBeVisible();
     expect(within(details).getByText(/Перевірити склад/)).toBeVisible();
+    // Tournament and match link are hidden for ordinal records.
+    expect(
+      within(details).queryByRole("link", { name: /Відкрити матч/ }),
+    ).not.toBeInTheDocument();
+  });
+  it("shows tournament and match link only for express records", () => {
+    mount({
+      ...props(),
+      bets: [
+        {
+          ...express,
+          tournament: "ESL Pro League Season 24 — Group Stage",
+          matchUrl: "https://tips.gg/matches/example",
+        },
+      ],
+    });
+    openDetails(express.match);
+    const details = screen.getByRole("region", { name: "Події експресу" });
+    expect(
+      within(details).getByText("ESL Pro League Season 24 — Group Stage"),
+    ).toBeVisible();
     expect(
       within(details).getByRole("link", { name: /Відкрити матч/ }),
     ).toHaveAttribute("rel", "noopener noreferrer");
   });
   it("does not render unsafe match URLs", () => {
-    mount({ ...props(), bets: [{ ...bet, matchUrl: "javascript:alert(1)" }] });
-    openDetails(bet.match);
+    mount({
+      ...props(),
+      bets: [{ ...express, matchUrl: "javascript:alert(1)" }],
+    });
+    openDetails(express.match);
     expect(
       screen.queryByRole("link", { name: /Відкрити матч/ }),
     ).not.toBeInTheDocument();

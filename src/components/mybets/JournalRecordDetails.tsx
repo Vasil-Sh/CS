@@ -38,7 +38,11 @@ export default function JournalRecordDetails({
     : [];
   const url = matchLink(bet.matchUrl);
   const hasMetadata =
-    bet.strategy || bet.tournament || bet.notes || url || hiddenGoal;
+    bet.strategy ||
+    (express && bet.tournament) ||
+    bet.notes ||
+    (express && url) ||
+    hiddenGoal;
 
   return (
     <section
@@ -126,7 +130,7 @@ export default function JournalRecordDetails({
                 <dd>{bet.strategy}</dd>
               </div>
             )}
-            {bet.tournament && (
+            {express && bet.tournament && (
               <div>
                 <dt>Турнір</dt>
                 <dd>{bet.tournament}</dd>
@@ -138,7 +142,7 @@ export default function JournalRecordDetails({
                 <dd>{hiddenGoal}</dd>
               </div>
             )}
-            {url && (
+            {express && url && (
               <div>
                 <dt>Посилання</dt>
                 <dd>
