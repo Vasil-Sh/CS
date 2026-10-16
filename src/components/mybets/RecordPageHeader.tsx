@@ -127,7 +127,7 @@ export default function RecordPageHeader({
         value: counts.wins,
         hint: "Успішні записи",
         Icon: Trophy,
-        color: "positive",
+        color: "",
       },
       {
         label: "Програші",
