@@ -20,6 +20,15 @@
   background: #111719 url("/assets/analytics/analytics-hero-dota-analysis.png")
     center/cover no-repeat;
 }
+.analytics-header[data-tab="profit"]::before {
+  background-image: url("/assets/analytics/analytics-hero-profit-coins.png");
+}
+.analytics-header[data-tab="odds"]::before {
+  background-image: url("/assets/analytics/analytics-hero-odds-rings.png");
+}
+.analytics-header[data-tab="comparison"]::before {
+  background-image: url("/assets/analytics/analytics-hero-periods-hourglass.png");
+}
 .analytics-header::after {
   content: "";
   position: absolute;

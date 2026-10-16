@@ -441,7 +441,7 @@ export default function Analytics() {
         <AnalyticsSkeleton />
       ) : (
         <>
-          <header className="analytics-header">
+          <header className="analytics-header" data-tab={activeTab}>
             <div className="analytics-header-top">
               <div className="analytics-title-block">
                 <p className="analytics-eyebrow">
