@@ -111,6 +111,26 @@
   background: #ff5b36;
   color: #fff;
 }
+.analytics-segment[aria-label="Валюта"] {
+  padding: 4px;
+  gap: 3px;
+  border-radius: 7px;
+  background: rgba(13, 20, 24, 0.85);
+}
+.analytics-segment[aria-label="Валюта"] button {
+  min-height: 0;
+  padding: 8px 14px;
+  border: 0;
+  border-left: 0;
+  border-radius: 4px;
+  color: #f8f7f3;
+  font-size: 13px;
+  font-weight: 400;
+}
+.analytics-segment[aria-label="Валюта"] button[aria-pressed="true"] {
+  background: #ff592c;
+  color: #171b17;
+}
 .analytics-segment button:focus-visible,
 .analytics-tab:focus-visible {
   outline: 2px solid #ff8e76;
