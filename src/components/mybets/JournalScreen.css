@@ -369,7 +369,7 @@
 }
 @media (max-width: 600px) {
   .journal-header .record-entry-hero {
-    padding: 98px 22px 42px;
+    padding: 48px 22px 44px;
     background-image:
       linear-gradient(90deg, #0b1115ed, #0b1115a6),
       url("/assets/records/journal-records-v2.jpg");

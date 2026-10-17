@@ -28,8 +28,8 @@
   font-family: "Record Inter", Inter, sans-serif;
 }
 .record-entry-hero {
-  min-height: clamp(300px, 25vw, 390px);
-  padding: 80px 4% 72px;
+  min-height: clamp(180px, 15vw, 234px);
+  padding: 48px 4% 44px;
   background: #0c1417 url("/assets/records/record-entry-hero.png") center 48% /
     cover no-repeat;
   position: relative;
@@ -880,8 +880,8 @@
 }
 @media (max-width: 760px) {
   .record-entry-hero {
-    padding: 80px 24px 52px;
-    min-height: 260px;
+    padding: 48px 24px 44px;
+    min-height: 160px;
     background-position: 60% center;
   }
   .record-entry-intro {
