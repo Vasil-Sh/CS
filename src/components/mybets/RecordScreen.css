@@ -28,8 +28,8 @@
   font-family: "Record Inter", Inter, sans-serif;
 }
 .record-entry-hero {
-  min-height: 265px;
-  padding: 64px 4% 56px;
+  min-height: clamp(300px, 25vw, 390px);
+  padding: 80px 4% 72px;
   background: #0c1417 url("/assets/records/record-entry-hero.png") center 48% /
     cover no-repeat;
   position: relative;
@@ -38,6 +38,66 @@
 .record-entry-intro {
   position: relative;
   max-width: 62%;
+}
+/* Entry artwork is independent of the journal. Auto width keeps the plaques
+   proportional; the dark overlay protects the title at narrower widths. */
+.record-entry-header:not(.journal-header) .record-entry-hero {
+  isolation: isolate;
+  overflow: hidden;
+  background-color: #0c1417;
+  background-image:
+    linear-gradient(90deg, #0c1417 0%, #0c1417cc 28%, #0c141700 62%),
+    url("/assets/records/record-entry-games-v2.png");
+  background-size:
+    100% 100%,
+    auto 120%;
+  background-position:
+    center,
+    right center;
+  background-repeat: no-repeat;
+}
+/* Details sit above the dark wash, so the left side stays textured.
+   This decorative layer does not alter or stretch the game plaques. */
+.record-entry-header:not(.journal-header) .record-entry-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 18% 0 0;
+  z-index: 0;
+  pointer-events: none;
+  background: url("/assets/records/record-entry-detail.svg") left center / cover
+    no-repeat;
+}
+.record-entry-header:not(.journal-header) .record-entry-intro,
+.record-entry-header:not(.journal-header) .record-entry-hero .record-currency {
+  z-index: 1;
+}
+@media (max-width: 1000px) {
+  .record-entry-header:not(.journal-header) .record-entry-hero {
+    background-image:
+      linear-gradient(90deg, #0c1417f2 0%, #0c1417bd 46%, #0c141740 100%),
+      url("/assets/records/record-entry-games-v2.png");
+    background-size:
+      100% 100%,
+      auto 105%;
+  }
+}
+@media (max-width: 760px) {
+  .record-entry-header:not(.journal-header) .record-entry-hero::before {
+    right: 0;
+    opacity: 0.6;
+    background-size: auto 100%;
+  }
+  .record-entry-header:not(.journal-header) .record-entry-hero {
+    background-image:
+      linear-gradient(90deg, #0c1417ed, #0c141799),
+      url("/assets/records/record-entry-games-v2.png");
+    background-size:
+      100% 100%,
+      auto 100%;
+    background-position:
+      center,
+      right center;
+  }
 }
 .record-entry-eyebrow {
   display: flex;
