@@ -29,7 +29,7 @@
 }
 .record-entry-hero {
   min-height: clamp(180px, 15vw, 234px);
-  padding: 48px 4% 44px;
+  padding: 48px 4% 72px;
   background: #0c1417 url("/assets/records/record-entry-hero.png") center 48% /
     cover no-repeat;
   position: relative;
