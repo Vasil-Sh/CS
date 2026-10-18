@@ -113,7 +113,6 @@ function RiskBadge({ status }: { status: string }) {
   );
 }
 
-
 const percentLabel = (value: number) =>
   `${new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 1 }).format(value)}%`;
 
@@ -185,13 +184,22 @@ export default function MatchSchedule({
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [expressMode, setExpressMode] = useState(false);
   const [density, setDensity] = useState<"compact" | "comfortable">(() => {
-    try { return localStorage.getItem("matchiq.schedule.density") === "comfortable" ? "comfortable" : "compact"; }
-    catch { return "compact"; }
+    try {
+      return localStorage.getItem("matchiq.schedule.density") === "comfortable"
+        ? "comfortable"
+        : "compact";
+    } catch {
+      return "compact";
+    }
   });
   const [visibleLimit, setVisibleLimit] = useState(20);
   function changeDensity(value: "compact" | "comfortable") {
     setDensity(value);
-    try { localStorage.setItem("matchiq.schedule.density", value); } catch { /* Storage may be disabled. */ }
+    try {
+      localStorage.setItem("matchiq.schedule.density", value);
+    } catch {
+      /* Storage may be disabled. */
+    }
   }
   const regionId = useId();
 
@@ -210,14 +218,30 @@ export default function MatchSchedule({
     [matches, getTeamRiskInfo],
   );
   const hasNotes = (match: Match) => !!risks.get(match.id)?.some(Boolean);
-  const recordedIds = useMemo(() => new Set(matches.filter((match) => hasJournalRecord(match, journalBets)).map((match) => match.id)), [matches, journalBets]);
-  const visible = filterSchedule(m.matches, filters, m.matchRatings, hasNotes, (match) => recordedIds.has(match.id));
+  const recordedIds = useMemo(
+    () =>
+      new Set(
+        matches
+          .filter((match) => hasJournalRecord(match, journalBets))
+          .map((match) => match.id),
+      ),
+    [matches, journalBets],
+  );
+  const visible = filterSchedule(
+    m.matches,
+    filters,
+    m.matchRatings,
+    hasNotes,
+    (match) => recordedIds.has(match.id),
+  );
   const allSections = sectionSchedule(visible, today);
   let remaining = visibleLimit;
   const sections = allSections.flatMap((section) => {
     const entries = section.matches.slice(0, remaining);
     remaining = Math.max(0, remaining - entries.length);
-    return entries.length ? [{ ...section, matches: entries, total: section.matches.length }] : [];
+    return entries.length
+      ? [{ ...section, matches: entries, total: section.matches.length }]
+      : [];
   });
   // One slot at an existing section boundary, never interrupt a match or invent an empty group.
   const adAfterSection =
@@ -446,15 +470,52 @@ export default function MatchSchedule({
           </section>
         </div>
         <div className="msc-detail-tools">
-          <div className="msc-detail-forecast"><SourceForecast match={match} /><small>Прогноз джерела, не гарантія результату.</small></div>
-          <a className="ms-button" href={matchSource(match)} target="_blank" rel="noopener noreferrer" aria-label={`Гра: ${match.team1} — ${match.team2}`}><ExternalLink size={16} /> Джерело матчу</a>
-          <button type="button" className="ms-button" aria-pressed={m.matchRatings[match.id] === "dislike"}
-            onClick={() => m.handleRateMatch(match.id, m.matchRatings[match.id] === "dislike" ? null : "dislike")}><ThumbsDown size={16} /> Не цікавить</button>
-          <button type="button" className="ms-button" aria-pressed={m.selectedMatchIds.has(match.id)}
+          <div className="msc-detail-forecast">
+            <SourceForecast match={match} />
+            <small>Прогноз джерела, не гарантія результату.</small>
+          </div>
+          <a
+            className="ms-button"
+            href={matchSource(match)}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Гра: ${match.team1} — ${match.team2}`}
+          >
+            <ExternalLink size={16} /> Джерело матчу
+          </a>
+          <button
+            type="button"
+            className="ms-button"
+            aria-pressed={m.matchRatings[match.id] === "dislike"}
+            onClick={() =>
+              m.handleRateMatch(
+                match.id,
+                m.matchRatings[match.id] === "dislike" ? null : "dislike",
+              )
+            }
+          >
+            <ThumbsDown size={16} /> Не цікавить
+          </button>
+          <button
+            type="button"
+            className="ms-button"
+            aria-pressed={m.selectedMatchIds.has(match.id)}
             aria-label={`${m.selectedMatchIds.has(match.id) ? "Прибрати матч з експресу" : "Додати матч до експресу"}: ${match.team1} — ${match.team2}`}
-            onClick={() => m.toggleMatchSelection(match.id)}><Layers size={16} /> {m.selectedMatchIds.has(match.id) ? "Прибрати з експресу" : "До експресу"}</button>
-          <button type="button" className="ms-button ms-primary" aria-label={`Створити запис: ${match.team1} — ${match.team2}`}
-            onClick={() => m.handleAddToBets(match)}><CirclePlus size={16} /> Додати запис</button>
+            onClick={() => m.toggleMatchSelection(match.id)}
+          >
+            <Layers size={16} />{" "}
+            {m.selectedMatchIds.has(match.id)
+              ? "Прибрати з експресу"
+              : "До експресу"}
+          </button>
+          <button
+            type="button"
+            className="ms-button ms-primary"
+            aria-label={`Створити запис: ${match.team1} — ${match.team2}`}
+            onClick={() => m.handleAddToBets(match)}
+          >
+            <CirclePlus size={16} /> Додати запис
+          </button>
         </div>
       </div>
     );
@@ -465,69 +526,138 @@ export default function MatchSchedule({
     const open = activeId === match.id;
     const liked = m.matchRatings[match.id] === "like";
     const selectedForExpress = m.selectedMatchIds.has(match.id);
-    const live = match.matchStatus === "live" && scheduleDate(match.date) >= today;
-    const hasScore = (live || match.matchStatus === "finished") &&
-      [match.score1, match.score2].every((value) => typeof value === "number" && Number.isFinite(value) && value >= 0);
+    const live =
+      match.matchStatus === "live" && scheduleDate(match.date) >= today;
+    const hasScore =
+      (live || match.matchStatus === "finished") &&
+      [match.score1, match.score2].every(
+        (value) =>
+          typeof value === "number" && Number.isFinite(value) && value >= 0,
+      );
     const teams = [
       { name: match.team1, logo: match.logoTeam1, score: match.score1 },
       { name: match.team2, logo: match.logoTeam2, score: match.score2 },
     ];
     return (
       <Fragment key={match.id}>
-        <div className={`ms-row ${open ? "is-open" : ""} ${selectedForExpress ? "is-selected" : ""}`} data-testid="schedule-row">
+        <div
+          className={`ms-row ${open ? "is-open" : ""} ${selectedForExpress ? "is-selected" : ""}`}
+          data-testid="schedule-row"
+        >
           <div className="msc-time">
-            {expressMode && <input type="checkbox" checked={selectedForExpress}
-              aria-label={`Обрати для експресу: ${match.team1} — ${match.team2}`}
-              onChange={() => m.toggleMatchSelection(match.id)} />}
+            {expressMode && (
+              <input
+                type="checkbox"
+                checked={selectedForExpress}
+                aria-label={`Обрати для експресу: ${match.team1} — ${match.team2}`}
+                onChange={() => m.toggleMatchSelection(match.id)}
+              />
+            )}
             <time dateTime={match.date}>{scheduleTime(match.date)}</time>
             {live && <span className="msc-live">● LIVE</span>}
           </div>
-          <button type="button" className="msc-match"
-            onClick={() => toggleDetails(match.id)} aria-expanded={open}
+          <button
+            type="button"
+            className="msc-match"
+            onClick={() => toggleDetails(match.id)}
+            aria-expanded={open}
             aria-controls={`${regionId}-detail-${match.id}`}
-            aria-label={`Деталі: ${match.team1} — ${match.team2}`}>
+            aria-label={`Деталі: ${match.team1} — ${match.team2}`}
+          >
             {teams.map((team, index) => (
               <span className="msc-team" key={index}>
                 <TeamLogo name={team.name} src={team.logo} game={match.game} />
-                <strong title={team.name}>{team.name || "Команда ще невідома"}</strong>
-                <span className={`msc-score ${live && hasScore ? "is-live" : ""}`}
-                  aria-label={`Рахунок ${team.name}: ${hasScore ? team.score : "немає даних"}`}>
+                <strong title={team.name}>
+                  {team.name || "Команда ще невідома"}
+                </strong>
+                <span
+                  className={`msc-score ${live && hasScore ? "is-live" : ""}`}
+                  aria-label={`Рахунок ${team.name}: ${hasScore ? team.score : "немає даних"}`}
+                >
                   {hasScore ? team.score : "—"}
                 </span>
               </span>
             ))}
           </button>
           <div className="msc-tournament">
-            <img src={match.game === "Dota2" ? "/assets/team-placeholder-dota.svg" : "/assets/team-placeholder-cs2.svg"} alt="" />
-            <div><strong title={match.context}>{match.context || "Турнір не вказаний"}</strong>
-              <small>{match.game === "Dota2" ? "Dota 2" : "CS2"} · {match.matchType.toUpperCase()}</small></div>
+            <img
+              src={
+                match.game === "Dota2"
+                  ? "/assets/team-placeholder-dota.svg"
+                  : "/assets/team-placeholder-cs2.svg"
+              }
+              alt=""
+            />
+            <div>
+              <strong title={match.context}>
+                {match.context || "Турнір не вказаний"}
+              </strong>
+              <small>
+                {match.game === "Dota2" ? "Dota 2" : "CS2"} ·{" "}
+                {match.matchType.toUpperCase()}
+              </small>
+            </div>
           </div>
           <div className="msc-odds" role="group" aria-label="Коефіцієнти">
-            {[match.bettingCoefficientTeam1, match.bettingCoefficientTeam2].map((value, index) =>
-              <span key={index} aria-label={`${teams[index].name}: ${coefficient(value)}`}>{coefficient(value)}</span>)}
+            {[match.bettingCoefficientTeam1, match.bettingCoefficientTeam2].map(
+              (value, index) => (
+                <span
+                  key={index}
+                  aria-label={`${teams[index].name}: ${coefficient(value)}`}
+                >
+                  {coefficient(value)}
+                </span>
+              ),
+            )}
           </div>
           <div className="msc-marks">
-            {rowRisks.length > 0 && <button type="button" className="msc-note"
-              aria-label={`Показати нотатки: ${match.team1} — ${match.team2}`}
-              aria-expanded={open} aria-controls={`${regionId}-detail-${match.id}`}
-              onClick={() => toggleDetails(match.id)}>
-              <FileText size={16} /><span>{rowRisks.length} {rowRisks.length === 1 ? "нотатка" : "нотатки"}</span>
-            </button>}
-            {recordedIds.has(match.id) && onOpenJournal && <button type="button" className="msc-journal"
-              aria-label={`Відкрити журнал: ${match.team1} — ${match.team2}`}
-              onClick={() => onOpenJournal(match)}><FileText size={16} /><span>Є запис</span></button>}
+            {rowRisks.length > 0 && (
+              <button
+                type="button"
+                className="msc-note"
+                aria-label={`Показати нотатки: ${match.team1} — ${match.team2}`}
+                aria-expanded={open}
+                aria-controls={`${regionId}-detail-${match.id}`}
+                onClick={() => toggleDetails(match.id)}
+              >
+                <FileText size={16} />
+                <span>
+                  {rowRisks.length}{" "}
+                  {rowRisks.length === 1 ? "нотатка" : "нотатки"}
+                </span>
+              </button>
+            )}
+            {recordedIds.has(match.id) && onOpenJournal && (
+              <button
+                type="button"
+                className="msc-journal"
+                aria-label={`Відкрити журнал: ${match.team1} — ${match.team2}`}
+                onClick={() => onOpenJournal(match)}
+              >
+                <FileText size={16} />
+                <span>Є запис</span>
+              </button>
+            )}
           </div>
           <div className="msc-row-actions">
-            <button type="button" className={`ms-icon msc-bookmark ${liked ? "is-liked" : ""}`}
-              aria-pressed={liked} title={liked ? "Відкріпити матч" : "Закріпити матч"}
+            <button
+              type="button"
+              className={`ms-icon msc-bookmark ${liked ? "is-liked" : ""}`}
+              aria-pressed={liked}
+              title={liked ? "Відкріпити матч" : "Закріпити матч"}
               aria-label={`${liked ? "Відкріпити" : "Закріпити"} матч: ${match.team1} — ${match.team2}`}
-              onClick={() => m.handleRateMatch(match.id, liked ? null : "like")}>
+              onClick={() => m.handleRateMatch(match.id, liked ? null : "like")}
+            >
               <Bookmark size={19} fill={liked ? "currentColor" : "none"} />
             </button>
-            <button type="button" className="ms-icon ms-disclosure"
-              onClick={() => toggleDetails(match.id)} aria-expanded={open}
+            <button
+              type="button"
+              className="ms-icon ms-disclosure"
+              onClick={() => toggleDetails(match.id)}
+              aria-expanded={open}
               aria-controls={`${regionId}-detail-${match.id}`}
-              aria-label={`${open ? "Згорнути" : "Розгорнути"} матч: ${match.team1} — ${match.team2}`}>
+              aria-label={`${open ? "Згорнути" : "Розгорнути"} матч: ${match.team1} — ${match.team2}`}
+            >
               <ChevronDown size={17} className={open ? "ms-rotate" : ""} />
             </button>
           </div>
@@ -573,9 +703,7 @@ export default function MatchSchedule({
           </h4>
         )}
         {(!isCollapsed || mode === "time") && (
-          <div id={id}>
-            {group.matches.map(renderMatch)}
-          </div>
+          <div id={id}>{group.matches.map(renderMatch)}</div>
         )}
       </div>
     );
@@ -634,12 +762,29 @@ export default function MatchSchedule({
           </div>
         </dl>
       </header>
-      <div className={`ms-body ms-body--dense ms-body--sectioned msc-schedule msc-schedule--${density}`}>
+      <div
+        className={`ms-body ms-body--dense ms-body--sectioned msc-schedule msc-schedule--${density}`}
+      >
         <div className="ms-dense-tools">
           <h2 className="ms-dense-title">Розклад матчів</h2>
-          <div className="ms-segment msc-density" aria-label="Щільність розкладу">
-            <button type="button" aria-pressed={density === "comfortable"} onClick={() => changeDensity("comfortable")}>Звичайний</button>
-            <button type="button" aria-pressed={density === "compact"} onClick={() => changeDensity("compact")}>Компактний</button>
+          <div
+            className="ms-segment msc-density"
+            aria-label="Щільність розкладу"
+          >
+            <button
+              type="button"
+              aria-pressed={density === "comfortable"}
+              onClick={() => changeDensity("comfortable")}
+            >
+              Звичайний
+            </button>
+            <button
+              type="button"
+              aria-pressed={density === "compact"}
+              onClick={() => changeDensity("compact")}
+            >
+              Компактний
+            </button>
           </div>
           <div className="ms-date-tools">
             <div className="ms-segment" aria-label="Швидкий вибір дати">
@@ -746,10 +891,28 @@ export default function MatchSchedule({
             <span className="msc-timezone">Час за Києвом</span>
           </div>
           <div className="ms-segment msc-personal" aria-label="Ваші позначки">
-            {([ ["all", "Усі матчі"], ["liked", "Закріплені"], ["notes", "З нотатками"], ["records", "Є запис"] ] as const).map(([value, label]) =>
-              <button key={value} type="button" aria-pressed={filters.personal === value} onClick={() => changeFilters({ personal: value })}>
-                {value === "liked" ? <Star size={15} /> : value !== "all" ? <FileText size={15} /> : null}{label}
-              </button>)}
+            {(
+              [
+                ["all", "Усі матчі"],
+                ["liked", "Закріплені"],
+                ["notes", "З нотатками"],
+                ["records", "Є запис"],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={filters.personal === value}
+                onClick={() => changeFilters({ personal: value })}
+              >
+                {value === "liked" ? (
+                  <Star size={15} />
+                ) : value !== "all" ? (
+                  <FileText size={15} />
+                ) : null}
+                {label}
+              </button>
+            ))}
           </div>
         </div>
         {filtersOpen && (
@@ -915,7 +1078,12 @@ export default function MatchSchedule({
         ) : (
           <>
             <div className="ms-columns msc-columns" aria-hidden="true">
-              <span>Час</span><span>Матч</span><span>Турнір</span><span>Коеф.</span><span>Ваші позначки</span><span />
+              <span>Час</span>
+              <span>Матч</span>
+              <span>Турнір</span>
+              <span>Коеф.</span>
+              <span>Ваші позначки</span>
+              <span />
             </div>
             {sections.map((section) => (
               <Fragment key={section.key}>
@@ -953,8 +1121,19 @@ export default function MatchSchedule({
           </>
         )}
         <footer className="ms-footer">
-          <span><Info size={15} /> Показано {Math.min(visibleLimit, visible.length)} із {matchCount(visible.length)}</span>
-          {visible.length > visibleLimit && <button type="button" className="ms-button msc-more" onClick={() => setVisibleLimit((limit) => limit + 20)}>Показати ще <ChevronDown size={16} /></button>}
+          <span>
+            <Info size={15} /> Показано {Math.min(visibleLimit, visible.length)}{" "}
+            із {matchCount(visible.length)}
+          </span>
+          {visible.length > visibleLimit && (
+            <button
+              type="button"
+              className="ms-button msc-more"
+              onClick={() => setVisibleLimit((limit) => limit + 20)}
+            >
+              Показати ще <ChevronDown size={16} />
+            </button>
+          )}
           <button
             type="button"
             className="ms-bulk-express"

@@ -10,7 +10,7 @@ import PastDaysModal from "@/components/matches/PastDaysModal";
 import MatchSchedule from "@/components/matches/MatchSchedule";
 import type { ScheduleAdCampaign } from "@/components/matches/ScheduleAdvertisement";
 import { fetchActiveBanner } from "@/lib/bannerApi";
-import { useMatches, type Match } from "@/hooks/useMatches";
+import { useMatches } from "@/hooks/useMatches";
 
 export type { Match } from "@/hooks/useMatches";
 
@@ -41,8 +41,12 @@ export default function Matches() {
         <MatchSchedule
           model={m}
           journalBets={bets}
-          onOpenJournal={(match) => navigate(`/app/my-bets?tab=records&q=${encodeURIComponent(match.team1)}`)}
-          advertising={{ campaign: banner, preview: import.meta.env.DEV }}
+          onOpenJournal={(match) =>
+            navigate(
+              `/app/my-bets?tab=records&q=${encodeURIComponent(match.team1)}`,
+            )
+          }
+          advertising={{ campaign: banner }}
           onResults={() => m.setPastDaysModalOpen(true)}
           onEditNote={(match, team) => {
             setNoteTeam(team);

@@ -9,9 +9,12 @@
 .ms-page--compact-schedule strong,
 .ms-page--compact-schedule h1,
 .ms-page--compact-schedule h2,
-.ms-page--compact-schedule h3 { font-family: Inter, Arial, sans-serif; }
+.ms-page--compact-schedule h3 {
+  font-family: Inter, Arial, sans-serif;
+}
 .ms-page--compact-schedule .msc-schedule {
-  --msc-columns: 108px minmax(220px, 2.4fr) minmax(160px, 1.35fr) 96px 140px 76px;
+  --msc-columns: 108px minmax(220px, 2.4fr) minmax(160px, 1.35fr) 96px 140px
+    76px;
   --msc-row-height: 48px;
   --msc-cell-padding: 4px 12px;
   margin: 16px;
@@ -31,130 +34,519 @@
   gap: 10px 16px;
   margin-bottom: 12px;
 }
-.ms-page--compact-schedule .ms-dense-title { grid-area: 1 / 1; font-size: 26px; line-height: 1.2; white-space: normal; }
-.ms-page--compact-schedule .msc-density { grid-area: 1 / 2; justify-self: end; }
-.ms-page--compact-schedule .ms-date-tools { grid-area: 2 / 1; gap: 8px; margin: 0; }
-.ms-page--compact-schedule .ms-search-tools { grid-area: 2 / 2; min-width: 320px; gap: 8px; }
-.ms-page--compact-schedule .ms-search { max-width: none; min-width: 140px; }
-.ms-page--compact-schedule .msc-personal { grid-area: 3 / 1; flex-wrap: wrap; }
-.ms-page--compact-schedule .ms-grouping { grid-area: 3 / 2; justify-self: end; align-items: center; flex-wrap: wrap; }
-.ms-page--compact-schedule .msc-timezone { font-size: 12px; color: var(--ms-muted); margin-left: 10px; white-space: nowrap; }
-.ms-page--compact-schedule .ms-segment { overflow: visible; border: 0; gap: 5px; background: transparent; }
+.ms-page--compact-schedule .ms-dense-title {
+  grid-area: 1 / 1;
+  font-size: 26px;
+  line-height: 1.2;
+  white-space: normal;
+}
+.ms-page--compact-schedule .msc-density {
+  grid-area: 1 / 2;
+  justify-self: end;
+}
+.ms-page--compact-schedule .ms-date-tools {
+  grid-area: 2 / 1;
+  gap: 8px;
+  margin: 0;
+}
+.ms-page--compact-schedule .ms-search-tools {
+  grid-area: 2 / 2;
+  min-width: 320px;
+  gap: 8px;
+}
+.ms-page--compact-schedule .ms-search {
+  max-width: none;
+  min-width: 140px;
+}
+.ms-page--compact-schedule .msc-personal {
+  grid-area: 3 / 1;
+  flex-wrap: wrap;
+}
+.ms-page--compact-schedule .ms-grouping {
+  grid-area: 3 / 2;
+  justify-self: end;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.ms-page--compact-schedule .msc-timezone {
+  font-size: 12px;
+  color: var(--ms-muted);
+  margin-left: 10px;
+  white-space: nowrap;
+}
+.ms-page--compact-schedule .ms-segment {
+  overflow: visible;
+  border: 0;
+  gap: 5px;
+  background: transparent;
+}
 .ms-page--compact-schedule .ms-segment button,
 .ms-page--compact-schedule .ms-search-tools .ms-button,
 .ms-page--compact-schedule .ms-date-input {
-  min-height: 34px; padding: 6px 11px; border: 1px solid #dce4ef; border-radius: 5px;
-  color: #17243e; background: #fff; font-size: 13px; font-weight: 500;
+  min-height: 34px;
+  padding: 6px 11px;
+  border: 1px solid #dce4ef;
+  border-radius: 5px;
+  color: #17243e;
+  background: #fff;
+  font-size: 13px;
+  font-weight: 500;
 }
-.ms-page--compact-schedule .ms-segment button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
-.ms-page--compact-schedule .ms-segment button[aria-pressed="true"] { background: #1a303a; border-color: #1a303a; color: white; }
-.ms-page--compact-schedule .ms-search { border-color: #dce4ef; border-radius: 5px; }
-.ms-page--compact-schedule .ms-search input { height: 32px; font-size: 13px; }
-.ms-page--compact-schedule .ms-game-filter { margin-left: 4px; }
-.ms-page--compact-schedule .ms-game-count { display: none; }
-.ms-page--compact-schedule .ms-filter-panel { margin: 0 0 12px; }
+.ms-page--compact-schedule .ms-segment button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.ms-page--compact-schedule .ms-segment button[aria-pressed="true"] {
+  background: #1a303a;
+  border-color: #1a303a;
+  color: white;
+}
+.ms-page--compact-schedule .ms-search {
+  border-color: #dce4ef;
+  border-radius: 5px;
+}
+.ms-page--compact-schedule .ms-search input {
+  height: 32px;
+  font-size: 13px;
+}
+.ms-page--compact-schedule .ms-game-filter {
+  margin-left: 4px;
+}
+.ms-page--compact-schedule .ms-game-count {
+  display: none;
+}
+.ms-page--compact-schedule .ms-filter-panel {
+  margin: 0 0 12px;
+}
 .ms-page--compact-schedule .ms-row,
 .ms-page--compact-schedule .msc-columns {
-  display: grid; grid-template-columns: var(--msc-columns); gap: 0; padding: 0;
-  border: 0; border-bottom: 1px solid var(--ms-line); align-items: stretch;
+  display: grid;
+  grid-template-columns: var(--msc-columns);
+  gap: 0;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--ms-line);
+  align-items: stretch;
 }
-.ms-page--compact-schedule .msc-columns { min-height: 32px; border: 1px solid var(--ms-line); border-radius: 7px 7px 0 0; background: #f4f7fb; }
+.ms-page--compact-schedule .msc-columns {
+  min-height: 32px;
+  border: 1px solid var(--ms-line);
+  border-radius: 7px 7px 0 0;
+  background: #f4f7fb;
+}
 .ms-page--compact-schedule .msc-columns > span {
-  display: flex; padding: 6px 12px; justify-content: flex-start; font-size: 12px;
-  color: #435371; text-align: left; border: 0; min-width: 0;
+  display: flex;
+  padding: 6px 12px;
+  justify-content: flex-start;
+  font-size: 12px;
+  color: #435371;
+  text-align: left;
+  border: 0;
+  min-width: 0;
 }
-.ms-page--compact-schedule .ms-row { min-height: var(--msc-row-height); background: white; }
+.ms-page--compact-schedule .ms-row {
+  min-height: var(--msc-row-height);
+  background: white;
+}
 .ms-page--compact-schedule .ms-row > * {
-  grid-area: auto; padding: var(--msc-cell-padding); border: 0; min-width: 0;
-  box-shadow: none; align-self: stretch;
+  grid-area: auto;
+  padding: var(--msc-cell-padding);
+  border: 0;
+  min-width: 0;
+  box-shadow: none;
+  align-self: stretch;
 }
-.ms-page--compact-schedule .ms-row > * + * { border-left: 1px solid #edf1f7; }
-.ms-page--compact-schedule .ms-status-section { margin: 0; border-inline: 1px solid var(--ms-line); }
+.ms-page--compact-schedule .ms-row > * + * {
+  border-left: 1px solid #edf1f7;
+}
+.ms-page--compact-schedule .ms-status-section {
+  margin: 0;
+  border-inline: 1px solid var(--ms-line);
+}
 .ms-page--compact-schedule .ms-status-title {
-  display: flex; align-items: center; gap: 7px; min-height: 28px; padding: 4px 12px;
-  margin: 0; background: #f3f6fb; border-bottom: 1px solid var(--ms-line);
-  color: #1c2c49; font-size: 14px; line-height: 20px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 4px 12px;
+  margin: 0;
+  background: #f3f6fb;
+  border-bottom: 1px solid var(--ms-line);
+  color: #1c2c49;
+  font-size: 14px;
+  line-height: 20px;
 }
-.ms-page--compact-schedule .ms-status-section--live .ms-status-title { background: #fff5f6; color: #df2843; }
-.ms-page--compact-schedule .ms-status-count { color: inherit; background: transparent; padding: 0 3px; font-size: 13px; }
+.ms-page--compact-schedule .ms-status-section--live .ms-status-title {
+  background: #fff5f6;
+  color: #df2843;
+}
+.ms-page--compact-schedule .ms-status-count {
+  color: inherit;
+  background: transparent;
+  padding: 0 3px;
+  font-size: 13px;
+}
 .ms-page--compact-schedule .ms-group,
-.ms-page--compact-schedule .ms-group--time { margin: 0; border: 0; border-radius: 0; }
-.ms-page--compact-schedule .ms-group-title { padding: 8px 12px; }
-.ms-page--compact-schedule .ms-group-title strong { font-size: 14px; }
-.ms-page--compact-schedule .msc-time { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px; align-content: center; font-weight: 650; font-variant-numeric: tabular-nums; }
-.ms-page--compact-schedule .msc-time time { font-size: 14px; }
-.ms-page--compact-schedule .msc-live { font-size: 9px; line-height: 16px; background: #ed263e; color: white; border-radius: 3px; padding: 0 4px; white-space: nowrap; }
-.ms-page--compact-schedule .msc-match { display: flex; flex-direction: column; justify-content: center; gap: 1px; background: transparent; text-align: left; color: inherit; width: 100%; }
-.ms-page--compact-schedule .msc-team { display: flex; align-items: center; gap: 9px; min-height: 19px; width: 100%; }
-.ms-page--compact-schedule .msc-team .ms-logo { width: 18px; height: 18px; flex: 0 0 18px; object-fit: contain; }
-.ms-page--compact-schedule .msc-team strong { font-size: 14px; line-height: 19px; font-weight: 600; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.ms-page--compact-schedule .msc-score { margin-left: auto; padding-left: 8px; color: var(--ms-muted); font-size: 13px; line-height: 19px; font-variant-numeric: tabular-nums; }
-.ms-page--compact-schedule .msc-score.is-live { color: #e72840; }
-.ms-page--compact-schedule .msc-tournament { display: flex; align-items: center; gap: 10px; }
-.ms-page--compact-schedule .msc-tournament > img { width: 23px; height: 23px; object-fit: contain; flex-shrink: 0; }
-.ms-page--compact-schedule .msc-tournament > div { min-width: 0; }
-.ms-page--compact-schedule .msc-tournament strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 19px; font-weight: 600; }
-.ms-page--compact-schedule .msc-tournament small { display: block; font-size: 11px; line-height: 19px; color: var(--ms-muted); }
-.ms-page--compact-schedule .msc-odds { display: flex; flex-direction: column; gap: 1px; justify-content: center; text-align: center; font-size: 13px; font-weight: 600; line-height: 19px; font-variant-numeric: tabular-nums; }
-.ms-page--compact-schedule .msc-marks { display: flex; align-items: center; justify-content: flex-start; gap: 3px; flex-wrap: wrap; align-content: center; }
-.ms-page--compact-schedule .msc-marks button { display: inline-flex; align-items: center; gap: 5px; border: 0; background: transparent; color: #24385c; font-size: 12px; min-height: 28px; border-radius: 4px; padding: 2px 4px; white-space: nowrap; }
-.ms-page--compact-schedule .msc-marks .msc-journal { background: #edf5ff; color: #2375ef; }
-.ms-page--compact-schedule .msc-marks button:hover { background: #e6effc; }
-.ms-page--compact-schedule .ms-row > .msc-row-actions { display: flex; align-items: center; justify-content: center; padding: 0; }
-.ms-page--compact-schedule .msc-row-actions .ms-icon { width: 34px; min-width: 30px; height: 34px; color: #31486b; }
-.ms-page--compact-schedule .msc-row-actions .is-liked { color: #ff602d; }
-.ms-page--compact-schedule .ms-row:hover:not(.is-open) { background: #f7faff; }
-.ms-page--compact-schedule .ms-row.is-open { background: #eef5ff; box-shadow: inset 3px 0 #668ebc; }
-.ms-page--compact-schedule .ms-detail-panel { box-shadow: none; border-color: var(--ms-line); }
-.ms-page--compact-schedule .ms-detail-panel h3 { font-family: Inter, Arial, sans-serif; font-size: 19px; }
-.ms-page--compact-schedule .msc-detail-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 12px 20px; border-top: 1px solid var(--ms-line); }
-.ms-page--compact-schedule .msc-detail-forecast { min-width: 160px; margin-right: auto; }
-.ms-page--compact-schedule .msc-detail-forecast small { font-size: 11px; color: var(--ms-muted); }
-.ms-page--compact-schedule .ms-footer { align-items: center; font-size: 12px; color: var(--ms-muted); gap: 8px; }
-.ms-page--compact-schedule .ms-footer > span { display: inline-flex; align-items: center; gap: 7px; }
-.ms-page--compact-schedule .ms-footer .ms-button { min-height: 32px; padding: 5px 12px; font-size: 12px; }
-.ms-page--compact-schedule .msc-more { margin-left: auto; }
+.ms-page--compact-schedule .ms-group--time {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+.ms-page--compact-schedule .ms-group-title {
+  padding: 8px 12px;
+}
+.ms-page--compact-schedule .ms-group-title strong {
+  font-size: 14px;
+}
+.ms-page--compact-schedule .msc-time {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-content: center;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.ms-page--compact-schedule .msc-time time {
+  font-size: 14px;
+}
+.ms-page--compact-schedule .msc-live {
+  font-size: 9px;
+  line-height: 16px;
+  background: #ed263e;
+  color: white;
+  border-radius: 3px;
+  padding: 0 4px;
+  white-space: nowrap;
+}
+.ms-page--compact-schedule .msc-match {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  background: transparent;
+  text-align: left;
+  color: inherit;
+  width: 100%;
+}
+.ms-page--compact-schedule .msc-team {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 19px;
+  width: 100%;
+}
+.ms-page--compact-schedule .msc-team .ms-logo {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  object-fit: contain;
+}
+.ms-page--compact-schedule .msc-team strong {
+  font-size: 14px;
+  line-height: 19px;
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ms-page--compact-schedule .msc-score {
+  margin-left: auto;
+  padding-left: 8px;
+  color: var(--ms-muted);
+  font-size: 13px;
+  line-height: 19px;
+  font-variant-numeric: tabular-nums;
+}
+.ms-page--compact-schedule .msc-score.is-live {
+  color: #e72840;
+}
+.ms-page--compact-schedule .msc-tournament {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ms-page--compact-schedule .msc-tournament > img {
+  width: 23px;
+  height: 23px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.ms-page--compact-schedule .msc-tournament > div {
+  min-width: 0;
+}
+.ms-page--compact-schedule .msc-tournament strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 19px;
+  font-weight: 600;
+}
+.ms-page--compact-schedule .msc-tournament small {
+  display: block;
+  font-size: 11px;
+  line-height: 19px;
+  color: var(--ms-muted);
+}
+.ms-page--compact-schedule .msc-odds {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  justify-content: center;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 19px;
+  font-variant-numeric: tabular-nums;
+}
+.ms-page--compact-schedule .msc-marks {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  flex-wrap: wrap;
+  align-content: center;
+}
+.ms-page--compact-schedule .msc-marks button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  color: #24385c;
+  font-size: 12px;
+  min-height: 28px;
+  border-radius: 4px;
+  padding: 2px 4px;
+  white-space: nowrap;
+}
+.ms-page--compact-schedule .msc-marks .msc-journal {
+  background: #edf5ff;
+  color: #2375ef;
+}
+.ms-page--compact-schedule .msc-marks button:hover {
+  background: #e6effc;
+}
+.ms-page--compact-schedule .ms-row > .msc-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.ms-page--compact-schedule .msc-row-actions .ms-icon {
+  width: 34px;
+  min-width: 30px;
+  height: 34px;
+  color: #31486b;
+}
+.ms-page--compact-schedule .msc-row-actions .is-liked {
+  color: #ff602d;
+}
+.ms-page--compact-schedule .ms-row:hover:not(.is-open) {
+  background: #f7faff;
+}
+.ms-page--compact-schedule .ms-row.is-open {
+  background: #eef5ff;
+  box-shadow: inset 3px 0 #668ebc;
+}
+.ms-page--compact-schedule .ms-detail-panel {
+  box-shadow: none;
+  border-color: var(--ms-line);
+}
+.ms-page--compact-schedule .ms-detail-panel h3 {
+  font-family: Inter, Arial, sans-serif;
+  font-size: 19px;
+}
+.ms-page--compact-schedule .msc-detail-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--ms-line);
+}
+.ms-page--compact-schedule .msc-detail-forecast {
+  min-width: 160px;
+  margin-right: auto;
+}
+.ms-page--compact-schedule .msc-detail-forecast small {
+  font-size: 11px;
+  color: var(--ms-muted);
+}
+.ms-page--compact-schedule .ms-footer {
+  align-items: center;
+  font-size: 12px;
+  color: var(--ms-muted);
+  gap: 8px;
+}
+.ms-page--compact-schedule .ms-footer > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.ms-page--compact-schedule .ms-footer .ms-button {
+  min-height: 32px;
+  padding: 5px 12px;
+  font-size: 12px;
+}
+.ms-page--compact-schedule .msc-more {
+  margin-left: auto;
+}
+@container schedule (max-width: 900px) {
+  .ms-page--compact-schedule .ms-date-tools {
+    grid-area: 2 / 1 / auto / -1;
+  }
+  .ms-page--compact-schedule .ms-search-tools {
+    grid-area: 3 / 2;
+    min-width: 260px;
+  }
+  .ms-page--compact-schedule .msc-personal {
+    grid-area: 3 / 1;
+  }
+  .ms-page--compact-schedule .ms-grouping {
+    grid-area: 4 / 1 / auto / -1;
+  }
+}
 @container schedule (max-width: 1100px) {
-  .ms-page--compact-schedule .ms-date-tools { grid-area: 2 / 1 / auto / -1; }
-  .ms-page--compact-schedule .ms-search-tools { grid-area: 3 / 2; min-width: 260px; }
-  .ms-page--compact-schedule .msc-personal { grid-area: 3 / 1; }
-  .ms-page--compact-schedule .ms-grouping { grid-area: 4 / 1 / auto / -1; }
-  .ms-page--compact-schedule .ms-row,.ms-page--compact-schedule .msc-columns { grid-template-columns: 76px minmax(180px, 2fr) minmax(125px, 1.3fr) 70px 115px 68px; }
-  .ms-page--compact-schedule .ms-row > * { padding-inline: 8px; }
+  .ms-page--compact-schedule .ms-row,
+  .ms-page--compact-schedule .msc-columns {
+    grid-template-columns:
+      76px minmax(180px, 2fr) minmax(125px, 1.3fr)
+      70px 115px 68px;
+  }
+  .ms-page--compact-schedule .ms-row > * {
+    padding-inline: 8px;
+  }
 }
 @container schedule (max-width: 760px) {
-  .ms-page--compact-schedule .ms-dense-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-  .ms-page--compact-schedule .ms-dense-title { font-size: 22px; flex: 1; }
-  .ms-page--compact-schedule .ms-date-tools,.ms-page--compact-schedule .ms-search-tools { flex-basis: 100%; min-width: 0; }
-  .ms-page--compact-schedule .ms-search-tools { flex-wrap: nowrap; }
-  .ms-page--compact-schedule .ms-grouping { margin-left: auto; }
-  .ms-page--compact-schedule .msc-columns { display: none; }
-  .ms-page--compact-schedule .ms-row { grid-template-columns: 60px minmax(0, 1fr) 58px 64px; grid-template-rows: auto auto; min-height: 76px; }
-  .ms-page--compact-schedule .ms-row > * { border: 0; box-shadow: none; padding: 4px 6px; }
-  .ms-page--compact-schedule .msc-time { grid-area: 1 / 1 / 3 / 2; }
-  .ms-page--compact-schedule .msc-match { grid-area: 1 / 2; }
-  .ms-page--compact-schedule .msc-odds { grid-area: 1 / 3; }
-  .ms-page--compact-schedule .msc-tournament { grid-area: 2 / 2 / 3 / 4; }
-  .ms-page--compact-schedule .msc-tournament > img { display: none; }
-  .ms-page--compact-schedule .msc-tournament > div { display: flex; gap: 8px; align-items: center; }
-  .ms-page--compact-schedule .msc-tournament strong { font-size: 11px; }
-  .ms-page--compact-schedule .msc-tournament small { white-space: nowrap; }
-  .ms-page--compact-schedule .ms-row > .msc-row-actions { grid-area: 1 / 4; }
-  .ms-page--compact-schedule .msc-marks { grid-area: 2 / 4; justify-content: center; }
-  .ms-page--compact-schedule .msc-marks button { padding: 0 2px; }
-  .ms-page--compact-schedule .msc-marks button span { display: none; }
-  .ms-page--compact-schedule .msc-team strong { font-size: 13px; }
+  .ms-page--compact-schedule .ms-dense-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .ms-page--compact-schedule .ms-dense-title {
+    font-size: 22px;
+    flex: 1;
+  }
+  .ms-page--compact-schedule .ms-date-tools,
+  .ms-page--compact-schedule .ms-search-tools {
+    flex-basis: 100%;
+    min-width: 0;
+  }
+  .ms-page--compact-schedule .ms-search-tools {
+    flex-wrap: nowrap;
+  }
+  .ms-page--compact-schedule .ms-grouping {
+    margin-left: auto;
+  }
+  .ms-page--compact-schedule .msc-columns {
+    display: none;
+  }
+  .ms-page--compact-schedule .ms-row {
+    grid-template-columns: 60px minmax(0, 1fr) 58px 64px;
+    grid-template-rows: auto auto;
+    min-height: 76px;
+  }
+  .ms-page--compact-schedule .ms-row > * {
+    border: 0;
+    box-shadow: none;
+    padding: 4px 6px;
+  }
+  .ms-page--compact-schedule .ms-row > .msc-time {
+    grid-area: 1 / 1 / 3 / 2;
+  }
+  .ms-page--compact-schedule .ms-row > .msc-match {
+    grid-area: 1 / 2;
+  }
+  .ms-page--compact-schedule .ms-row > .msc-odds {
+    grid-area: 1 / 3;
+  }
+  .ms-page--compact-schedule .ms-row > .msc-tournament {
+    grid-area: 2 / 2 / 3 / 4;
+  }
+  .ms-page--compact-schedule .msc-tournament > img {
+    display: none;
+  }
+  .ms-page--compact-schedule .msc-tournament > div {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .ms-page--compact-schedule .msc-tournament strong {
+    font-size: 11px;
+  }
+  .ms-page--compact-schedule .msc-tournament small {
+    white-space: nowrap;
+  }
+  .ms-page--compact-schedule .ms-row > .msc-row-actions {
+    grid-area: 1 / 4;
+  }
+  .ms-page--compact-schedule .ms-row > .msc-marks {
+    grid-area: 2 / 4;
+    justify-content: center;
+  }
+  .ms-page--compact-schedule .msc-marks button {
+    padding: 0 2px;
+  }
+  .ms-page--compact-schedule .msc-marks button span {
+    display: none;
+  }
+  .ms-page--compact-schedule .msc-team strong {
+    font-size: 13px;
+  }
 }
 @media (max-width: 600px) {
-  .ms-page--compact-schedule .msc-schedule { margin: 8px; padding: 10px; }
+  .ms-page--compact-schedule .msc-schedule {
+    margin: 8px;
+    padding: 10px;
+  }
 }
-.dark .ms-page--compact-schedule { --ms-line: #344253; --ms-muted: #a1afc2; background: #141c26; color: #e7edf5; }
-.dark .ms-page--compact-schedule .msc-schedule,.dark .ms-page--compact-schedule .ms-row { background: #1d2835; }
-.dark .ms-page--compact-schedule .ms-segment button,.dark .ms-page--compact-schedule .ms-search,.dark .ms-page--compact-schedule .ms-date-input { background: #233141; color: #e7edf5; border-color: #405064; }
-.dark .ms-page--compact-schedule .ms-row > * + * { border-color: #344253; }
-.dark .ms-page--compact-schedule .msc-columns,.dark .ms-page--compact-schedule .ms-status-title { background: #253345; color: #e7edf5; }
-.dark .ms-page--compact-schedule .msc-columns > span { color: #bdcbe0; }
-.dark .ms-page--compact-schedule .ms-status-section--live .ms-status-title { background: #392c38; color: #ff8291; }
-.dark .ms-page--compact-schedule .ms-row:hover:not(.is-open),.dark .ms-page--compact-schedule .ms-row.is-open { background: #2a3a4e; }
-.dark .ms-page--compact-schedule .msc-note,.dark .ms-page--compact-schedule .msc-row-actions .ms-icon { color: #bdcbe0; }
-.dark .ms-page--compact-schedule .msc-row-actions .is-liked { color: #ff784b; }
+.dark .ms-page--compact-schedule {
+  --ms-line: #344253;
+  --ms-muted: #a1afc2;
+  background: #141c26;
+  color: #e7edf5;
+}
+.dark .ms-page--compact-schedule .msc-schedule,
+.dark .ms-page--compact-schedule .ms-row {
+  background: #1d2835;
+}
+.dark .ms-page--compact-schedule .ms-segment button,
+.dark .ms-page--compact-schedule .ms-search,
+.dark .ms-page--compact-schedule .ms-date-input {
+  background: #233141;
+  color: #e7edf5;
+  border-color: #405064;
+}
+.dark .ms-page--compact-schedule .ms-row > * + * {
+  border-color: #344253;
+}
+.dark .ms-page--compact-schedule .msc-columns,
+.dark .ms-page--compact-schedule .ms-status-title {
+  background: #253345;
+  color: #e7edf5;
+}
+.dark .ms-page--compact-schedule .msc-columns > span {
+  color: #bdcbe0;
+}
+.dark .ms-page--compact-schedule .ms-status-section--live .ms-status-title {
+  background: #392c38;
+  color: #ff8291;
+}
+.dark .ms-page--compact-schedule .ms-row:hover:not(.is-open),
+.dark .ms-page--compact-schedule .ms-row.is-open {
+  background: #2a3a4e;
+}
+.dark .ms-page--compact-schedule .msc-note,
+.dark .ms-page--compact-schedule .msc-row-actions .ms-icon {
+  color: #bdcbe0;
+}
+.dark .ms-page--compact-schedule .msc-row-actions .is-liked {
+  color: #ff784b;
+}

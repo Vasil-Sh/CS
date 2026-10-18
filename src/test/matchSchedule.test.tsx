@@ -23,6 +23,8 @@ import {
   type ScheduleFilters,
 } from "@/components/matches/matchScheduleModel";
 import type { Match } from "@/hooks/useMatches";
+import type { Bet } from "@/types/betting";
+import { hasJournalRecord } from "@/components/matches/scheduleJournal";
 
 const now = new Date("2026-10-05T10:00:00Z");
 const makeMatch = (patch: Partial<Match> = {}): Match => ({
@@ -103,7 +105,139 @@ const props = (
   onEditNote: vi.fn(),
   onResults: vi.fn(),
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  localStorage.removeItem("matchiq.schedule.density");
+});
+
+describe("compact schedule controls", () => {
+  it("defaults to compact and remembers the chosen density", () => {
+    const view = render(<MatchSchedule {...props()} />);
+    expect(screen.getByRole("button", { name: "Компактний" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Звичайний" }));
+    expect(view.container.querySelector(".msc-schedule")).toHaveClass(
+      "msc-schedule--comfortable",
+    );
+    view.unmount();
+    render(<MatchSchedule {...props()} />);
+    expect(screen.getByRole("button", { name: "Звичайний" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
+  it("filters bookmarks, notes and real journal records separately", () => {
+    const p = props();
+    p.model.matchRatings = { m2: "like" };
+    p.journalBets = [
+      {
+        match: "STATE vs ECSTATIC",
+        game: "CS2",
+        date: "2026-10-05",
+        betType: "П1",
+        amount: 100,
+        odds: 2,
+        result: "Pending",
+      },
+    ];
+    p.onOpenJournal = vi.fn();
+    render(<MatchSchedule {...p} />);
+    expect(
+      screen.queryByRole("button", {
+        name: "Відкрити журнал: MASONIC — Linx Legacy Esport",
+      }),
+    ).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Закріплені", exact: true }),
+    );
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(1);
+    expect(screen.getByTestId("schedule-row")).toHaveTextContent("STATE");
+    fireEvent.click(
+      screen.getByRole("button", { name: "З нотатками", exact: true }),
+    );
+    expect(screen.getByTestId("schedule-row")).toHaveTextContent("MASONIC");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Є запис", exact: true }),
+    );
+    expect(screen.getByTestId("schedule-row")).toHaveTextContent("STATE");
+    fireEvent.click(
+      screen.getByRole("button", { name: "Відкрити журнал: STATE — ECSTATIC" }),
+    );
+    expect(p.onOpenJournal).toHaveBeenCalledWith(p.model.matches[1]);
+  });
+  it("reveals the remaining matches and resets pagination on filtering", () => {
+    render(
+      <MatchSchedule
+        {...props(
+          Array.from({ length: 25 }, (_, i) =>
+            makeMatch({ id: String(i), team1: `Team ${i}` }),
+          ),
+        )}
+      />,
+    );
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(20);
+    fireEvent.click(screen.getByRole("button", { name: "Показати ще" }));
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(25);
+    expect(screen.queryByRole("button", { name: "Показати ще" })).toBeNull();
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "Team 24" },
+    });
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(1);
+    fireEvent.change(screen.getByRole("searchbox"), { target: { value: "" } });
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(20);
+  });
+  it("matches records by source URL, or by date, game and exact team pair", () => {
+    const bet: Bet = {
+      match: "MASONIC vs Linx Legacy Esport",
+      game: "CS2",
+      date: "2026-10-05",
+      betType: "П1",
+      amount: 100,
+      odds: 2,
+      result: "Pending",
+    };
+    expect(hasJournalRecord(makeMatch(), [bet])).toBe(true);
+    expect(
+      hasJournalRecord(makeMatch(), [{ ...bet, date: "2026-10-06" }]),
+    ).toBe(false);
+    expect(hasJournalRecord(makeMatch(), [{ ...bet, game: "Dota2" }])).toBe(
+      false,
+    );
+    expect(
+      hasJournalRecord(makeMatch(), [{ ...bet, match: "MASONIC vs OTHER" }]),
+    ).toBe(false);
+    expect(
+      hasJournalRecord(
+        makeMatch({ url: "https://www.hltv.org/matches/123/test/" }),
+        [
+          {
+            ...bet,
+            date: "2026-10-04",
+            matchUrl: "https://hltv.org/matches/123/test?source=journal",
+          },
+        ],
+      ),
+    ).toBe(true);
+    expect(
+      hasJournalRecord(
+        makeMatch({ url: "https://hltv.org/matches/123/test" }),
+        [{ ...bet, matchUrl: "https://hltv.org/matches/124/test" }],
+      ),
+    ).toBe(false);
+    expect(
+      hasJournalRecord(makeMatch(), [
+        {
+          ...bet,
+          match: "Експрес",
+          betType:
+            "Експрес 2x | 1. MASONIC vs Linx Legacy Esport | П1: MASONIC @2.00 • 2. A vs B | П1: A @1.50",
+        },
+      ]),
+    ).toBe(true);
+  });
+});
 
 describe("status sections and advertising placement", () => {
   const mixed = () => [
@@ -167,7 +301,7 @@ describe("status sections and advertising placement", () => {
     expect(ad.nextElementSibling).toBe(upcoming);
     expect(screen.getAllByTestId("schedule-row")).toHaveLength(3);
     const headers = Array.from(container.querySelectorAll(".ms-columns"));
-    expect(headers).toHaveLength(3);
+    expect(headers).toHaveLength(1);
     expect(new Set(headers.map((h) => h.textContent)).size).toBe(1);
     expect(ad.querySelector(".ms-row")).toBeNull();
   });
@@ -215,6 +349,11 @@ describe("status sections and advertising placement", () => {
     expect(
       screen.getAllByRole("complementary", { name: "Реклама" }),
     ).toHaveLength(1);
+    fireEvent.click(
+      within(upcoming).getByRole("button", {
+        name: "Деталі: NEXT — Linx Legacy Esport",
+      }),
+    );
     fireEvent.click(
       within(upcoming).getByRole("button", {
         name: "Створити запис: NEXT — Linx Legacy Esport",
@@ -515,11 +654,11 @@ describe("match schedule interactions", () => {
       0,
     );
     const first = screen.getAllByTestId("schedule-row")[0];
-    expect(within(first).getByText("Показати запис")).toBeVisible();
+    expect(within(first).getByText("1 нотатка")).toBeVisible();
     expect(within(first).queryByText("MASONIC · БАН")).not.toBeInTheDocument();
     fireEvent.click(
       within(first).getByRole("button", {
-        name: "Показати запис: MASONIC — Linx Legacy Esport",
+        name: "Показати нотатки: MASONIC — Linx Legacy Esport",
       }),
     );
     expect(screen.getAllByRole("region", { name: /Деталі:/ })).toHaveLength(1);
@@ -554,19 +693,25 @@ describe("match schedule interactions", () => {
       "Linx Legacy Esport",
     );
   });
-  it("opens the record form from its single row action", () => {
+  it("opens the record form from expanded details without saving", () => {
     const p = props();
     render(<MatchSchedule {...p} />);
+    expect(
+      screen.queryByRole("button", { name: /Створити запис:/ }),
+    ).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Деталі: MASONIC — Linx Legacy Esport",
+      }),
+    );
     fireEvent.click(
       screen.getByRole("button", {
         name: "Створити запис: MASONIC — Linx Legacy Esport",
       }),
     );
     expect(p.model.handleAddToBets).toHaveBeenCalledWith(p.model.matches[0]);
-    expect(
-      screen.queryByRole("button", { name: "Створити запис" }),
-    ).not.toBeInTheDocument();
   });
+
   it("shows all matches at once and switches grouping", () => {
     const matches = Array.from({ length: 6 }, (_, index) =>
       makeMatch({ id: String(index), team1: `Team ${index}` }),
@@ -615,7 +760,7 @@ describe("match schedule interactions", () => {
     render(<MatchSchedule {...p} />);
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Прибрати з цікавих: MASONIC — Linx Legacy Esport",
+        name: "Відкріпити матч: MASONIC — Linx Legacy Esport",
       }),
     );
     expect(p.model.handleRateMatch).toHaveBeenCalledWith("m1", null);
@@ -704,7 +849,7 @@ describe("dense schedule", () => {
       ).toBeNull();
     }
   });
-  it("keeps forecast position stable, with the correct team names and an honest empty state", () => {
+  it("moves source forecasts to details and preserves real percentages", () => {
     render(
       <MatchSchedule
         {...props([
@@ -713,114 +858,103 @@ describe("dense schedule", () => {
         ])}
       />,
     );
+    expect(
+      screen.queryByRole("group", { name: /Прогноз джерела:/ }),
+    ).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Деталі: MASONIC — Linx Legacy Esport",
+      }),
+    );
     const forecast = screen.getByRole("group", {
       name: "Прогноз джерела: MASONIC — Linx Legacy Esport",
     });
-    expect(within(forecast).getByText("28%")).toBeVisible();
-    expect(within(forecast).getByText("72%")).toBeVisible();
     expect(forecast).toHaveTextContent(
       "MASONIC: 28%; Linx Legacy Esport: 72%.",
     );
     expect(forecast.querySelector(".ms-forecast-track > span")).toHaveStyle({
       width: "28%",
     });
+    fireEvent.click(
+      screen.getByRole("button", { name: "Деталі: STATE — ECSTATIC" }),
+    );
     expect(
       screen.getByRole("group", { name: "Прогноз джерела: STATE — ECSTATIC" }),
     ).toHaveTextContent("Немає даних");
   });
-  it("does not label an unmarked team as safe, and Add opens the existing note editor", () => {
+
+  it("keeps an unmarked row clean and adds notes from details", () => {
     const p = props();
     render(<MatchSchedule {...p} />);
     const row = screen.getAllByTestId("schedule-row")[1];
-    expect(row.querySelectorAll(".ms-team-risk")).toHaveLength(0);
+    expect(row.querySelector(".msc-note")).toBeNull();
     fireEvent.click(
-      within(row).getByRole("button", {
-        name: "Додати примітку: STATE — ECSTATIC",
-      }),
+      within(row).getByRole("button", { name: "Деталі: STATE — ECSTATIC" }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Додати нотатку: STATE" }),
     );
     expect(p.onEditNote).toHaveBeenCalledWith(p.model.matches[1], "STATE");
   });
-  it("shows scores in the Гра block and a Гра link otherwise", () => {
-    const { container } = render(
+
+  it("aligns each score with its team and keeps LIVE explicit", () => {
+    render(
       <MatchSchedule
-        {...props([
-          makeMatch({ matchStatus: "live", score1: 1, score2: 0 }),
-          makeMatch({
-            id: "m2",
-            matchStatus: "finished",
-            score1: 2,
-            score2: 1,
-          }),
-        ])}
+        {...props([makeMatch({ matchStatus: "live", score1: 1, score2: 0 })])}
       />,
     );
-    const scores = Array.from(
-      container.querySelectorAll(".ms-source-cell .ms-source-score"),
-    ).map((el) => el.getAttribute("aria-label"));
-    expect(scores).toContain("Рахунок матчу: 1:0");
-    expect(scores).toContain("Рахунок матчу: 2:1");
+    expect(screen.getByLabelText("Рахунок MASONIC: 1")).toHaveTextContent("1");
     expect(
-      container.querySelectorAll(".ms-source-cell .ms-source-score"),
-    ).toHaveLength(2);
-    expect(container.querySelector(".match-identity__live")).toHaveTextContent(
-      "LIVE",
-    );
-    expect(screen.queryByText("Зараз грають · 1:0")).not.toBeInTheDocument();
-    expect(screen.queryByText("Завершено · 2:1")).not.toBeInTheDocument();
+      screen.getByLabelText("Рахунок Linx Legacy Esport: 0"),
+    ).toHaveTextContent("0");
+    expect(screen.getByText("● LIVE")).toBeVisible();
   });
-  it("pins liked matches to the top and pushes disliked above finished", () => {
+
+  it("keeps time sorting chronological rather than promoting bookmarks", () => {
     const p = props([
-      makeMatch({
-        id: "finished",
-        team1: "FINISHED",
-        matchStatus: "finished",
-        score1: 2,
-        score2: 1,
-      }),
-      makeMatch({ id: "disliked", team1: "DISLIKED" }),
-      makeMatch({ id: "neutral", team1: "NEUTRAL" }),
-      makeMatch({ id: "liked", team1: "LIKED" }),
+      makeMatch({ id: "late", team1: "LATE", date: "2026-10-05T18:00:00Z" }),
+      makeMatch({ id: "early", team1: "EARLY", date: "2026-10-05T10:00:00Z" }),
     ]);
-    p.model.matchRatings = { disliked: "dislike", liked: "like" };
+    p.model.matchRatings = { late: "like" };
     render(<MatchSchedule {...p} />);
-    const order = screen
-      .getAllByTestId("schedule-row")
-      .map((row) => row.querySelector(".match-identity__name")?.textContent);
-    expect(order).toEqual(["LIKED", "NEUTRAL", "DISLIKED", "FINISHED"]);
+    expect(
+      screen
+        .getAllByTestId("schedule-row")
+        .map((row) => row.querySelector(".msc-team strong")?.textContent),
+    ).toEqual(["EARLY", "LATE"]);
   });
-  it("shows time, game and format together in the identity block", () => {
+
+  it("separates time and tournament metadata from teams", () => {
     render(<MatchSchedule {...props([makeMatch()])} />);
     const row = screen.getByTestId("schedule-row");
-    expect(row.querySelector(".match-identity__time")).toHaveTextContent(
-      "19:00",
-    );
-    expect(row.querySelector(".match-identity__format")).toHaveTextContent(
-      "BO1",
-    );
-    expect(row.querySelector(".match-identity__game")).toHaveTextContent("CS2");
-    const record = within(row).getByRole("button", {
-      name: "Створити запис: MASONIC — Linx Legacy Esport",
-    });
-    expect(record).toHaveAttribute("title", "Створити запис");
-    expect(record.textContent).toBe("");
+    expect(row.querySelector(".msc-time")).toHaveTextContent("19:00");
+    expect(row.querySelector(".msc-tournament")).toHaveTextContent("CS2 · BO1");
+    expect(row.querySelectorAll(".msc-team")).toHaveLength(2);
   });
-  it("does not turn a missing score into a fictional 0:0", () => {
+
+  it("does not turn missing scores into fictional zeroes", () => {
     const view = render(
       <MatchSchedule {...props([makeMatch({ matchStatus: "live" })])} />,
     );
-    expect(view.container.querySelector(".ms-source-score")).toBeNull();
+    expect(
+      screen.getByLabelText("Рахунок MASONIC: немає даних"),
+    ).toHaveTextContent("—");
     view.rerender(
       <MatchSchedule
         {...props([makeMatch({ matchStatus: "live", score1: 0, score2: 0 })])}
       />,
     );
-    expect(screen.getByLabelText("Рахунок матчу: 0:0")).toBeInTheDocument();
+    expect(screen.getByLabelText("Рахунок MASONIC: 0")).toHaveTextContent("0");
+    expect(
+      screen.getByLabelText("Рахунок Linx Legacy Esport: 0"),
+    ).toHaveTextContent("0");
   });
+
   it("opens and closes notes from the compact view action without saving", () => {
     const p = props([makeMatch()]);
     render(<MatchSchedule {...p} />);
     const notes = screen.getByRole("button", {
-      name: "Показати запис: MASONIC — Linx Legacy Esport",
+      name: "Показати нотатки: MASONIC — Linx Legacy Esport",
     });
     expect(notes).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(notes);
@@ -836,6 +970,11 @@ describe("dense schedule", () => {
   it("preserves source, express, results and refresh actions without saving a record", () => {
     const p = props([makeMatch({ url: "https://tips.gg/match/example/" })]);
     render(<MatchSchedule {...p} />);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Деталі: MASONIC — Linx Legacy Esport",
+      }),
+    );
     const source = screen.getByRole("link", {
       name: "Гра: MASONIC — Linx Legacy Esport",
     });
@@ -853,38 +992,34 @@ describe("dense schedule", () => {
     expect(p.model.refreshMatches).toHaveBeenCalledOnce();
     expect(p.model.handleAddToBets).not.toHaveBeenCalled();
   });
-  it("renders odds in team order and only highlights a genuinely lower available value", () => {
-    const p = props([
-      makeMatch({
-        bettingCoefficientTeam1: 3.01,
-        bettingCoefficientTeam2: 1.35,
-      }),
-    ]);
-    const view = render(<MatchSchedule {...p} />);
-    let odds = screen.getByRole("group", { name: "Коефіцієнти" });
-    expect(odds.querySelectorAll(".ms-odd-line")[0]).toHaveTextContent(
-      "MASONIC: 3.01",
+  it("renders neutral odds in team order and keeps missing values honest", () => {
+    const view = render(
+      <MatchSchedule
+        {...props([
+          makeMatch({
+            bettingCoefficientTeam1: 3.01,
+            bettingCoefficientTeam2: 1.35,
+          }),
+        ])}
+      />,
     );
-    expect(odds.querySelector(".ms-odd-value--lower")).toHaveTextContent(
+    expect(screen.getByLabelText("MASONIC: 3.01")).toHaveTextContent("3.01");
+    expect(screen.getByLabelText("Linx Legacy Esport: 1.35")).toHaveTextContent(
       "1.35",
     );
-    for (const values of [
-      [1.5, 1.5],
-      [1.5, null],
-      [1.501, 1.502],
-    ]) {
-      view.rerender(
-        <MatchSchedule
-          {...props([
-            makeMatch({
-              bettingCoefficientTeam1: values[0],
-              bettingCoefficientTeam2: values[1],
-            }),
-          ])}
-        />,
-      );
-      odds = screen.getByRole("group", { name: "Коефіцієнти" });
-      expect(odds.querySelector(".ms-odd-value--lower")).toBeNull();
-    }
+    view.rerender(
+      <MatchSchedule
+        {...props([
+          makeMatch({
+            bettingCoefficientTeam1: 1.5,
+            bettingCoefficientTeam2: null,
+          }),
+        ])}
+      />,
+    );
+    expect(screen.getByLabelText("MASONIC: 1.50")).toHaveTextContent("1.50");
+    expect(screen.getByLabelText("Linx Legacy Esport: —")).toHaveTextContent(
+      "—",
+    );
   });
 });
