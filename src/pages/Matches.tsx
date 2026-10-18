@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useData } from "@/contexts/DataContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AIRecommendationModal from "@/components/AIRecommendationModal";
@@ -14,6 +16,8 @@ export type { Match } from "@/hooks/useMatches";
 
 export default function Matches() {
   const m = useMatches();
+  const { bets } = useData();
+  const navigate = useNavigate();
   const [noteTeam, setNoteTeam] = useState<string>();
   const [banner, setBanner] = useState<ScheduleAdCampaign | null>(null);
   const riskyMatch = m.selectedRiskyMatch;
@@ -36,6 +40,8 @@ export default function Matches() {
       <ErrorBoundary>
         <MatchSchedule
           model={m}
+          journalBets={bets}
+          onOpenJournal={(match) => navigate(`/app/my-bets?tab=records&q=${encodeURIComponent(match.team1)}`)}
           advertising={{ campaign: banner, preview: import.meta.env.DEV }}
           onResults={() => m.setPastDaysModalOpen(true)}
           onEditNote={(match, team) => {

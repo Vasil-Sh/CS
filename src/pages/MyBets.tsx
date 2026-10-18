@@ -99,7 +99,7 @@ export default function MyBets() {
   const sortOrder: "asc" | "desc" = "desc";
   const [currentPage, setCurrentPage] = useState(1);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState(searchParams.get("q") || "");
   const [currencyMode, setCurrencyMode] = useState<"UAH" | "USD">("UAH");
   // dualBank now comes from DataProvider (single source of truth)
   const dualBank = dataProvider.bankroll;

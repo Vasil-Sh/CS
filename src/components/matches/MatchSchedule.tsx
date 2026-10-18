@@ -1,13 +1,15 @@
 import { Fragment, useId, useMemo, useState } from "react";
 import {
   ArrowRight,
+  Bookmark,
+  FileText,
+  Star,
   CalendarDays,
   Check,
   ChevronDown,
   CirclePlus,
   Clock3,
   ExternalLink,
-  Eye,
   Info,
   Layers,
   Pencil,
@@ -17,13 +19,13 @@ import {
   ShieldAlert,
   SlidersHorizontal,
   ThumbsDown,
-  ThumbsUp,
   Trophy,
   X,
 } from "lucide-react";
 import type { Match, useMatches } from "@/hooks/useMatches";
 import { proxyLogoUrl } from "@/lib/logoProxy";
-import { MatchIdentity } from "./MatchIdentity";
+import type { Bet } from "@/types/betting";
+import { hasJournalRecord } from "./scheduleJournal";
 import {
   ScheduleAdvertisement,
   type ScheduleAdvertisementProps,
@@ -48,6 +50,7 @@ import "./MatchSchedule.css";
 import "./MatchScheduleDense.css";
 import "./MatchDetails.css";
 import "./MatchScheduleSections.css";
+import "./MatchScheduleCompact.css";
 
 type Controller = ReturnType<typeof useMatches>;
 export interface MatchScheduleProps {
@@ -71,6 +74,8 @@ export interface MatchScheduleProps {
   onResults: () => void;
   now?: Date;
   advertising?: ScheduleAdvertisementProps;
+  journalBets?: Bet[];
+  onOpenJournal?: (match: Match) => void;
 }
 
 function TeamLogo({
@@ -108,76 +113,6 @@ function RiskBadge({ status }: { status: string }) {
   );
 }
 
-function CompactOdds({ match }: { match: Match }) {
-  const teams = [
-    {
-      name: match.team1,
-      logo: match.logoTeam1,
-      value: coefficient(match.bettingCoefficientTeam1),
-    },
-    {
-      name: match.team2,
-      logo: match.logoTeam2,
-      value: coefficient(match.bettingCoefficientTeam2),
-    },
-  ];
-
-  const bothAvailable = teams.every((team) => team.value !== "—");
-  const lowest = bothAvailable
-    ? Math.min(...teams.map((team) => Number(team.value)))
-    : null;
-
-  // Однакові показані значення не виділяємо.
-  const canHighlight = bothAvailable && teams[0].value !== teams[1].value;
-
-  if (teams.every((team) => team.value === "—")) {
-    return (
-      <div
-        className="ms-odds ms-odds--compact ms-odds--empty"
-        role="group"
-        aria-label="Коефіцієнти недоступні"
-        title="Джерело ще не надало коефіцієнти"
-      >
-        <Info size={15} aria-hidden="true" />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="ms-odds ms-odds--compact"
-      role="group"
-      aria-label="Коефіцієнти"
-    >
-      {teams.map((team, index) => {
-        const isLower = canHighlight && Number(team.value) === lowest;
-
-        const description = `${team.name}: ${
-          team.value === "—" ? "немає даних" : team.value
-        }${isLower ? " · менший коефіцієнт у парі" : ""}`;
-
-        return (
-          <span key={index} className="ms-odd-line" title={description}>
-            <TeamLogo name={team.name} src={team.logo} game={match.game} />
-
-            <span className="ms-odds-sr">{description}</span>
-
-            <strong
-              aria-hidden="true"
-              className={[
-                "ms-odd-value",
-                isLower ? "ms-odd-value--lower" : "",
-                team.value === "—" ? "ms-odd-value--missing" : "",
-              ].join(" ")}
-            >
-              {team.value}
-            </strong>
-          </span>
-        );
-      })}
-    </div>
-  );
-}
 
 const percentLabel = (value: number) =>
   `${new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 1 }).format(value)}%`;
@@ -228,6 +163,8 @@ export default function MatchSchedule({
   onResults,
   now = new Date(),
   advertising,
+  journalBets = [],
+  onOpenJournal,
 }: MatchScheduleProps) {
   const today = scheduleDate(now);
   const tomorrow = nextScheduleDate(today);
@@ -247,6 +184,15 @@ export default function MatchSchedule({
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [expressMode, setExpressMode] = useState(false);
+  const [density, setDensity] = useState<"compact" | "comfortable">(() => {
+    try { return localStorage.getItem("matchiq.schedule.density") === "comfortable" ? "comfortable" : "compact"; }
+    catch { return "compact"; }
+  });
+  const [visibleLimit, setVisibleLimit] = useState(20);
+  function changeDensity(value: "compact" | "comfortable") {
+    setDensity(value);
+    try { localStorage.setItem("matchiq.schedule.density", value); } catch { /* Storage may be disabled. */ }
+  }
   const regionId = useId();
 
   const { matches, getTeamRiskInfo } = m;
@@ -264,18 +210,15 @@ export default function MatchSchedule({
     [matches, getTeamRiskInfo],
   );
   const hasNotes = (match: Match) => !!risks.get(match.id)?.some(Boolean);
-  const visible = filterSchedule(m.matches, filters, m.matchRatings, hasNotes);
-  const sortedVisible = [...visible].sort((a, b) => {
-    const rank = (match: Match) => {
-      const rating = m.matchRatings[match.id];
-      if (rating === "like") return 0;
-      if (match.matchStatus === "finished") return 3;
-      if (rating === "dislike") return 2;
-      return 1;
-    };
-    return rank(a) - rank(b);
+  const recordedIds = useMemo(() => new Set(matches.filter((match) => hasJournalRecord(match, journalBets)).map((match) => match.id)), [matches, journalBets]);
+  const visible = filterSchedule(m.matches, filters, m.matchRatings, hasNotes, (match) => recordedIds.has(match.id));
+  const allSections = sectionSchedule(visible, today);
+  let remaining = visibleLimit;
+  const sections = allSections.flatMap((section) => {
+    const entries = section.matches.slice(0, remaining);
+    remaining = Math.max(0, remaining - entries.length);
+    return entries.length ? [{ ...section, matches: entries, total: section.matches.length }] : [];
   });
-  const sections = sectionSchedule(sortedVisible, today);
   // One slot at an existing section boundary, never interrupt a match or invent an empty group.
   const adAfterSection =
     sections.length > 1 && ["live", "upcoming"].includes(sections[0].key)
@@ -310,6 +253,7 @@ export default function MatchSchedule({
     setFilters((current) => ({ ...current, ...patch }));
     setExpandedId(null);
     setCollapsed(new Set());
+    setVisibleLimit(20);
   }
   function resetFilters() {
     changeFilters({
@@ -501,198 +445,90 @@ export default function MatchSchedule({
             </div>
           </section>
         </div>
+        <div className="msc-detail-tools">
+          <div className="msc-detail-forecast"><SourceForecast match={match} /><small>Прогноз джерела, не гарантія результату.</small></div>
+          <a className="ms-button" href={matchSource(match)} target="_blank" rel="noopener noreferrer" aria-label={`Гра: ${match.team1} — ${match.team2}`}><ExternalLink size={16} /> Джерело матчу</a>
+          <button type="button" className="ms-button" aria-pressed={m.matchRatings[match.id] === "dislike"}
+            onClick={() => m.handleRateMatch(match.id, m.matchRatings[match.id] === "dislike" ? null : "dislike")}><ThumbsDown size={16} /> Не цікавить</button>
+          <button type="button" className="ms-button" aria-pressed={m.selectedMatchIds.has(match.id)}
+            aria-label={`${m.selectedMatchIds.has(match.id) ? "Прибрати матч з експресу" : "Додати матч до експресу"}: ${match.team1} — ${match.team2}`}
+            onClick={() => m.toggleMatchSelection(match.id)}><Layers size={16} /> {m.selectedMatchIds.has(match.id) ? "Прибрати з експресу" : "До експресу"}</button>
+          <button type="button" className="ms-button ms-primary" aria-label={`Створити запис: ${match.team1} — ${match.team2}`}
+            onClick={() => m.handleAddToBets(match)}><CirclePlus size={16} /> Додати запис</button>
+        </div>
       </div>
     );
   }
 
   function renderMatch(match: Match) {
-    const teamRisks = risks.get(match.id);
-    const rowRisks = [
-      teamRisks?.[0] && { name: match.team1, ...teamRisks[0] },
-      teamRisks?.[1] && { name: match.team2, ...teamRisks[1] },
-    ].filter(Boolean) as { name: string; notes: string; status: string }[];
+    const rowRisks = risks.get(match.id)?.filter(Boolean) || [];
     const open = activeId === match.id;
-    const selectedForExpress = m.selectedMatchIds.has(match.id);
     const liked = m.matchRatings[match.id] === "like";
-    const disliked = m.matchRatings[match.id] === "dislike";
-    const showSourceScore =
-      (match.matchStatus === "finished" || match.matchStatus === "live") &&
-      typeof match.score1 === "number" &&
-      Number.isFinite(match.score1) &&
-      match.score1 >= 0 &&
-      typeof match.score2 === "number" &&
-      Number.isFinite(match.score2) &&
-      match.score2 >= 0;
-    const s1 = match.score1 ?? 0;
-    const s2 = match.score2 ?? 0;
+    const selectedForExpress = m.selectedMatchIds.has(match.id);
+    const live = match.matchStatus === "live" && scheduleDate(match.date) >= today;
+    const hasScore = (live || match.matchStatus === "finished") &&
+      [match.score1, match.score2].every((value) => typeof value === "number" && Number.isFinite(value) && value >= 0);
+    const teams = [
+      { name: match.team1, logo: match.logoTeam1, score: match.score1 },
+      { name: match.team2, logo: match.logoTeam2, score: match.score2 },
+    ];
     return (
       <Fragment key={match.id}>
-        <div
-          className={`ms-row ${open ? "is-open" : ""} ${selectedForExpress ? "is-selected" : ""} ${liked ? "is-liked" : ""} ${disliked ? "is-disliked" : ""}`}
-          data-testid="schedule-row"
-        >
-          <div className="ms-interest">
-            {expressMode && (
-              <input
-                type="checkbox"
-                aria-label={`Обрати для експресу: ${match.team1} — ${match.team2}`}
-                checked={selectedForExpress}
-                onChange={() => m.toggleMatchSelection(match.id)}
-              />
-            )}
-            <button
-              type="button"
-              className={`ms-rate ${liked ? "is-active" : ""}`}
-              aria-label={`${liked ? "Прибрати з цікавих" : "Позначити цікавим"}: ${match.team1} — ${match.team2}`}
-              aria-pressed={liked}
-              title={liked ? "Прибрати з цікавих" : "Позначити цікавим"}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => m.handleRateMatch(match.id, liked ? null : "like")}
-            >
-              <ThumbsUp size={14} fill={liked ? "currentColor" : "none"} />
-            </button>
-            <button
-              type="button"
-              className={`ms-rate ${disliked ? "is-active is-disliked" : ""}`}
-              aria-label={`${disliked ? "Повернути матч" : "Не цікавить"}: ${match.team1} — ${match.team2}`}
-              aria-pressed={disliked}
-              title={disliked ? "Повернути матч" : "Не цікавить"}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() =>
-                m.handleRateMatch(match.id, disliked ? null : "dislike")
-              }
-            >
-              <ThumbsDown size={14} fill={disliked ? "currentColor" : "none"} />
-            </button>
+        <div className={`ms-row ${open ? "is-open" : ""} ${selectedForExpress ? "is-selected" : ""}`} data-testid="schedule-row">
+          <div className="msc-time">
+            {expressMode && <input type="checkbox" checked={selectedForExpress}
+              aria-label={`Обрати для експресу: ${match.team1} — ${match.team2}`}
+              onChange={() => m.toggleMatchSelection(match.id)} />}
+            <time dateTime={match.date}>{scheduleTime(match.date)}</time>
+            {live && <span className="msc-live">● LIVE</span>}
           </div>
-          <button
-            type="button"
-            className="ms-match"
-            onClick={() => toggleDetails(match.id)}
-            aria-expanded={open}
+          <button type="button" className="msc-match"
+            onClick={() => toggleDetails(match.id)} aria-expanded={open}
             aria-controls={`${regionId}-detail-${match.id}`}
-            aria-label={`Деталі: ${match.team1} — ${match.team2}`}
-          >
-            <MatchIdentity
-              tournament={match.context || "Турнір не вказаний"}
-              game={match.game === "Dota2" ? "Dota 2" : "CS2"}
-              format={match.matchType.toUpperCase()}
-              time={scheduleTime(match.date)}
-              isLive={
-                match.matchStatus === "live" &&
-                scheduleDate(match.date) >= today
-              }
-              team1={{
-                name: match.team1 || "Команда ще невідома",
-                logo: proxyLogoUrl(match.logoTeam1, match.game) ?? undefined,
-              }}
-              team2={{
-                name: match.team2 || "Команда ще невідома",
-                logo: proxyLogoUrl(match.logoTeam2, match.game) ?? undefined,
-              }}
-            />
-          </button>
-          <div className="ms-source-cell">
-            {showSourceScore ? (
-              <span
-                className="ms-source-score"
-                aria-label={`Рахунок матчу: ${match.score1}:${match.score2}`}
-              >
-                <span
-                  className={
-                    s1 === s2 ? "" : s1 > s2 ? "ms-score-win" : "ms-score-loss"
-                  }
-                >
-                  {s1}
-                </span>
-                <span className="ms-score-sep">:</span>
-                <span
-                  className={
-                    s1 === s2 ? "" : s2 > s1 ? "ms-score-win" : "ms-score-loss"
-                  }
-                >
-                  {s2}
+            aria-label={`Деталі: ${match.team1} — ${match.team2}`}>
+            {teams.map((team, index) => (
+              <span className="msc-team" key={index}>
+                <TeamLogo name={team.name} src={team.logo} game={match.game} />
+                <strong title={team.name}>{team.name || "Команда ще невідома"}</strong>
+                <span className={`msc-score ${live && hasScore ? "is-live" : ""}`}
+                  aria-label={`Рахунок ${team.name}: ${hasScore ? team.score : "немає даних"}`}>
+                  {hasScore ? team.score : "—"}
                 </span>
               </span>
-            ) : (
-              <a
-                className="ms-cell-icon"
-                href={matchSource(match)}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Гра: ${match.team1} — ${match.team2}`}
-                title="Відкрити джерело матчу"
-              >
-                <ExternalLink size={15} />
-              </a>
-            )}
+            ))}
+          </button>
+          <div className="msc-tournament">
+            <img src={match.game === "Dota2" ? "/assets/team-placeholder-dota.svg" : "/assets/team-placeholder-cs2.svg"} alt="" />
+            <div><strong title={match.context}>{match.context || "Турнір не вказаний"}</strong>
+              <small>{match.game === "Dota2" ? "Dota 2" : "CS2"} · {match.matchType.toUpperCase()}</small></div>
           </div>
-          <SourceForecast match={match} />
-          <CompactOdds match={match} />
-          <div className="ms-notes-cell">
-            <button
-              type="button"
-              className={`ms-note-button ${rowRisks.length ? "" : "ms-note-button--add"}`}
-              onClick={() => {
-                if (rowRisks.length) toggleDetails(match.id);
-                else onEditNote(match, match.team1);
-              }}
-              aria-label={`${rowRisks.length ? "Показати запис" : "Додати примітку"}: ${match.team1} — ${match.team2}`}
-              aria-expanded={rowRisks.length ? open : undefined}
-              aria-controls={
-                rowRisks.length ? `${regionId}-detail-${match.id}` : undefined
-              }
-              title={
-                rowRisks.map((r) => `${r.name}: ${r.status}`).join("; ") ||
-                "Немає нотаток"
-              }
-            >
-              {rowRisks.length ? (
-                <>
-                  <Eye size={15} />
-                  <span>Показати запис</span>
-                </>
-              ) : (
-                <>
-                  <CirclePlus size={15} />
-                  <span>Додати нотатку</span>
-                </>
-              )}
-            </button>
+          <div className="msc-odds" role="group" aria-label="Коефіцієнти">
+            {[match.bettingCoefficientTeam1, match.bettingCoefficientTeam2].map((value, index) =>
+              <span key={index} aria-label={`${teams[index].name}: ${coefficient(value)}`}>{coefficient(value)}</span>)}
           </div>
-          <div className="ms-record">
-            <button
-              type="button"
-              className="ms-button ms-record-button"
-              onClick={() => m.handleAddToBets(match)}
-              aria-label={`Створити запис: ${match.team1} — ${match.team2}`}
-              title="Створити запис"
-            >
-              <CirclePlus size={16} />
+          <div className="msc-marks">
+            {rowRisks.length > 0 && <button type="button" className="msc-note"
+              aria-label={`Показати нотатки: ${match.team1} — ${match.team2}`}
+              aria-expanded={open} aria-controls={`${regionId}-detail-${match.id}`}
+              onClick={() => toggleDetails(match.id)}>
+              <FileText size={16} /><span>{rowRisks.length} {rowRisks.length === 1 ? "нотатка" : "нотатки"}</span>
+            </button>}
+            {recordedIds.has(match.id) && onOpenJournal && <button type="button" className="msc-journal"
+              aria-label={`Відкрити журнал: ${match.team1} — ${match.team2}`}
+              onClick={() => onOpenJournal(match)}><FileText size={16} /><span>Є запис</span></button>}
+          </div>
+          <div className="msc-row-actions">
+            <button type="button" className={`ms-icon msc-bookmark ${liked ? "is-liked" : ""}`}
+              aria-pressed={liked} title={liked ? "Відкріпити матч" : "Закріпити матч"}
+              aria-label={`${liked ? "Відкріпити" : "Закріпити"} матч: ${match.team1} — ${match.team2}`}
+              onClick={() => m.handleRateMatch(match.id, liked ? null : "like")}>
+              <Bookmark size={19} fill={liked ? "currentColor" : "none"} />
             </button>
-            <button
-              type="button"
-              className="ms-cell-icon ms-express-toggle"
-              aria-pressed={selectedForExpress}
-              aria-label={`${selectedForExpress ? "Прибрати матч з експресу" : "Додати матч до експресу"}: ${match.team1} — ${match.team2}`}
-              title={
-                selectedForExpress
-                  ? "Прибрати з експресу"
-                  : "Додати до експресу"
-              }
-              onClick={() => m.toggleMatchSelection(match.id)}
-            >
-              {selectedForExpress ? <Check size={15} /> : <Layers size={15} />}
-            </button>
-            <button
-              type="button"
-              className="ms-icon ms-disclosure"
-              onClick={() => toggleDetails(match.id)}
-              aria-label={`${open ? "Згорнути" : "Розгорнути"} матч: ${match.team1} — ${match.team2}`}
-              aria-expanded={open}
+            <button type="button" className="ms-icon ms-disclosure"
+              onClick={() => toggleDetails(match.id)} aria-expanded={open}
               aria-controls={`${regionId}-detail-${match.id}`}
-            >
-              <ChevronDown size={16} className={open ? "ms-rotate" : ""} />
+              aria-label={`${open ? "Згорнути" : "Розгорнути"} матч: ${match.team1} — ${match.team2}`}>
+              <ChevronDown size={17} className={open ? "ms-rotate" : ""} />
             </button>
           </div>
         </div>
@@ -738,30 +574,6 @@ export default function MatchSchedule({
         )}
         {(!isCollapsed || mode === "time") && (
           <div id={id}>
-            <div className="ms-columns">
-              <span className="ms-interest-heading" aria-label="Інтерес">
-                <span className="ms-interest-heading-text">Інтерес</span>
-              </span>
-              <span>Матч</span>
-              <span className="ms-source-heading">Гра</span>
-              <span className="ms-forecast-heading">
-                Прогноз
-                <details className="ms-forecast-help">
-                  <summary aria-label="Про прогноз джерела">
-                    <Info size={14} />
-                  </summary>
-                  <span role="note">
-                    Відсотки від джерела матчу, не розрахунок із коефіцієнтів.
-                    Синій — перша команда, зелений — друга. Це не гарантія
-                    результату. Якщо повної пари даних немає, прогноз не
-                    показується.
-                  </span>
-                </details>
-              </span>
-              <span>Коеф.</span>
-              <span>Примітки</span>
-              <span>Дії</span>
-            </div>
             {group.matches.map(renderMatch)}
           </div>
         )}
@@ -770,7 +582,7 @@ export default function MatchSchedule({
   }
 
   return (
-    <div className="ms-page">
+    <div className="ms-page ms-page--compact-schedule">
       <header className="ms-hero">
         <div className="ms-hero-top">
           <div>
@@ -822,9 +634,13 @@ export default function MatchSchedule({
           </div>
         </dl>
       </header>
-      <div className="ms-body ms-body--dense ms-body--sectioned">
+      <div className={`ms-body ms-body--dense ms-body--sectioned msc-schedule msc-schedule--${density}`}>
         <div className="ms-dense-tools">
           <h2 className="ms-dense-title">Розклад матчів</h2>
+          <div className="ms-segment msc-density" aria-label="Щільність розкладу">
+            <button type="button" aria-pressed={density === "comfortable"} onClick={() => changeDensity("comfortable")}>Звичайний</button>
+            <button type="button" aria-pressed={density === "compact"} onClick={() => changeDensity("compact")}>Компактний</button>
+          </div>
           <div className="ms-date-tools">
             <div className="ms-segment" aria-label="Швидкий вибір дати">
               <button
@@ -927,6 +743,13 @@ export default function MatchSchedule({
             >
               За турніром
             </button>
+            <span className="msc-timezone">Час за Києвом</span>
+          </div>
+          <div className="ms-segment msc-personal" aria-label="Ваші позначки">
+            {([ ["all", "Усі матчі"], ["liked", "Закріплені"], ["notes", "З нотатками"], ["records", "Є запис"] ] as const).map(([value, label]) =>
+              <button key={value} type="button" aria-pressed={filters.personal === value} onClick={() => changeFilters({ personal: value })}>
+                {value === "liked" ? <Star size={15} /> : value !== "all" ? <FileText size={15} /> : null}{label}
+              </button>)}
           </div>
         </div>
         {filtersOpen && (
@@ -1091,6 +914,9 @@ export default function MatchSchedule({
           </div>
         ) : (
           <>
+            <div className="ms-columns msc-columns" aria-hidden="true">
+              <span>Час</span><span>Матч</span><span>Турнір</span><span>Коеф.</span><span>Ваші позначки</span><span />
+            </div>
             {sections.map((section) => (
               <Fragment key={section.key}>
                 <section
@@ -1112,7 +938,7 @@ export default function MatchSchedule({
                     )}
                     {section.title}
                     <span className="ms-status-count" aria-hidden="true">
-                      {section.matches.length}
+                      {section.total}
                     </span>
                   </h3>
                   {groupSchedule(section.matches, mode).map((group, index) =>
@@ -1127,11 +953,8 @@ export default function MatchSchedule({
           </>
         )}
         <footer className="ms-footer">
-          <span>
-            {dateLabel(filters.date)} · {matchCount(visible.length)}
-          </span>
-          <span>Синій — команда 1 · Зелений — команда 2</span>
-          <span>Час за Києвом</span>
+          <span><Info size={15} /> Показано {Math.min(visibleLimit, visible.length)} із {matchCount(visible.length)}</span>
+          {visible.length > visibleLimit && <button type="button" className="ms-button msc-more" onClick={() => setVisibleLimit((limit) => limit + 20)}>Показати ще <ChevronDown size={16} /></button>}
           <button
             type="button"
             className="ms-bulk-express"

@@ -174,7 +174,7 @@ export function matchScore(match: Match): { text: string; tone: string } {
   return { text: "Очікує", tone: "upcoming" };
 }
 
-export type PersonalFilter = "all" | "liked" | "notes" | "skipped";
+export type PersonalFilter = "all" | "liked" | "notes" | "skipped" | "records";
 export type ScheduleSort = "time" | "time-desc" | "odds" | "odds-desc";
 export interface ScheduleFilters {
   date: string;
@@ -192,6 +192,7 @@ export function filterSchedule(
   filters: ScheduleFilters,
   ratings: Record<string, MatchRating>,
   hasNotes: (match: Match) => boolean,
+  hasRecord: (match: Match) => boolean = () => false,
 ): Match[] {
   const query = filters.query.trim().toLocaleLowerCase("uk-UA");
   const filtered = matches.filter(
@@ -208,6 +209,7 @@ export function filterSchedule(
       (filters.personal === "all" ||
         (filters.personal === "liked" && ratings[match.id] === "like") ||
         (filters.personal === "skipped" && ratings[match.id] === "dislike") ||
+        (filters.personal === "records" && hasRecord(match)) ||
         (filters.personal === "notes" && hasNotes(match))),
   );
   return filtered.sort((a, b) => {

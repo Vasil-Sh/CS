@@ -39,8 +39,8 @@
   isolation: isolate;
   overflow: hidden;
   background: #101619;
-  min-height: 280px;
-  padding: 52px 3.5% 78px;
+  min-height: 246px;
+  padding: 58px 50px 64px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -72,14 +72,15 @@
   background: #ff5b2a;
 }
 .strategies-hero h1 {
-  font-size: clamp(38px, 4.3vw, 58px);
-  font-weight: 750;
-  line-height: 1.15;
-  letter-spacing: -1.8px;
-  margin: 18px 0 14px;
+  font:
+    750 60px/1.08 "Strategies Inter",
+    Arial,
+    sans-serif;
+  letter-spacing: -0.04em;
+  margin: 0 0 10px;
 }
 .strategies-hero p {
-  font-size: 18px;
+  font-size: 19px;
   line-height: 1.5;
   color: #c9d0d8;
   max-width: 510px;
@@ -111,7 +112,10 @@
   cursor: not-allowed;
 }
 .strategies-hero > .strategies-create {
-  margin-top: 43px;
+  position: absolute;
+  top: 58px;
+  right: 50px;
+  margin-top: 0;
 }
 .strategies-summary {
   position: relative;
@@ -490,7 +494,7 @@
 }
 @media (min-width: 1700px) {
   .strategies-hero {
-    min-height: 320px;
+    min-height: 246px;
   }
   .strategies-empty {
     min-height: 450px;
