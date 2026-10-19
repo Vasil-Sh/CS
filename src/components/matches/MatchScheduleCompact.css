@@ -206,10 +206,10 @@
 }
 .ms-page--compact-schedule .msc-time {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 4px;
+  gap: 3px;
   align-content: center;
   font-weight: 650;
   font-variant-numeric: tabular-nums;
@@ -263,6 +263,7 @@
   color: var(--ms-muted);
   font-size: 17px;
   line-height: 24px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .ms-page--compact-schedule .msc-score.is-live {
@@ -317,7 +318,7 @@
 .ms-page--compact-schedule .msc-marks {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 3px;
   flex-wrap: wrap;
   align-content: center;
@@ -374,7 +375,7 @@
   white-space: nowrap;
 }
 .ms-page--compact-schedule .msc-record-actions .msc-single-action {
-  color: #d84a1a;
+  color: #17754a;
 }
 .ms-page--compact-schedule .msc-record-actions button:hover {
   background: #f2f6fc;
@@ -409,8 +410,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.ms-page--compact-schedule .msc-marks .msc-note svg {
-  color: #d84a1a;
+.ms-page--compact-schedule .msc-marks .msc-note {
+  justify-content: center;
+  border-color: #ff653b;
+  background: #fff;
+  color: #e94d1d;
+}
+.ms-page--compact-schedule .msc-marks .msc-note:hover {
+  background: #fff3ed;
+  border-color: #e94d1d;
 }
 .ms-page--compact-schedule .msc-marks .msc-journal {
   background: #edf5ff;
@@ -476,12 +484,16 @@
   color: var(--ms-muted);
 }
 .ms-page--compact-schedule .ms-footer {
+  position: relative;
+  justify-content: center;
   align-items: center;
   font-size: 12px;
   color: var(--ms-muted);
   gap: 8px;
 }
 .ms-page--compact-schedule .ms-footer > span {
+  position: absolute;
+  left: 0;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -492,7 +504,14 @@
   font-size: 12px;
 }
 .ms-page--compact-schedule .msc-more {
-  margin-left: auto;
+  background: var(--ms-orange);
+  border-color: var(--ms-orange);
+  color: #fff;
+}
+.ms-page--compact-schedule .msc-more:hover {
+  background: #e9572b;
+  border-color: #e9572b;
+  color: #fff;
 }
 @container schedule (max-width: 1200px) {
   .ms-page--compact-schedule .ms-date-tools {
@@ -715,7 +734,15 @@
 .dark .ms-page--compact-schedule .ms-row.is-open {
   background: #2a3a4e;
 }
-.dark .ms-page--compact-schedule .msc-note,
+.dark .ms-page--compact-schedule .msc-note {
+  color: #ff956e;
+  border-color: #d57450;
+  background: #233141;
+}
+.dark .ms-page--compact-schedule .msc-note:hover {
+  background: #413029;
+  border-color: #ff956e;
+}
 .dark .ms-page--compact-schedule .msc-row-actions .ms-icon {
   color: #bdcbe0;
 }
@@ -732,7 +759,7 @@
   color: #bdcbe0;
 }
 .dark .ms-page--compact-schedule .msc-record-actions .msc-single-action {
-  color: #ff956e;
+  color: #8ee1b1;
 }
 .dark .ms-page--compact-schedule .msc-record-actions button:hover {
   background: #2a3a4e;

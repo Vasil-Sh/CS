@@ -53,6 +53,28 @@
   font-weight: 600;
   gap: 7px;
 }
+.ms-page--compact-schedule .msc-toolbar .msc-personal .msc-personal-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #e6ebf3;
+  color: #5a6b85;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+}
+.ms-page--compact-schedule
+  .msc-toolbar
+  .msc-personal
+  button[aria-pressed="true"]
+  .msc-personal-count {
+  background: #ffe0d5;
+  color: #e94d1d;
+}
 .ms-page--compact-schedule
   .msc-toolbar
   .msc-personal
@@ -279,4 +301,21 @@
   button[aria-pressed="true"] {
   background: #405064;
   color: white;
+}
+.dark
+  .ms-page--compact-schedule
+  .msc-toolbar
+  .msc-personal
+  .msc-personal-count {
+  background: #33435a;
+  color: #bdcbe0;
+}
+.dark
+  .ms-page--compact-schedule
+  .msc-toolbar
+  .msc-personal
+  button[aria-pressed="true"]
+  .msc-personal-count {
+  background: #4a2b24;
+  color: #ff956e;
 }

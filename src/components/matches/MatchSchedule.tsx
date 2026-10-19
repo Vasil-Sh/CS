@@ -279,6 +279,14 @@ export default function MatchSchedule({
     }),
     [dateMatches],
   );
+  const personalCounts = useMemo(
+    () => ({
+      liked: dateMatches.filter((match) => m.matchRatings[match.id] === "like")
+        .length,
+      notes: dateMatches.filter((match) => hasNotes(match)).length,
+    }),
+    [dateMatches, m.matchRatings, hasNotes],
+  );
   const tournaments = [
     ...new Set(dayMatches.map((match) => match.context).filter(Boolean)),
   ].sort();
@@ -614,9 +622,9 @@ export default function MatchSchedule({
                   </strong>
                   <span
                     className={`msc-score ${tone}`}
-                    aria-label={`Рахунок ${team.name}: ${hasScore ? team.score : "немає даних"}`}
+                    aria-label={`Рахунок ${team.name}: ${hasScore ? team.score : "0"}`}
                   >
-                    {hasScore ? team.score : "—"}
+                    {hasScore ? team.score : "0"}
                   </span>
                 </span>
               );
@@ -659,8 +667,8 @@ export default function MatchSchedule({
           <div className="msc-marks">
             {rowRisks.length === 0 &&
               !(recordedIds.has(match.id) && onOpenJournal) && (
-                <span className="msc-marks-empty" aria-label="Немає позначок">
-                  —
+                <span className="msc-marks-empty" aria-label="Немає записів">
+                  Немає записів
                 </span>
               )}
             {rowRisks.length > 0 && (
@@ -942,6 +950,11 @@ export default function MatchSchedule({
                   <FileText size={15} />
                 ) : null}
                 {label}
+                {value !== "all" && (
+                  <span className="msc-personal-count">
+                    {personalCounts[value]}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -1262,15 +1275,6 @@ export default function MatchSchedule({
               Показати ще <ChevronDown size={16} />
             </button>
           )}
-          <button
-            type="button"
-            className="ms-bulk-express"
-            aria-pressed={expressMode}
-            onClick={() => setExpressMode(!expressMode)}
-          >
-            <Layers size={15} />
-            {expressMode ? "Завершити вибір" : "Вибрати для експресу"}
-          </button>
         </footer>
         {m.selectedMatchIds.size > 0 && (
           <aside className="ms-express" aria-label="Вибрані матчі для експресу">

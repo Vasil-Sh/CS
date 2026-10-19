@@ -103,6 +103,8 @@
 }
 .ms-page--compact-schedule .msc-marks-empty {
   color: var(--ms-muted);
+  font-size: 12px;
+  white-space: nowrap;
 }
 .ms-page--compact-schedule .ms-row > .msc-record-actions {
   padding: 6px 10px;
@@ -118,13 +120,13 @@
   color: #16294b;
 }
 .ms-page--compact-schedule .msc-record-actions .msc-single-action {
-  border-color: #ff653b;
-  color: #e94d1d;
+  border-color: #4a9f73;
+  color: #17754a;
   background: #fff;
 }
 .ms-page--compact-schedule .msc-record-actions .msc-single-action:hover {
-  background: #fff3ed;
-  border-color: #e94d1d;
+  background: #e9f4ee;
+  border-color: #17754a;
 }
 .ms-page--compact-schedule .msc-record-actions button[aria-pressed="true"] {
   border-color: #4a9f73;
@@ -233,11 +235,11 @@
   color: #e7edf5;
 }
 .dark .ms-page--compact-schedule .msc-record-actions .msc-single-action {
-  border-color: #d57450;
-  color: #ff956e;
+  border-color: #4a9f73;
+  color: #8ee1b1;
 }
 .dark .ms-page--compact-schedule .msc-record-actions .msc-single-action:hover {
-  background: #413029;
+  background: #214436;
 }
 .dark
   .ms-page--compact-schedule
