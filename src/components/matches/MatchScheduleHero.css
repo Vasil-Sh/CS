@@ -1,0 +1,274 @@
+/* A decorative arena behind real, accessible header controls and live metrics. */
+.ms-page--compact-schedule .msc-arena-hero {
+  position: relative;
+  isolation: isolate;
+  padding: 36px clamp(24px, 3vw, 48px) 0;
+  background: transparent;
+  color: #f7fafc;
+}
+.ms-page--compact-schedule .msc-arena-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 74px;
+  z-index: -1;
+  background-color: #0b1519;
+  background-image:
+    linear-gradient(90deg, #08131725 0%, transparent 65%),
+    url("/assets/matches/arena-hero-v1.jpg");
+  background-size: cover;
+  background-position: center 57%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-top {
+  min-height: 180px;
+  gap: 24px;
+  align-items: flex-start;
+}
+.ms-page--compact-schedule .msc-hero-copy {
+  max-width: 65%;
+}
+.ms-page--compact-schedule .msc-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  margin: 0 0 18px;
+}
+.ms-page--compact-schedule .msc-hero-eyebrow > span {
+  width: 7px;
+  height: 7px;
+  background: #ff602d;
+}
+.ms-page--compact-schedule .msc-arena-hero h1 {
+  font-family: Inter, Arial, sans-serif;
+  font-size: clamp(40px, 4.2vw, 60px);
+  line-height: 1.08;
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  margin: 0 0 16px;
+  text-transform: none;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-top p {
+  font-size: clamp(15px, 1.4vw, 18px);
+  line-height: 1.5;
+  color: #dbe5ec;
+  margin: 0;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-actions {
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font:
+    600 14px/20px Inter,
+    Arial,
+    sans-serif;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-results {
+  border: 1px solid #a2b0b88c;
+  background: #0a151bba;
+  color: #f7fafc;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-results:hover {
+  background: #24333de8;
+  border-color: #cad6de;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-refresh {
+  background: #ff602d;
+  color: white;
+  border: 1px solid #ff602d;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-refresh:hover {
+  background: #ed4d1b;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-stats > div {
+  display: block;
+  min-width: 0;
+  min-height: 112px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid #dce4ef;
+  border-radius: 7px;
+  box-shadow: 0 3px 12px #14273b05;
+  text-align: left;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-stats > div:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px #14273b16;
+  border-color: #b7bcb7;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats > div {
+    transition: none;
+  }
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats > div:hover {
+    transform: none;
+  }
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-stats dt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #40516b;
+  font-size: 13px;
+  line-height: 23px;
+  margin: 0 0 4px;
+  white-space: normal;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-stats dt svg {
+  color: #142039;
+  flex-shrink: 0;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-stats dd {
+  margin: 0 0 0 35px;
+  color: #101c36;
+  font:
+    700 28px/1.15 Inter,
+    Arial,
+    sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-stats dd > span {
+  display: block;
+  margin-top: 6px;
+  color: #70809a;
+  font:
+    400 12px/1.4 Inter,
+    Arial,
+    sans-serif;
+  letter-spacing: normal;
+}
+.ms-page--compact-schedule .msc-arena-hero .ms-hero-stats .has-live-matches {
+  color: #15845d;
+}
+.ms-page--compact-schedule .msc-arena-hero + .msc-schedule {
+  margin-top: 24px;
+}
+@media (max-width: 900px) {
+  .ms-page--compact-schedule .msc-arena-hero {
+    padding: 24px 24px 0;
+  }
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-top {
+    min-height: 180px;
+    flex-direction: row;
+  }
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-actions {
+    max-width: 150px;
+  }
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats > div {
+    padding: 16px 12px;
+  }
+}
+@media (max-width: 600px) {
+  .ms-page--compact-schedule .msc-arena-hero {
+    padding: 24px 16px 0;
+  }
+  .ms-page--compact-schedule .msc-arena-hero::before {
+    bottom: 44px;
+    background-image:
+      linear-gradient(90deg, #081317dd, #08131770),
+      url("/assets/matches/arena-hero-v1.jpg");
+    background-position: 65% center;
+  }
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-top {
+    flex-direction: column;
+    min-height: 0;
+    gap: 18px;
+    padding-bottom: 24px;
+  }
+  .ms-page--compact-schedule .msc-hero-copy {
+    max-width: 100%;
+  }
+  .ms-page--compact-schedule .msc-hero-eyebrow {
+    margin-bottom: 12px;
+    font-size: 10px;
+  }
+  .ms-page--compact-schedule .msc-arena-hero h1 {
+    font-size: 40px;
+    margin-bottom: 10px;
+  }
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-actions {
+    max-width: none;
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-actions button {
+    padding: 9px 14px;
+  }
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats {
+    gap: 8px;
+  }
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats > div {
+    min-height: 108px;
+    padding: 12px 10px;
+  }
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats dt {
+    font-size: 11px;
+    line-height: 16px;
+    gap: 6px;
+    align-items: flex-start;
+    min-height: 32px;
+  }
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats dt svg {
+    width: 16px;
+    height: 16px;
+  }
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats dd {
+    margin-left: 0;
+    font-size: 25px;
+  }
+  .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats dd > span {
+    font-size: 10px;
+  }
+  .ms-page--compact-schedule .msc-arena-hero + .msc-schedule {
+    margin-top: 16px;
+  }
+}
+.dark .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats > div {
+  background: #1d2835;
+  border-color: #344253;
+}
+.dark .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats > div:hover {
+  box-shadow: 0 10px 24px #00000040;
+  border-color: #5a6d84;
+}
+.dark .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats dt,
+.dark .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats dt svg,
+.dark .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats dd {
+  color: #e7edf5;
+}
+.dark .ms-page--compact-schedule .msc-arena-hero .ms-hero-stats dd > span {
+  color: #a1afc2;
+}
+.dark
+  .ms-page--compact-schedule
+  .msc-arena-hero
+  .ms-hero-stats
+  .has-live-matches {
+  color: #6cdbad;
+}

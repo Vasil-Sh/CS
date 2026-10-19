@@ -1,4 +1,4 @@
-/* Scoped desktop density: 48px rows, two 19px team lines, readable type. */
+/* Match the approved compact layout: readable type, tight rows, balanced columns. */
 .ms-page--compact-schedule {
   --ms-line: #e1e7f0;
   --ms-muted: #70809a;
@@ -13,30 +13,30 @@
   font-family: Inter, Arial, sans-serif;
 }
 .ms-page--compact-schedule .msc-schedule {
-  --msc-columns: 108px minmax(220px, 2.4fr) minmax(160px, 1.35fr) 96px 140px
-    76px;
-  --msc-row-height: 48px;
-  --msc-cell-padding: 4px 12px;
+  --msc-columns: minmax(76px, 8fr) minmax(190px, 25fr) minmax(140px, 18fr)
+    minmax(110px, 12fr) minmax(64px, 7fr) minmax(96px, 11fr) 112px 72px;
+  --msc-row-height: 60px;
+  --msc-cell-padding: 4px 16px;
   margin: 16px;
-  padding: 16px;
+  padding: 20px;
   border: 1px solid var(--ms-line);
   border-radius: 12px;
   background: #fff;
   max-width: none;
 }
 .ms-page--compact-schedule .msc-schedule--comfortable {
-  --msc-row-height: 68px;
-  --msc-cell-padding: 12px;
+  --msc-row-height: 76px;
+  --msc-cell-padding: 12px 16px;
 }
 .ms-page--compact-schedule .ms-dense-tools {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px 16px;
-  margin-bottom: 12px;
+  gap: 14px 16px;
+  margin-bottom: 14px;
 }
 .ms-page--compact-schedule .ms-dense-title {
   grid-area: 1 / 1;
-  font-size: 26px;
+  font-size: 38px;
   line-height: 1.2;
   white-space: normal;
 }
@@ -51,7 +51,9 @@
 }
 .ms-page--compact-schedule .ms-search-tools {
   grid-area: 2 / 2;
-  min-width: 320px;
+  width: min(100%, 560px);
+  min-width: 360px;
+  justify-self: end;
   gap: 8px;
 }
 .ms-page--compact-schedule .ms-search {
@@ -69,7 +71,7 @@
   flex-wrap: wrap;
 }
 .ms-page--compact-schedule .msc-timezone {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--ms-muted);
   margin-left: 10px;
   white-space: nowrap;
@@ -77,19 +79,19 @@
 .ms-page--compact-schedule .ms-segment {
   overflow: visible;
   border: 0;
-  gap: 5px;
+  gap: 6px;
   background: transparent;
 }
 .ms-page--compact-schedule .ms-segment button,
 .ms-page--compact-schedule .ms-search-tools .ms-button,
 .ms-page--compact-schedule .ms-date-input {
-  min-height: 34px;
-  padding: 6px 11px;
+  min-height: 44px;
+  padding: 8px 16px;
   border: 1px solid #dce4ef;
   border-radius: 5px;
   color: #17243e;
   background: #fff;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 500;
 }
 .ms-page--compact-schedule .ms-segment button {
@@ -108,8 +110,8 @@
   border-radius: 5px;
 }
 .ms-page--compact-schedule .ms-search input {
-  height: 32px;
-  font-size: 13px;
+  height: 42px;
+  font-size: 16px;
 }
 .ms-page--compact-schedule .ms-game-filter {
   margin-left: 4px;
@@ -131,18 +133,20 @@
   align-items: stretch;
 }
 .ms-page--compact-schedule .msc-columns {
-  min-height: 32px;
+  min-height: 40px;
   border: 1px solid var(--ms-line);
   border-radius: 7px 7px 0 0;
   background: #f4f7fb;
 }
 .ms-page--compact-schedule .msc-columns > span {
   display: flex;
-  padding: 6px 12px;
-  justify-content: flex-start;
-  font-size: 12px;
+  align-items: center;
+  gap: 5px;
+  padding: 9px 16px;
+  justify-content: center;
+  font-size: 14px;
   color: #435371;
-  text-align: left;
+  text-align: center;
   border: 0;
   min-width: 0;
 }
@@ -169,14 +173,14 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  min-height: 28px;
-  padding: 4px 12px;
+  min-height: 38px;
+  padding: 6px 14px;
   margin: 0;
   background: #f3f6fb;
   border-bottom: 1px solid var(--ms-line);
   color: #1c2c49;
-  font-size: 14px;
-  line-height: 20px;
+  font-size: 18px;
+  line-height: 24px;
 }
 .ms-page--compact-schedule .ms-status-section--live .ms-status-title {
   background: #fff5f6;
@@ -186,7 +190,7 @@
   color: inherit;
   background: transparent;
   padding: 0 3px;
-  font-size: 13px;
+  font-size: 17px;
 }
 .ms-page--compact-schedule .ms-group,
 .ms-page--compact-schedule .ms-group--time {
@@ -211,11 +215,11 @@
   font-variant-numeric: tabular-nums;
 }
 .ms-page--compact-schedule .msc-time time {
-  font-size: 14px;
+  font-size: 18px;
 }
 .ms-page--compact-schedule .msc-live {
-  font-size: 9px;
-  line-height: 16px;
+  font-size: 11px;
+  line-height: 22px;
   background: #ed263e;
   color: white;
   border-radius: 3px;
@@ -235,19 +239,19 @@
 .ms-page--compact-schedule .msc-team {
   display: flex;
   align-items: center;
-  gap: 9px;
-  min-height: 19px;
+  gap: 12px;
+  min-height: 24px;
   width: 100%;
 }
 .ms-page--compact-schedule .msc-team .ms-logo {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
   object-fit: contain;
 }
 .ms-page--compact-schedule .msc-team strong {
-  font-size: 14px;
-  line-height: 19px;
+  font-size: 18px;
+  line-height: 24px;
   font-weight: 600;
   overflow: hidden;
   white-space: nowrap;
@@ -257,12 +261,18 @@
   margin-left: auto;
   padding-left: 8px;
   color: var(--ms-muted);
-  font-size: 13px;
-  line-height: 19px;
+  font-size: 17px;
+  line-height: 24px;
   font-variant-numeric: tabular-nums;
 }
 .ms-page--compact-schedule .msc-score.is-live {
   color: #e72840;
+}
+.ms-page--compact-schedule .msc-score.is-win {
+  color: #16a34a;
+}
+.ms-page--compact-schedule .msc-score.is-loss {
+  color: #dc2626;
 }
 .ms-page--compact-schedule .msc-tournament {
   display: flex;
@@ -270,8 +280,8 @@
   gap: 10px;
 }
 .ms-page--compact-schedule .msc-tournament > img {
-  width: 23px;
-  height: 23px;
+  width: 30px;
+  height: 30px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -283,14 +293,14 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 12px;
-  line-height: 19px;
+  font-size: 16px;
+  line-height: 24px;
   font-weight: 600;
 }
 .ms-page--compact-schedule .msc-tournament small {
   display: block;
-  font-size: 11px;
-  line-height: 19px;
+  font-size: 14px;
+  line-height: 24px;
   color: var(--ms-muted);
 }
 .ms-page--compact-schedule .msc-odds {
@@ -299,9 +309,9 @@
   gap: 1px;
   justify-content: center;
   text-align: center;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
-  line-height: 19px;
+  line-height: 24px;
   font-variant-numeric: tabular-nums;
 }
 .ms-page--compact-schedule .msc-marks {
@@ -312,18 +322,95 @@
   flex-wrap: wrap;
   align-content: center;
 }
+.ms-page--compact-schedule .msc-forecast-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ms-page--compact-schedule .msc-forecast-cell .ms-forecast {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+}
+.ms-page--compact-schedule .msc-forecast-cell .ms-cell-caption {
+  display: none;
+}
+.ms-page--compact-schedule .msc-forecast-cell .ms-forecast-values {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 20px;
+}
+.ms-page--compact-schedule .msc-forecast-cell .ms-forecast-track {
+  height: 4px;
+  margin-top: 3px;
+}
+.ms-page--compact-schedule .msc-forecast-cell .ms-forecast-empty {
+  color: var(--ms-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.ms-page--compact-schedule .ms-row > .msc-record-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 3px 6px;
+}
+.ms-page--compact-schedule .msc-record-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  min-height: 25px;
+  padding: 3px 5px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: #435371;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+.ms-page--compact-schedule .msc-record-actions .msc-single-action {
+  color: #d84a1a;
+}
+.ms-page--compact-schedule .msc-record-actions button:hover {
+  background: #f2f6fc;
+  border-color: var(--ms-line);
+}
+.ms-page--compact-schedule .msc-record-actions button[aria-pressed="true"] {
+  background: #e9f4ee;
+  color: #17754a;
+}
+.ms-page--compact-schedule .msc-record-actions button:focus-visible {
+  outline: 2px solid #437fe0;
+  outline-offset: 1px;
+}
 .ms-page--compact-schedule .msc-marks button {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  border: 0;
-  background: transparent;
-  color: #24385c;
-  font-size: 12px;
-  min-height: 28px;
+  gap: 6px;
+  border: 1px solid transparent;
   border-radius: 4px;
-  padding: 2px 4px;
+  background: transparent;
+  color: #435371;
+  font-size: 12px;
+  line-height: 16px;
+  min-height: 25px;
+  padding: 3px 5px;
   white-space: nowrap;
+  max-width: 100%;
+  min-width: 0;
+}
+.ms-page--compact-schedule .msc-marks button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ms-page--compact-schedule .msc-marks .msc-note svg {
+  color: #d84a1a;
 }
 .ms-page--compact-schedule .msc-marks .msc-journal {
   background: #edf5ff;
@@ -339,13 +426,23 @@
   padding: 0;
 }
 .ms-page--compact-schedule .msc-row-actions .ms-icon {
-  width: 34px;
-  min-width: 30px;
-  height: 34px;
+  width: 44px;
+  min-width: 34px;
+  height: 40px;
   color: #31486b;
 }
 .ms-page--compact-schedule .msc-row-actions .is-liked {
   color: #ff602d;
+}
+.ms-page--compact-schedule .msc-row-actions .ms-icon svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.ms-page--compact-schedule .msc-marks button svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
 }
 .ms-page--compact-schedule .ms-row:hover:not(.is-open) {
   background: #f7faff;
@@ -397,7 +494,7 @@
 .ms-page--compact-schedule .msc-more {
   margin-left: auto;
 }
-@container schedule (max-width: 900px) {
+@container schedule (max-width: 1200px) {
   .ms-page--compact-schedule .ms-date-tools {
     grid-area: 2 / 1 / auto / -1;
   }
@@ -413,26 +510,65 @@
   }
 }
 @container schedule (max-width: 1100px) {
+  .ms-page--compact-schedule .msc-columns > span {
+    padding-inline: 8px;
+  }
+  .ms-page--compact-schedule .msc-marks button {
+    font-size: 12px;
+    gap: 4px;
+    padding-inline: 0;
+  }
+  .ms-page--compact-schedule .msc-row-actions .ms-icon {
+    width: 30px;
+    min-width: 30px;
+  }
+  .ms-page--compact-schedule .ms-dense-title {
+    font-size: 30px;
+  }
   .ms-page--compact-schedule .ms-row,
   .ms-page--compact-schedule .msc-columns {
     grid-template-columns:
-      76px minmax(180px, 2fr) minmax(125px, 1.3fr)
-      70px 115px 68px;
+      70px minmax(160px, 1.8fr) minmax(125px, 1.2fr)
+      100px 60px 90px 100px 64px;
   }
   .ms-page--compact-schedule .ms-row > * {
     padding-inline: 8px;
   }
+  .ms-page--compact-schedule .msc-team strong,
+  .ms-page--compact-schedule .msc-time time {
+    font-size: 16px;
+  }
+  .ms-page--compact-schedule .msc-tournament strong,
+  .ms-page--compact-schedule .msc-marks button {
+    font-size: 14px;
+  }
 }
-@container schedule (max-width: 760px) {
+@container schedule (max-width: 850px) {
   .ms-page--compact-schedule .ms-dense-tools {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
   }
+  .ms-page--compact-schedule .msc-personal {
+    min-width: 0;
+    width: 100%;
+    flex-wrap: wrap;
+  }
   .ms-page--compact-schedule .ms-dense-title {
     font-size: 22px;
     flex: 1;
+  }
+  .ms-page--compact-schedule .ms-segment button,
+  .ms-page--compact-schedule .ms-search-tools .ms-button,
+  .ms-page--compact-schedule .ms-date-input {
+    min-height: 38px;
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+  .ms-page--compact-schedule .ms-search input {
+    height: 36px;
+    font-size: 14px;
   }
   .ms-page--compact-schedule .ms-date-tools,
   .ms-page--compact-schedule .ms-search-tools {
@@ -450,7 +586,8 @@
   }
   .ms-page--compact-schedule .ms-row {
     grid-template-columns: 60px minmax(0, 1fr) 58px 64px;
-    grid-template-rows: auto auto;
+    grid-template-rows: auto auto auto;
+    grid-template-areas: none;
     min-height: 76px;
   }
   .ms-page--compact-schedule .ms-row > * {
@@ -477,12 +614,14 @@
     display: flex;
     gap: 8px;
     align-items: center;
+    max-width: 100%;
   }
   .ms-page--compact-schedule .msc-tournament strong {
     font-size: 11px;
   }
   .ms-page--compact-schedule .msc-tournament small {
     white-space: nowrap;
+    font-size: 11px;
   }
   .ms-page--compact-schedule .ms-row > .msc-row-actions {
     grid-area: 1 / 4;
@@ -490,6 +629,22 @@
   .ms-page--compact-schedule .ms-row > .msc-marks {
     grid-area: 2 / 4;
     justify-content: center;
+  }
+  .ms-page--compact-schedule .ms-row > .msc-forecast-cell {
+    grid-area: 3 / 1 / 4 / 3;
+    justify-content: flex-start;
+    padding: 8px;
+  }
+  .ms-page--compact-schedule .msc-forecast-cell .ms-forecast {
+    max-width: 180px;
+  }
+  .ms-page--compact-schedule .msc-forecast-cell .ms-cell-caption {
+    display: block;
+    font-size: 10px;
+    color: var(--ms-muted);
+  }
+  .ms-page--compact-schedule .ms-row > .msc-record-actions {
+    grid-area: 3 / 3 / 4 / 5;
   }
   .ms-page--compact-schedule .msc-marks button {
     padding: 0 2px;
@@ -499,6 +654,23 @@
   }
   .ms-page--compact-schedule .msc-team strong {
     font-size: 13px;
+  }
+  .ms-page--compact-schedule .msc-team {
+    gap: 6px;
+  }
+  .ms-page--compact-schedule .msc-team .ms-logo {
+    width: 18px;
+    height: 18px;
+    flex-basis: 18px;
+  }
+  .ms-page--compact-schedule .msc-time time,
+  .ms-page--compact-schedule .msc-odds,
+  .ms-page--compact-schedule .msc-score {
+    font-size: 13px;
+  }
+  .ms-page--compact-schedule .msc-row-actions .ms-icon {
+    width: 30px;
+    min-width: 30px;
   }
 }
 @media (max-width: 600px) {
@@ -549,4 +721,26 @@
 }
 .dark .ms-page--compact-schedule .msc-row-actions .is-liked {
   color: #ff784b;
+}
+.dark .ms-page--compact-schedule .msc-score.is-win {
+  color: #4ade80;
+}
+.dark .ms-page--compact-schedule .msc-score.is-loss {
+  color: #f87171;
+}
+.dark .ms-page--compact-schedule .msc-record-actions button {
+  color: #bdcbe0;
+}
+.dark .ms-page--compact-schedule .msc-record-actions .msc-single-action {
+  color: #ff956e;
+}
+.dark .ms-page--compact-schedule .msc-record-actions button:hover {
+  background: #2a3a4e;
+}
+.dark
+  .ms-page--compact-schedule
+  .msc-record-actions
+  button[aria-pressed="true"] {
+  background: #214436;
+  color: #8ee1b1;
 }

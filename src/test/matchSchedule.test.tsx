@@ -111,8 +111,112 @@ afterEach(() => {
 });
 
 describe("compact schedule controls", () => {
+  it("renders three arena-header cards using the selected day's real data", () => {
+    const view = render(
+      <MatchSchedule
+        {...props([
+          makeMatch({
+            id: "live",
+            matchStatus: "live",
+            context: "Live tournament",
+          }),
+          makeMatch({ id: "next", context: "Other tournament" }),
+          makeMatch({
+            id: "tomorrow",
+            date: "2026-10-06T16:00:00Z",
+            context: "Tomorrow tournament",
+          }),
+        ])}
+      />,
+    );
+    expect(
+      screen.getByRole("heading", { name: "Матчі", exact: true }),
+    ).toBeVisible();
+    const header = view.container.querySelector(".msc-arena-hero")!;
+    expect(header.querySelectorAll(".ms-hero-stats > div")).toHaveLength(3);
+    expect(
+      header.querySelector(".ms-hero-matches")?.firstChild?.textContent,
+    ).toBe("2");
+    expect(
+      header.querySelector(".ms-hero-tournaments")?.firstChild?.textContent,
+    ).toBe("2");
+    expect(header.querySelector(".ms-hero-live")?.firstChild?.textContent).toBe(
+      "1",
+    );
+    expect(header.querySelector(".ms-hero-live")).toHaveClass(
+      "has-live-matches",
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Завтра", exact: true }),
+    );
+    expect(
+      header.querySelector(".ms-hero-matches")?.firstChild?.textContent,
+    ).toBe("1");
+    expect(header.querySelector(".ms-hero-live")?.firstChild?.textContent).toBe(
+      "0",
+    );
+    expect(header.querySelector(".ms-hero-live")).not.toHaveClass(
+      "has-live-matches",
+    );
+    expect(header).toHaveTextContent("Немає live-матчів");
+  });
+  it("offers single and express actions without expanding the match", () => {
+    const p = props([makeMatch()]);
+    const view = render(<MatchSchedule {...p} />);
+    const row = screen.getByTestId("schedule-row");
+    fireEvent.click(
+      within(row).getByRole("button", {
+        name: "Ординар: MASONIC — Linx Legacy Esport",
+      }),
+    );
+    expect(p.model.handleAddToBets).toHaveBeenCalledWith(p.model.matches[0]);
+    fireEvent.click(
+      within(row).getByRole("button", {
+        name: "До експресу: MASONIC — Linx Legacy Esport",
+      }),
+    );
+    expect(p.model.toggleMatchSelection).toHaveBeenCalledWith(
+      p.model.matches[0].id,
+    );
+    p.model.selectedMatchIds = new Set([p.model.matches[0].id]);
+    view.rerender(<MatchSchedule {...p} />);
+    const remove = within(screen.getByTestId("schedule-row")).getByRole(
+      "button",
+      { name: "Прибрати з експресу: MASONIC — Linx Legacy Esport" },
+    );
+    expect(remove).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(remove);
+    expect(p.model.toggleMatchSelection).toHaveBeenCalledTimes(2);
+    expect(
+      screen.getByRole("button", {
+        name: "Деталі: MASONIC — Linx Legacy Esport",
+      }),
+    ).toHaveAttribute("aria-expanded", "false");
+  });
+  it("keeps game filters visible and puts secondary preferences in a dismissible menu", () => {
+    render(
+      <MatchSchedule
+        {...props([makeMatch(), makeMatch({ id: "dota", game: "Dota2" })])}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: "За турніром" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /^Dota 2/ }));
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Вигляд" }));
+    expect(
+      screen.getByRole("dialog", { name: "Вигляд розкладу" }),
+    ).toBeVisible();
+    fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getByRole("button", { name: /^Dota 2/ })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+  });
   it("defaults to compact and remembers the chosen density", () => {
     const view = render(<MatchSchedule {...props()} />);
+    expect(screen.queryByRole("button", { name: "Компактний" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Вигляд" }));
     expect(screen.getByRole("button", { name: "Компактний" })).toHaveAttribute(
       "aria-pressed",
       "true",
@@ -123,12 +227,13 @@ describe("compact schedule controls", () => {
     );
     view.unmount();
     render(<MatchSchedule {...props()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Вигляд" }));
     expect(screen.getByRole("button", { name: "Звичайний" })).toHaveAttribute(
       "aria-pressed",
       "true",
     );
   });
-  it("filters bookmarks, notes and real journal records separately", () => {
+  it("filters bookmarks and notes while keeping journal links tied to real records", () => {
     const p = props();
     p.model.matchRatings = { m2: "like" };
     p.journalBets = [
@@ -159,9 +264,9 @@ describe("compact schedule controls", () => {
     );
     expect(screen.getByTestId("schedule-row")).toHaveTextContent("MASONIC");
     fireEvent.click(
-      screen.getByRole("button", { name: "Є запис", exact: true }),
+      screen.getByRole("button", { name: "Усі матчі", exact: true }),
     );
-    expect(screen.getByTestId("schedule-row")).toHaveTextContent("STATE");
+    expect(screen.getAllByTestId("schedule-row")).toHaveLength(2);
     fireEvent.click(
       screen.getByRole("button", { name: "Відкрити журнал: STATE — ECSTATIC" }),
     );
@@ -294,9 +399,15 @@ describe("status sections and advertising placement", () => {
     const upcoming = screen.getByRole("region", { name: "Найближчі матчі" });
     const finished = screen.getByRole("region", { name: "Завершені матчі" });
     const ad = screen.getByRole("complementary", { name: "Реклама" });
-    expect(within(live).getByText("LIVE TEAM")).toBeVisible();
-    expect(within(upcoming).getByText("NEXT")).toBeVisible();
-    expect(within(finished).getByText("DONE")).toBeVisible();
+    expect(
+      within(live).getByRole("button", { name: /^Деталі: LIVE TEAM/ }),
+    ).toBeVisible();
+    expect(
+      within(upcoming).getByRole("button", { name: /^Деталі: NEXT/ }),
+    ).toBeVisible();
+    expect(
+      within(finished).getByRole("button", { name: /^Деталі: DONE/ }),
+    ).toBeVisible();
     expect(live.nextElementSibling).toBe(ad);
     expect(ad.nextElementSibling).toBe(upcoming);
     expect(screen.getAllByTestId("schedule-row")).toHaveLength(3);
@@ -338,6 +449,7 @@ describe("status sections and advertising placement", () => {
   it("keeps tournament collapse state independent across statuses and preserves actions", () => {
     const p = props(mixed());
     render(<MatchSchedule {...p} advertising={{ preview: true }} />);
+    fireEvent.click(screen.getByRole("button", { name: "Вигляд" }));
     fireEvent.click(screen.getByRole("button", { name: "За турніром" }));
     const live = screen.getByRole("region", { name: "Зараз грають" });
     const upcoming = screen.getByRole("region", { name: "Найближчі матчі" });
@@ -717,6 +829,7 @@ describe("match schedule interactions", () => {
       makeMatch({ id: String(index), team1: `Team ${index}` }),
     );
     render(<MatchSchedule {...props(matches)} />);
+    fireEvent.click(screen.getByRole("button", { name: "Вигляд" }));
     expect(screen.getByRole("button", { name: "За часом" })).toHaveAttribute(
       "aria-pressed",
       "true",
@@ -849,7 +962,7 @@ describe("dense schedule", () => {
       ).toBeNull();
     }
   });
-  it("moves source forecasts to details and preserves real percentages", () => {
+  it("shows source forecasts directly in rows and preserves real percentages", () => {
     render(
       <MatchSchedule
         {...props([
@@ -859,28 +972,67 @@ describe("dense schedule", () => {
       />,
     );
     expect(
-      screen.queryByRole("group", { name: /Прогноз джерела:/ }),
-    ).toBeNull();
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Деталі: MASONIC — Linx Legacy Esport",
-      }),
-    );
+      screen.getAllByRole("group", { name: /Прогноз джерела:/ }),
+    ).toHaveLength(2);
     const forecast = screen.getByRole("group", {
       name: "Прогноз джерела: MASONIC — Linx Legacy Esport",
     });
     expect(forecast).toHaveTextContent(
       "MASONIC: 28%; Linx Legacy Esport: 72%.",
     );
-    expect(forecast.querySelector(".ms-forecast-track > span")).toHaveStyle({
+    expect(
+      forecast.querySelector(
+        ".msc-probability--1 .msc-probability-track > span",
+      ),
+    ).toHaveStyle({
       width: "28%",
     });
-    fireEvent.click(
-      screen.getByRole("button", { name: "Деталі: STATE — ECSTATIC" }),
-    );
+    expect(
+      forecast.querySelector(
+        ".msc-probability--2 .msc-probability-track > span",
+      ),
+    ).toHaveStyle({
+      width: "72%",
+    });
+    expect(within(forecast).getByLabelText("MASONIC: 28%")).toBeInTheDocument();
+    expect(
+      within(forecast).getByLabelText("Linx Legacy Esport: 72%"),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("group", { name: "Прогноз джерела: STATE — ECSTATIC" }),
     ).toHaveTextContent("Немає даних");
+  });
+
+  it("keeps both comparison rows for missing forecasts and real zero-percent forecasts", () => {
+    const view = render(<MatchSchedule {...props([makeMatch()])} />);
+    const forecast = screen.getByRole("group", { name: /Прогноз джерела:/ });
+    expect(forecast.querySelectorAll(".msc-probability")).toHaveLength(2);
+    expect(
+      forecast.querySelectorAll(".msc-probability-track > span"),
+    ).toHaveLength(0);
+    expect(
+      within(forecast).getByLabelText("MASONIC: немає даних"),
+    ).toHaveTextContent("—");
+    view.rerender(
+      <MatchSchedule
+        {...props([
+          makeMatch({ predictionPercentTeam1: 0, predictionPercentTeam2: 100 }),
+        ])}
+      />,
+    );
+    expect(within(forecast).getByLabelText("MASONIC: 0%")).toHaveTextContent(
+      "0%",
+    );
+    expect(
+      forecast.querySelector(
+        ".msc-probability--1 .msc-probability-track > span",
+      ),
+    ).toHaveStyle({ width: "0%" });
+    expect(
+      forecast.querySelector(
+        ".msc-probability--2 .msc-probability-track > span",
+      ),
+    ).toHaveStyle({ width: "100%" });
   });
 
   it("keeps an unmarked row clean and adds notes from details", () => {

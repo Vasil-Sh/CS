@@ -1,0 +1,249 @@
+/* Pair each team's forecast and odds on the same 24px baseline. */
+.ms-page--compact-schedule .ms-row > .msc-row-actions {
+  gap: 0;
+}
+.ms-page--compact-schedule .msc-row-actions .ms-icon {
+  flex: 0 1 50%;
+  width: 38px;
+  min-width: 0;
+  padding: 0;
+}
+.ms-page--compact-schedule .msc-schedule {
+  --msc-columns: minmax(104px, 9fr) minmax(210px, 25fr) minmax(170px, 18fr)
+    minmax(150px, 15fr) minmax(76px, 7fr) minmax(108px, 11fr) 132px 76px;
+  --msc-row-height: 68px;
+  --msc-cell-padding: 8px 14px;
+}
+.ms-page--compact-schedule .msc-schedule--comfortable {
+  --msc-row-height: 82px;
+  --msc-cell-padding: 15px 14px;
+}
+.ms-page--compact-schedule .msc-columns > span {
+  border-right: 1px solid var(--ms-line);
+  font-size: 13px;
+}
+.ms-page--compact-schedule .msc-columns > span:last-child {
+  border-right: 0;
+}
+.ms-page--compact-schedule .msc-columns > span:nth-child(2),
+.ms-page--compact-schedule .msc-columns > span:nth-child(3) {
+  justify-content: flex-start;
+}
+.ms-page--compact-schedule .msc-team strong {
+  font-size: 16px;
+}
+.ms-page--compact-schedule .msc-time time {
+  font-size: 16px;
+}
+.ms-page--compact-schedule .msc-team {
+  gap: 9px;
+  height: 24px;
+}
+.ms-page--compact-schedule .msc-match,
+.ms-page--compact-schedule .msc-odds {
+  gap: 4px;
+}
+.ms-page--compact-schedule .msc-tournament strong {
+  font-size: 14px;
+  line-height: 22px;
+}
+.ms-page--compact-schedule .msc-tournament small {
+  font-size: 13px;
+  line-height: 22px;
+}
+.ms-page--compact-schedule .msc-forecast-cell .ms-forecast {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+.ms-page--compact-schedule .msc-probability {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  height: 24px;
+  min-width: 0;
+  font-size: 14px;
+  line-height: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.ms-page--compact-schedule .msc-probability-team {
+  display: none;
+}
+.ms-page--compact-schedule .msc-probability-track {
+  display: block;
+  height: 7px;
+  background: #dce5f1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.ms-page--compact-schedule .msc-probability-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #287fff;
+}
+.ms-page--compact-schedule .msc-probability--2 .msc-probability-track > span {
+  background: #16b985;
+}
+.ms-page--compact-schedule .msc-odds > span {
+  display: block;
+  box-sizing: border-box;
+  height: 24px;
+  line-height: 22px;
+  border: 1px solid #e2e9f3;
+  border-radius: 5px;
+  background: #f7f9fc;
+  font-size: 14px;
+}
+.ms-page--compact-schedule .msc-marks button {
+  font-size: 13px;
+}
+.ms-page--compact-schedule .msc-marks-empty {
+  color: var(--ms-muted);
+}
+.ms-page--compact-schedule .ms-row > .msc-record-actions {
+  padding: 6px 10px;
+  gap: 4px;
+}
+.ms-page--compact-schedule .msc-record-actions button {
+  justify-content: center;
+  min-height: 26px;
+  padding: 3px 6px;
+  border-color: #b9cbe2;
+  background: #f8fafd;
+  font-size: 13px;
+  color: #16294b;
+}
+.ms-page--compact-schedule .msc-record-actions .msc-single-action {
+  border-color: #ff653b;
+  color: #e94d1d;
+  background: #fff;
+}
+.ms-page--compact-schedule .msc-record-actions .msc-single-action:hover {
+  background: #fff3ed;
+  border-color: #e94d1d;
+}
+.ms-page--compact-schedule .msc-record-actions button[aria-pressed="true"] {
+  border-color: #4a9f73;
+  background: #e9f4ee;
+  color: #17754a;
+}
+.ms-page--compact-schedule .msc-comparison-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ms-muted);
+  font-size: 12px;
+  margin: 12px 0 0;
+}
+.ms-page--compact-schedule .msc-comparison-hint svg {
+  flex-shrink: 0;
+}
+@container schedule (min-width: 851px) and (max-width: 1100px) {
+  .ms-page--compact-schedule .ms-row,
+  .ms-page--compact-schedule .msc-columns {
+    grid-template-columns:
+      70px minmax(150px, 1.6fr) minmax(120px, 1.2fr)
+      118px 60px 86px 108px 64px;
+  }
+  .ms-page--compact-schedule .msc-probability {
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 5px;
+    font-size: 13px;
+  }
+  .ms-page--compact-schedule .msc-team strong {
+    font-size: 14px;
+  }
+  .ms-page--compact-schedule .msc-team {
+    gap: 6px;
+  }
+  .ms-page--compact-schedule .msc-tournament strong {
+    font-size: 13px;
+  }
+  .ms-page--compact-schedule .msc-tournament > img {
+    width: 24px;
+    height: 24px;
+  }
+  .ms-page--compact-schedule .msc-tournament {
+    gap: 6px;
+  }
+  .ms-page--compact-schedule .msc-marks button {
+    font-size: 12px;
+  }
+  .ms-page--compact-schedule .ms-row > .msc-record-actions {
+    padding-inline: 5px;
+  }
+  .ms-page--compact-schedule .msc-record-actions button {
+    font-size: 12px;
+    gap: 4px;
+  }
+}
+@container schedule (max-width: 850px) {
+  .ms-page--compact-schedule .msc-team strong {
+    font-size: 13px;
+  }
+  .ms-page--compact-schedule .msc-tournament strong,
+  .ms-page--compact-schedule .msc-tournament small {
+    font-size: 11px;
+  }
+  .ms-page--compact-schedule .msc-forecast-cell .ms-forecast {
+    max-width: none;
+  }
+  .ms-page--compact-schedule .msc-probability {
+    height: auto;
+    min-height: 24px;
+    grid-template-columns: minmax(0, 1fr) 34px minmax(25px, 0.7fr);
+    gap: 5px;
+    font-size: 11px;
+  }
+  .ms-page--compact-schedule .msc-probability-team {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 400;
+  }
+  .ms-page--compact-schedule .msc-odds > span {
+    font-size: 12px;
+  }
+  .ms-page--compact-schedule .ms-row > .msc-record-actions {
+    padding: 8px 5px;
+  }
+  .ms-page--compact-schedule .msc-record-actions button {
+    min-height: 32px;
+    font-size: 12px;
+  }
+  .ms-page--compact-schedule .msc-marks-empty {
+    display: none;
+  }
+  .ms-page--compact-schedule .msc-comparison-hint {
+    display: none;
+  }
+}
+.dark .ms-page--compact-schedule .msc-probability-track {
+  background: #43546a;
+}
+.dark .ms-page--compact-schedule .msc-odds > span,
+.dark .ms-page--compact-schedule .msc-record-actions button {
+  background: #233141;
+  border-color: #4c617c;
+  color: #e7edf5;
+}
+.dark .ms-page--compact-schedule .msc-record-actions .msc-single-action {
+  border-color: #d57450;
+  color: #ff956e;
+}
+.dark .ms-page--compact-schedule .msc-record-actions .msc-single-action:hover {
+  background: #413029;
+}
+.dark
+  .ms-page--compact-schedule
+  .msc-record-actions
+  button[aria-pressed="true"] {
+  background: #214436;
+  color: #8ee1b1;
+  border-color: #4a9f73;
+}
