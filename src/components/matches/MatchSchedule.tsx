@@ -19,7 +19,6 @@ import {
   Search,
   ShieldAlert,
   SlidersHorizontal,
-  ThumbsDown,
   Trophy,
   X,
 } from "lucide-react";
@@ -111,6 +110,26 @@ function TeamLogo({
     />
   ) : (
     <img className="ms-logo" src={placeholder} alt="" aria-hidden="true" />
+  );
+}
+
+function TournamentLogo({
+  src,
+  game,
+}: {
+  src?: string | null;
+  game: Match["game"];
+}) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const placeholder =
+    game === "Dota2"
+      ? "/assets/team-placeholder-dota.svg"
+      : "/assets/team-placeholder-cs2.svg";
+  // tournamentLogo is already proxied by the API client (/api/v1/.../logo/external/...)
+  return src && src !== failedUrl ? (
+    <img src={src} alt="" loading="lazy" onError={() => setFailedUrl(src)} />
+  ) : (
+    <img src={placeholder} alt="" aria-hidden="true" />
   );
 }
 
@@ -485,22 +504,6 @@ export default function MatchSchedule({
                 <Info size={19} aria-hidden="true" /> Даних про форму поки немає
               </p>
             )}
-            <div className="ms-detail-form-tools">
-              <details className="ms-detail-results">
-                <summary>Останні результати</summary>
-                {match.interestStars ? (
-                  <p>Інтерес за рейтингом: {match.interestStars}/5</p>
-                ) : null}
-                {teams.map((team) => (
-                  <p key={team.name}>
-                    <strong>{team.name}:</strong>{" "}
-                    {team.wins || team.losses || team.last || team.streak
-                      ? `${team.wins || 0}W / ${team.losses || 0}L${team.streak ? ` · Серія ${team.streak > 0 ? "W" : "L"}${Math.abs(team.streak)}` : ""}${team.last ? ` · ${team.last}` : ""}`
-                      : "Немає даних"}
-                  </p>
-                ))}
-              </details>
-            </div>
           </section>
         </div>
         <div className="msc-detail-tools">
@@ -516,19 +519,6 @@ export default function MatchSchedule({
           >
             <ExternalLink size={16} /> Джерело матчу
           </a>
-          <button
-            type="button"
-            className="ms-button"
-            aria-pressed={m.matchRatings[match.id] === "dislike"}
-            onClick={() =>
-              m.handleRateMatch(
-                match.id,
-                m.matchRatings[match.id] === "dislike" ? null : "dislike",
-              )
-            }
-          >
-            <ThumbsDown size={16} /> Не цікавить
-          </button>
           <button
             type="button"
             className="ms-button"
@@ -631,14 +621,7 @@ export default function MatchSchedule({
             })}
           </button>
           <div className="msc-tournament">
-            <img
-              src={
-                match.game === "Dota2"
-                  ? "/assets/team-placeholder-dota.svg"
-                  : "/assets/team-placeholder-cs2.svg"
-              }
-              alt=""
-            />
+            <TournamentLogo src={match.tournamentLogo} game={match.game} />
             <div>
               <strong title={match.context}>
                 {match.context || "Турнір не вказаний"}

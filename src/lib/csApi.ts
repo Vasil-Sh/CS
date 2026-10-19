@@ -63,6 +63,7 @@ function tipsGgToApiMatch(m: Record<string, unknown>): ApiMatch {
     positionTeam2: (m.positionTeam2 as number | null) ?? null,
     logoTeam1: proxyLogoUrl(m.logoTeam1 as string | null),
     logoTeam2: proxyLogoUrl(m.logoTeam2 as string | null),
+    tournamentLogo: proxyLogoUrl(m.tournamentLogo as string | null),
     predictionPercentTeam1: (m.pred1 as number) ?? null,
     predictionPercentTeam2: (m.pred2 as number) ?? null,
     bettingCoefficientTeam1: (m.coeff1 as number | null) ?? null,

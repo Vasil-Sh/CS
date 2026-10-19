@@ -27,6 +27,7 @@ interface TipsGgApiMatch {
   logoTeam2: string | null;
   tournament: string;
   stage: string;
+  tournamentLogo?: string | null;
   status: "upcoming" | "live" | "finished";
   tipsCount: number;
   performer: string | null;
@@ -94,6 +95,7 @@ function tipsGgToApiMatch(m: TipsGgApiMatch): Dota2ApiMatch {
     positionTeam2: m.positionTeam2 ?? null,
     logoTeam1: proxyLogoUrl(m.logoTeam1),
     logoTeam2: proxyLogoUrl(m.logoTeam2),
+    tournamentLogo: proxyLogoUrl(m.tournamentLogo ?? null),
     predictionPercentTeam1: m.pred1,
     predictionPercentTeam2: m.pred2,
     bettingCoefficientTeam1: m.coeff1 ?? null,

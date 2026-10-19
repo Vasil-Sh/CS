@@ -26,6 +26,7 @@ export interface BaseApiMatch {
   /** @remarks Backend may provide these from tips.gg JSON-LD */
   tournament?: string;
   stage?: string;
+  tournamentLogo?: string | null;
   status?: "upcoming" | "live" | "finished";
   /** Raw slug for CS2 live-score matching */
   cs2Slug?: string;

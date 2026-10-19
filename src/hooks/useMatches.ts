@@ -76,6 +76,7 @@ export interface Match {
   positionTeam2?: number | null;
   logoTeam1?: string | null;
   logoTeam2?: string | null;
+  tournamentLogo?: string | null;
   predictionPercentTeam1?: number | null;
   predictionPercentTeam2?: number | null;
   bettingCoefficientTeam1?: number | null;
@@ -292,6 +293,7 @@ function apiMatchToMatch(
     positionTeam2: apiMatch.positionTeam2,
     logoTeam1: apiMatch.logoTeam1,
     logoTeam2: apiMatch.logoTeam2,
+    tournamentLogo: apiMatch.tournamentLogo ?? null,
     predictionPercentTeam1: apiMatch.predictionPercentTeam1,
     predictionPercentTeam2: apiMatch.predictionPercentTeam2,
     bettingCoefficientTeam1: apiMatch.bettingCoefficientTeam1,
@@ -373,6 +375,7 @@ function dota2ApiMatchToMatch(m: Dota2ApiMatch): Match {
     positionTeam2: m.positionTeam2,
     logoTeam1: m.logoTeam1,
     logoTeam2: m.logoTeam2,
+    tournamentLogo: m.tournamentLogo ?? null,
     predictionPercentTeam1: m.predictionPercentTeam1,
     predictionPercentTeam2: m.predictionPercentTeam2,
     bettingCoefficientTeam1: m.bettingCoefficientTeam1,
