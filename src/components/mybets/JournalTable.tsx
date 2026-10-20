@@ -65,6 +65,7 @@ const columns = [
   ["profit", "Прибуток"],
   ["goal", "Ціль"],
   ["status", "Статус"],
+  ["result", "Результат"],
 ] as const;
 type Column = (typeof columns)[number][0];
 const statuses = [
@@ -73,7 +74,7 @@ const statuses = [
   ["Win", "Виграші"],
   ["Loss", "Програші"],
 ] as const;
-type Goal = { id: string; name: string };
+type Goal = { id: string; name: string; config?: Record<string, unknown> };
 function TeamLogo({ src, name }: { src?: string | null; name: string }) {
   const [failed, setFailed] = useState(false);
   useEffect(() => setFailed(false), [src]);
@@ -142,9 +143,29 @@ export default function JournalTable(p: Props) {
     setSelectedKey(null);
     disclosureRefs.current.get(journalKey(bet))?.focus({ preventScroll: true });
   };
-  const goalName = (bet: Bet) =>
-    goals.find((goal) => String(goal.id) === String(bet.goalId))?.name ||
-    (goalsLoaded ? "Видалена ціль" : "Ціль недоступна");
+  // Bets store the goal's LOCAL id (timestamp), while GET /goals returns
+  // backend rows whose local id lives inside `config.id`. Match against both
+  // so a valid, active goal never renders as "Видалена ціль".
+  const resolveGoal = (bet: Bet): Goal | undefined => {
+    const target = String(bet.goalId ?? "");
+    if (!target) return undefined;
+    return goals.find((g) => {
+      const cfg = (g.config ?? {}) as { id?: string; _backendId?: string };
+      return (
+        String(g.id) === target ||
+        String(cfg.id ?? "") === target ||
+        String(cfg._backendId ?? "") === target
+      );
+    });
+  };
+  const goalName = (bet: Bet) => {
+    const g = resolveGoal(bet);
+    if (g) {
+      const cfg = (g.config ?? {}) as { name?: string };
+      return g.name || cfg.name || "Без назви";
+    }
+    return goalsLoaded ? "Видалена ціль" : "Ціль недоступна";
+  };
   const scope = useMemo(() => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -304,16 +325,6 @@ export default function JournalTable(p: Props) {
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
-        {bet.result === "Pending" && (
-          <>
-            <DropdownMenuItem onSelect={() => p.onUpdateResult(bet, "Win")}>
-              Позначити виграш
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => p.onUpdateResult(bet, "Loss")}>
-              Позначити програш
-            </DropdownMenuItem>
-          </>
-        )}
         <DropdownMenuItem
           className="text-red-600"
           onSelect={() => p.onDeleteBet(bet)}
@@ -363,7 +374,7 @@ export default function JournalTable(p: Props) {
   const goal = (bet: Bet) =>
     !bet.goalId ? (
       <span className="journal-muted">—</span>
-    ) : goals.some((g) => String(g.id) === String(bet.goalId)) ? (
+    ) : resolveGoal(bet) ? (
       <Link className="journal-goal" to={`/app/goals`} title={goalName(bet)}>
         <Flag size={13} />
         {goalName(bet)}
@@ -463,6 +474,31 @@ export default function JournalTable(p: Props) {
         return goal(bet);
       case "status":
         return badge(bet);
+      case "result":
+        return bet.result === "Pending" ? (
+          <div className="journal-result-actions">
+            <button
+              type="button"
+              className="journal-result-win"
+              onClick={() => p.onUpdateResult(bet, "Win")}
+              aria-label={`Позначити виграш: ${bet.match}`}
+              title="Позначити виграш"
+            >
+              <CheckCircle size={16} />
+            </button>
+            <button
+              type="button"
+              className="journal-result-loss"
+              onClick={() => p.onUpdateResult(bet, "Loss")}
+              aria-label={`Позначити програш: ${bet.match}`}
+              title="Позначити програш"
+            >
+              <XCircle size={16} />
+            </button>
+          </div>
+        ) : (
+          badge(bet)
+        );
     }
   };
   const compactBets = filtered.filter((b) => {

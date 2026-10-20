@@ -27,7 +27,6 @@ import "@/components/mybets/RecordScreen.css";
 import "@/components/mybets/JournalScreen.css";
 import { toast } from "sonner";
 import type { Bet } from "@/types/betting";
-import ResultNoteDialog from "@/components/mybets/ResultNoteDialog";
 import DeleteBetDialog from "@/components/mybets/DeleteBetDialog";
 
 // ── Types ──
@@ -65,12 +64,6 @@ export default function MyBets() {
   const [selectedExpressBet, setSelectedExpressBet] = useState<Bet | null>(
     null,
   );
-  const [resultNoteOpen, setResultNoteOpen] = useState(false);
-  const [resultNote, setResultNote] = useState("");
-  const [pendingResultAction, setPendingResultAction] = useState<{
-    bet: Bet;
-    result: "Win" | "Loss";
-  } | null>(null);
   const [selectedExpressEvents, setSelectedExpressEvents] = useState<
     ParsedEvent[]
   >([]);
@@ -347,35 +340,11 @@ export default function MyBets() {
 
   const updateBetResult = useCallback(
     async (bet: Bet, result: "Win" | "Loss") => {
-      if (result === "Loss") {
-        setPendingResultAction({ bet, result });
-        setResultNote("");
-        setResultNoteOpen(true);
-        return;
-      }
-      // Win — mark directly without notes dialog
+      // Mark directly — no intermediate dialog.
       await executeResultUpdate(bet, result);
     },
     [executeResultUpdate],
   );
-
-  const skipResultNote = useCallback(async () => {
-    if (!pendingResultAction) return;
-    const { bet, result } = pendingResultAction;
-    await executeResultUpdate(bet, result, "");
-    setResultNoteOpen(false);
-    setPendingResultAction(null);
-    setResultNote("");
-  }, [pendingResultAction, executeResultUpdate]);
-
-  const confirmResultUpdate = useCallback(async () => {
-    if (!pendingResultAction) return;
-    const { bet, result } = pendingResultAction;
-    await executeResultUpdate(bet, result, resultNote);
-    setResultNoteOpen(false);
-    setPendingResultAction(null);
-    setResultNote("");
-  }, [pendingResultAction, executeResultUpdate, resultNote]);
 
   const handleShareBet = useCallback((bet: Bet) => {
     setSelectedBet(bet);
@@ -645,14 +614,6 @@ export default function MyBets() {
         )}
 
         {/* Result Note Dialog — opens when marking bet result */}
-        <ResultNoteDialog
-          open={resultNoteOpen}
-          resultNote={resultNote}
-          onResultNoteChange={setResultNote}
-          pendingAction={pendingResultAction}
-          onConfirm={confirmResultUpdate}
-          onSkip={skipResultNote}
-        />
 
         {/* Delete Confirmation Dialog */}
         <DeleteBetDialog

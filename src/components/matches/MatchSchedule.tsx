@@ -640,6 +640,7 @@ export default function MatchSchedule({
               (value, index) => (
                 <span
                   key={index}
+                  className={`odds-chip ${value == null || !Number.isFinite(value) || value <= 1 ? "odds-chip--empty" : index === 0 ? "odds-chip--team1" : "odds-chip--team2"}`}
                   aria-label={`${teams[index].name}: ${coefficient(value)}`}
                 >
                   {coefficient(value)}
@@ -663,7 +664,6 @@ export default function MatchSchedule({
                 aria-controls={`${regionId}-detail-${match.id}`}
                 onClick={() => toggleDetails(match.id)}
               >
-                <FileText size={15} />
                 <span>
                   {rowRisks.length}{" "}
                   {rowRisks.length === 1 ? "нотатка" : "нотатки"}
@@ -683,21 +683,22 @@ export default function MatchSchedule({
             )}
           </div>
           <div
-            className="msc-record-actions"
+            className="msc-record-actions record-actions record-actions--stacked"
             role="group"
             aria-label={`Додати запис: ${match.team1} — ${match.team2}`}
           >
             <button
               type="button"
-              className="msc-single-action"
+              className="record-action record-action--single"
               aria-label={`Ординар: ${match.team1} — ${match.team2}`}
               title="Відкрити форму ординара"
               onClick={() => m.handleAddToBets(match)}
             >
-              <CirclePlus size={15} /> Ординар
+              Ординар
             </button>
             <button
               type="button"
+              className="record-action record-action--express"
               aria-pressed={selectedForExpress}
               aria-label={`${selectedForExpress ? "Прибрати з експресу" : "До експресу"}: ${match.team1} — ${match.team2}`}
               title={
@@ -707,7 +708,6 @@ export default function MatchSchedule({
               }
               onClick={() => m.toggleMatchSelection(match.id)}
             >
-              {selectedForExpress ? <Check size={15} /> : <Layers size={15} />}{" "}
               Експрес
             </button>
           </div>

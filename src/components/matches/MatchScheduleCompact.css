@@ -309,13 +309,38 @@
 .ms-page--compact-schedule .msc-odds {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 4px;
   justify-content: center;
-  text-align: center;
-  font-size: 16px;
+  align-items: center;
+}
+/* Загальні стилі чипа коефіцієнта */
+.ms-page--compact-schedule .msc-odds .odds-chip {
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 13px;
   font-weight: 600;
-  line-height: 24px;
+  line-height: 1.3;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* Коефіцієнт першої команди — синій */
+.ms-page--compact-schedule .msc-odds .odds-chip--team1 {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #dbeafe;
+}
+/* Коефіцієнт другої команди — зелений */
+.ms-page--compact-schedule .msc-odds .odds-chip--team2 {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #d1fae5;
+}
+/* Немає даних */
+.ms-page--compact-schedule .msc-odds .odds-chip--empty {
+  background: #f8fafc;
+  color: #64748b;
+  border-color: #e2e8f0;
 }
 .ms-page--compact-schedule .msc-marks {
   display: flex;
@@ -358,38 +383,64 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 2px;
+  align-items: stretch;
+  gap: 4px;
   padding: 3px 6px;
 }
-.ms-page--compact-schedule .msc-record-actions button {
+/* Загальні стилі кнопки дії запису */
+.ms-page--compact-schedule .msc-record-actions .record-action {
   display: inline-flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 6px;
-  min-height: 25px;
-  padding: 3px 5px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  background: transparent;
-  color: #435371;
+  min-height: 28px;
+  padding: 4px 10px;
+  border: 1px solid;
+  border-radius: 6px;
   font-size: 12px;
+  font-weight: 500;
   line-height: 16px;
   white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 150ms,
+    border-color 150ms;
 }
-.ms-page--compact-schedule .msc-record-actions .msc-single-action {
-  color: #17754a;
+/* Ординар */
+.ms-page--compact-schedule .msc-record-actions .record-action--single {
+  background: #ffffff;
+  color: #2563eb;
+  border-color: #93c5fd;
 }
-.ms-page--compact-schedule .msc-record-actions button:hover {
-  background: #f2f6fc;
-  border-color: var(--ms-line);
+.ms-page--compact-schedule .msc-record-actions .record-action--single:hover {
+  background: #eff6ff;
+  border-color: #2563eb;
 }
-.ms-page--compact-schedule .msc-record-actions button[aria-pressed="true"] {
-  background: #e9f4ee;
-  color: #17754a;
+/* Експрес */
+.ms-page--compact-schedule .msc-record-actions .record-action--express {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: #cbd5e1;
 }
-.ms-page--compact-schedule .msc-record-actions button:focus-visible {
-  outline: 2px solid #437fe0;
-  outline-offset: 1px;
+.ms-page--compact-schedule .msc-record-actions .record-action--express:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+.ms-page--compact-schedule .msc-record-actions .record-action:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+.ms-page--compact-schedule .msc-record-actions .record-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* Обраний для експресу */
+.ms-page--compact-schedule
+  .msc-record-actions
+  .record-action[aria-pressed="true"] {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #1d4ed8;
 }
 .ms-page--compact-schedule .msc-marks button {
   display: inline-flex;
@@ -414,13 +465,13 @@
 }
 .ms-page--compact-schedule .msc-marks .msc-note {
   justify-content: center;
-  border-color: #ff653b;
+  border-color: #cbd5e1;
   background: #fff;
-  color: #e94d1d;
+  color: #0f172a;
 }
 .ms-page--compact-schedule .msc-marks .msc-note:hover {
-  background: #fff3ed;
-  border-color: #e94d1d;
+  background: #f8fafc;
+  border-color: #94a3b8;
 }
 .ms-page--compact-schedule .msc-marks .msc-journal {
   background: #edf5ff;
@@ -737,13 +788,13 @@
   background: #2a3a4e;
 }
 .dark .ms-page--compact-schedule .msc-note {
-  color: #ff956e;
-  border-color: #d57450;
-  background: #233141;
+  color: #e7edf5;
+  border-color: #405064;
+  background: #1d2835;
 }
 .dark .ms-page--compact-schedule .msc-note:hover {
-  background: #413029;
-  border-color: #ff956e;
+  background: #233141;
+  border-color: #94a3b8;
 }
 .dark .ms-page--compact-schedule .msc-row-actions .ms-icon {
   color: #bdcbe0;

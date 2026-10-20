@@ -249,3 +249,36 @@
   color: #8ee1b1;
   border-color: #4a9f73;
 }
+/* Dark mode — record-action chips */
+.dark .ms-page--compact-schedule .msc-record-actions .record-action--single {
+  background: #1d2835;
+  color: #93c5fd;
+  border-color: #3b5b8f;
+}
+.dark
+  .ms-page--compact-schedule
+  .msc-record-actions
+  .record-action--single:hover {
+  background: #233141;
+  border-color: #93c5fd;
+}
+.dark .ms-page--compact-schedule .msc-record-actions .record-action--express {
+  background: #1d2835;
+  color: #e7edf5;
+  border-color: #405064;
+}
+.dark
+  .ms-page--compact-schedule
+  .msc-record-actions
+  .record-action--express:hover {
+  background: #233141;
+  border-color: #94a3b8;
+}
+.dark
+  .ms-page--compact-schedule
+  .msc-record-actions
+  .record-action[aria-pressed="true"] {
+  background: #233141;
+  color: #93c5fd;
+  border-color: #93c5fd;
+}
