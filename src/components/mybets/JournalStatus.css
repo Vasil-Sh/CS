@@ -1,0 +1,48 @@
+.journal-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  min-width: 0;
+  min-height: 30px;
+  padding: 5px 10px;
+
+  border: 1px solid var(--status-border);
+  border-radius: 6px;
+  background: var(--status-background);
+  color: var(--status-color);
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.journal-status-chip svg {
+  flex-shrink: 0;
+  color: var(--status-color);
+}
+
+.journal-status-chip__label {
+  white-space: nowrap;
+}
+
+.journal-status-chip--pending {
+  --status-background: #fff5df;
+  --status-border: #f1dcae;
+  --status-color: #c78100;
+}
+
+.journal-status-chip--win {
+  --status-background: #ddf8ec;
+  --status-border: #b9ecd6;
+  --status-color: #00a86b;
+}
+
+.journal-status-chip--loss {
+  --status-background: #ffebee;
+  --status-border: #f6c3c9;
+  --status-color: #e32636;
+}

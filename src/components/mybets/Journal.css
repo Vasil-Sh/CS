@@ -427,31 +427,8 @@
   color: #878d80;
   font-size: 11px;
 }
-.journal-goal {
-  display: inline-flex;
-  gap: 5px;
-  align-items: center;
-  color: #b34e28;
-  font-size: 12px;
-}
-.journal-goal-chip {
-  display: inline-block;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  white-space: normal;
-  padding: 8px 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 5px;
-  background: #ffffff;
-  color: #0f172a;
-  font-size: 13px;
-  line-height: 1.3;
-}
 .journal-amount {
   font-weight: 700;
-}
-.journal-goal svg {
-  flex-shrink: 0;
 }
 .journal-icon {
   display: inline-flex;

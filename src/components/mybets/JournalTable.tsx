@@ -7,7 +7,7 @@ import {
   useState,
   type ComponentProps,
 } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
   SlidersHorizontal,
@@ -21,7 +21,6 @@ import {
   Trash2,
   CheckCircle,
   XCircle,
-  Clock3,
   ChevronDown,
   Download,
   Info,
@@ -41,6 +40,8 @@ import { UserDataService } from "@/lib/userDataService";
 import { parseExpressEvents } from "@/lib/parser/expressParser";
 import CompactBetModal from "./CompactBetModal";
 import JournalRecordDetails from "./JournalRecordDetails";
+import { JournalStatus } from "./JournalStatus";
+import { JournalGoal } from "./JournalGoal";
 import {
   journalKey,
   journalExpress,
@@ -90,6 +91,7 @@ function TeamLogo({ src, name }: { src?: string | null; name: string }) {
   );
 }
 export default function JournalTable(p: Props) {
+  const navigate = useNavigate();
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [game, setGame] = useState("all");
   const [currency, setCurrency] = useState("all");
@@ -373,16 +375,15 @@ export default function JournalTable(p: Props) {
     </div>
   );
   const badge = (bet: Bet) => (
-    <span className={`journal-badge status-${bet.result}`}>
-      {bet.result === "Win" ? (
-        <CheckCircle size={15} />
-      ) : bet.result === "Loss" ? (
-        <XCircle size={15} />
-      ) : (
-        <Clock3 size={15} />
-      )}
-      {journalStatus(bet)}
-    </span>
+    <JournalStatus
+      status={
+        bet.result === "Win"
+          ? "win"
+          : bet.result === "Loss"
+            ? "loss"
+            : "pending"
+      }
+    />
   );
   const profit = (bet: Bet) => (
     <strong
@@ -391,16 +392,24 @@ export default function JournalTable(p: Props) {
       {journalMoney(journalProfit(bet), bet.currency, true)}
     </strong>
   );
-  const goal = (bet: Bet) =>
-    !bet.goalId ? (
-      <span className="journal-muted">—</span>
-    ) : resolveGoal(bet) ? (
-      <Link className="journal-goal" to={`/app/goals`} title={goalName(bet)}>
-        <span className="journal-goal-chip">{goalName(bet)}</span>
-      </Link>
-    ) : (
-      <span className="journal-muted">{goalName(bet)}</span>
-    );
+  const goal = (bet: Bet) => {
+    const openGoal = () => navigate("/app/goals");
+    if (!bet.goalId) {
+      return <JournalGoal goal={{ kind: "none" }} onOpen={openGoal} />;
+    }
+    const g = resolveGoal(bet);
+    if (g) {
+      const cfg = (g.config ?? {}) as { name?: string };
+      const name = g.name || cfg.name || "Без назви";
+      return (
+        <JournalGoal
+          goal={{ kind: "linked", id: g.id, name }}
+          onOpen={openGoal}
+        />
+      );
+    }
+    return <JournalGoal goal={{ kind: "deleted" }} onOpen={openGoal} />;
+  };
   const cell = (id: Column, bet: Bet) => {
     const date = journalDate(bet.date);
     switch (id) {
@@ -684,7 +693,7 @@ export default function JournalTable(p: Props) {
                   .map(([id, label]) => (
                     <th
                       key={id}
-                      className={`col-${id}`}
+                      className={`col-${id}${id === "goal" ? " journal-goal-cell" : ""}`}
                       aria-sort={
                         p.sortBy === id
                           ? ascending
@@ -729,7 +738,11 @@ export default function JournalTable(p: Props) {
                     {columns
                       .filter(([id]) => visible.has(id))
                       .map(([id, label]) => (
-                        <td className={`col-${id}`} data-label={label} key={id}>
+                        <td
+                          className={`col-${id}${id === "goal" ? " journal-goal-cell" : ""}`}
+                          data-label={label}
+                          key={id}
+                        >
                           {cell(id, bet)}
                         </td>
                       ))}
