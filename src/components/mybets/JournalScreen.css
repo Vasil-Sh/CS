@@ -8,17 +8,25 @@
   font-family: "Record Inter", Inter, sans-serif;
 }
 .journal-header .record-entry-hero {
-  background-color: #0b1115;
-  background-image:
-    linear-gradient(90deg, #0b111566, transparent 55%),
-    url("/assets/records/journal-records-v2.jpg");
-  background-position:
-    center,
-    right center;
-  background-size:
-    100% 100%,
-    auto 115%;
-  background-repeat: no-repeat;
+  isolation: isolate;
+  overflow: hidden;
+  background: #0b1115;
+}
+/* Fit the whole artwork vertically. Fade its own left edge, rather than
+   exposing a hard seam where the image meets the solid header background. */
+.journal-header .record-entry-hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  aspect-ratio: 2157 / 729;
+  background: url("/assets/records/journal-records-v2.jpg") right top / auto
+    100% no-repeat;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 28%);
+  mask-image: linear-gradient(90deg, transparent, #000 28%);
+  pointer-events: none;
+  z-index: -1;
 }
 .journal-header .record-entry-intro {
   max-width: 58%;
@@ -141,6 +149,10 @@
 .journal-page .journal-statuses [aria-pressed="true"] {
   color: #ff572b;
 }
+.journal-page .journal-statuses button span {
+  background: #ff6035;
+  color: #fff;
+}
 .journal-page .journal-record-count {
   font-size: 13px;
 }
@@ -186,7 +198,7 @@
   width: 126px;
 }
 .journal-page .journal-records-table .col-actions-head {
-  width: 126px;
+  width: 210px;
 }
 .journal-page .journal-match-title strong {
   font-size: 18px;
@@ -259,15 +271,38 @@
   padding: 8px 10px;
   font-size: 13px;
   gap: 7px;
+  border: 1px solid #cbd5e1;
   border-radius: 5px;
+  background: #ffffff;
+  color: #0f172a;
 }
 .journal-page .journal-badge svg {
   width: 18px;
   height: 18px;
 }
 .journal-page .status-Win {
-  color: #008d60;
-  background: #e0f6ec;
+  color: #0f172a;
+  background: #ffffff;
+  border-color: #34d399;
+}
+.journal-page .status-Win svg {
+  color: #059669;
+}
+.journal-page .status-Loss {
+  color: #0f172a;
+  background: #ffffff;
+  border-color: #f87171;
+}
+.journal-page .status-Loss svg {
+  color: #dc2626;
+}
+.journal-page .status-Pending {
+  color: #0f172a;
+  background: #ffffff;
+  border-color: #fbbf24;
+}
+.journal-page .status-Pending svg {
+  color: #d97706;
 }
 .journal-page .journal-muted {
   color: #7d8ba5;
@@ -277,9 +312,9 @@
   gap: 10px;
 }
 .journal-page :is(.journal-row-share, .journal-actions .journal-icon) {
-  width: 42px;
-  height: 42px;
-  min-height: 42px;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
   padding: 0;
   border-color: var(--journal-border);
   border-radius: 6px;
@@ -318,13 +353,8 @@
   font-size: 22px;
 }
 @media (max-width: 1150px) {
-  .journal-header .record-entry-hero {
-    background-image:
-      linear-gradient(90deg, #0b1115cc, #0b111533 60%, transparent),
-      url("/assets/records/journal-records-v2.jpg");
-    background-size:
-      100% 100%,
-      auto 105%;
+  .journal-header .record-entry-hero::before {
+    opacity: 0.7;
   }
   .journal-header .record-entry-stats {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -353,7 +383,7 @@
     width: 110px;
   }
   .journal-page .journal-records-table .col-actions-head {
-    width: 108px;
+    width: 180px;
   }
   .journal-page .journal-record-row > td {
     padding: 14px 9px;
@@ -370,15 +400,9 @@
 @media (max-width: 600px) {
   .journal-header .record-entry-hero {
     padding: 48px 22px 44px;
-    background-image:
-      linear-gradient(90deg, #0b1115ed, #0b1115a6),
-      url("/assets/records/journal-records-v2.jpg");
-    background-size:
-      100% 100%,
-      auto 100%;
-    background-position:
-      center,
-      right center;
+  }
+  .journal-header .record-entry-hero::before {
+    opacity: 0.3;
   }
   .journal-header .record-entry-intro {
     max-width: 100%;

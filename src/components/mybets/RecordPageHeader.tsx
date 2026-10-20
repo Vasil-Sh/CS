@@ -111,7 +111,8 @@ export default function RecordPageHeader({
         value: (stats.profit > 0 ? "+" : "") + money(stats.profit),
         hint: journal ? currencyHint : "За весь час",
         Icon: BarChart3,
-        color: stats.profit > 0 ? "positive" : "",
+        color:
+          stats.profit > 0 ? "positive" : stats.profit < 0 ? "negative" : "",
       },
       {
         label: "Всього записів",

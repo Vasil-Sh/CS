@@ -13,7 +13,6 @@ import {
   SlidersHorizontal,
   Columns3,
   MoreHorizontal,
-  Flag,
   Share2,
   ChevronLeft,
   ChevronRight,
@@ -65,7 +64,6 @@ const columns = [
   ["profit", "Прибуток"],
   ["goal", "Ціль"],
   ["status", "Статус"],
-  ["result", "Результат"],
 ] as const;
 type Column = (typeof columns)[number][0];
 const statuses = [
@@ -339,6 +337,28 @@ export default function JournalTable(p: Props) {
       className="journal-actions"
       onClick={(event) => event.stopPropagation()}
     >
+      {bet.result === "Pending" && (
+        <div className="journal-result-actions">
+          <button
+            type="button"
+            className="journal-result-win"
+            onClick={() => p.onUpdateResult(bet, "Win")}
+            aria-label={`Позначити виграш: ${bet.match}`}
+            title="Позначити виграш"
+          >
+            <CheckCircle size={16} />
+          </button>
+          <button
+            type="button"
+            className="journal-result-loss"
+            onClick={() => p.onUpdateResult(bet, "Loss")}
+            aria-label={`Позначити програш: ${bet.match}`}
+            title="Позначити програш"
+          >
+            <XCircle size={16} />
+          </button>
+        </div>
+      )}
       <button
         type="button"
         className="journal-row-share"
@@ -376,8 +396,7 @@ export default function JournalTable(p: Props) {
       <span className="journal-muted">—</span>
     ) : resolveGoal(bet) ? (
       <Link className="journal-goal" to={`/app/goals`} title={goalName(bet)}>
-        <Flag size={13} />
-        {goalName(bet)}
+        <span className="journal-goal-chip">{goalName(bet)}</span>
       </Link>
     ) : (
       <span className="journal-muted">{goalName(bet)}</span>
@@ -465,7 +484,11 @@ export default function JournalTable(p: Props) {
         );
       }
       case "amount":
-        return journalMoney(journalAmount(bet), bet.currency);
+        return (
+          <strong className="journal-amount">
+            {journalMoney(journalAmount(bet), bet.currency)}
+          </strong>
+        );
       case "odds":
         return Number(bet.odds).toFixed(2);
       case "profit":
@@ -474,31 +497,6 @@ export default function JournalTable(p: Props) {
         return goal(bet);
       case "status":
         return badge(bet);
-      case "result":
-        return bet.result === "Pending" ? (
-          <div className="journal-result-actions">
-            <button
-              type="button"
-              className="journal-result-win"
-              onClick={() => p.onUpdateResult(bet, "Win")}
-              aria-label={`Позначити виграш: ${bet.match}`}
-              title="Позначити виграш"
-            >
-              <CheckCircle size={16} />
-            </button>
-            <button
-              type="button"
-              className="journal-result-loss"
-              onClick={() => p.onUpdateResult(bet, "Loss")}
-              aria-label={`Позначити програш: ${bet.match}`}
-              title="Позначити програш"
-            >
-              <XCircle size={16} />
-            </button>
-          </div>
-        ) : (
-          badge(bet)
-        );
     }
   };
   const compactBets = filtered.filter((b) => {

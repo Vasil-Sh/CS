@@ -5,6 +5,19 @@
   font-size: 14px;
   min-width: 0;
 }
+.sp-screen .strategies-tabs button {
+  font:
+    600 21px/1.4 Oswald,
+    sans-serif;
+  padding: 14px 12px;
+  color: #778195;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.sp-screen .strategies-tabs button[aria-pressed="true"] {
+  color: #ff5b2a;
+  border-color: #ff5b2a;
+}
 .sp-panel {
   background: white;
   border: 1px solid #dcded7;
