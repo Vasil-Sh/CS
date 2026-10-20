@@ -60,8 +60,8 @@
   min-width: 20px;
   padding: 1px 7px;
   border-radius: 999px;
-  background: #e6ebf3;
-  color: #5a6b85;
+  background: #ff602d;
+  color: #ffffff;
   font-size: 12px;
   font-weight: 600;
   line-height: 18px;
@@ -72,8 +72,8 @@
   .msc-personal
   button[aria-pressed="true"]
   .msc-personal-count {
-  background: #ffe0d5;
-  color: #e94d1d;
+  background: #ff602d;
+  color: #ffffff;
 }
 .ms-page--compact-schedule
   .msc-toolbar
@@ -115,8 +115,8 @@
   min-width: 20px;
   padding: 1px 7px;
   border-radius: 999px;
-  background: #e6ebf3;
-  color: #5a6b85;
+  background: #ff602d;
+  color: #ffffff;
   font-size: 12px;
   font-weight: 600;
   line-height: 18px;
@@ -128,8 +128,8 @@
   .msc-game-shortcuts
   button[aria-pressed="true"]
   .msc-game-count {
-  background: #dbe3ef;
-  color: #17243e;
+  background: #ff602d;
+  color: #ffffff;
 }
 .ms-page--compact-schedule
   .msc-toolbar
@@ -307,8 +307,8 @@
   .msc-toolbar
   .msc-personal
   .msc-personal-count {
-  background: #33435a;
-  color: #bdcbe0;
+  background: #ff602d;
+  color: #ffffff;
 }
 .dark
   .ms-page--compact-schedule
@@ -316,6 +316,6 @@
   .msc-personal
   button[aria-pressed="true"]
   .msc-personal-count {
-  background: #4a2b24;
-  color: #ff956e;
+  background: #ff602d;
+  color: #ffffff;
 }

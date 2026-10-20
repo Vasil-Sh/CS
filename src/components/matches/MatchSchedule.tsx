@@ -664,10 +664,8 @@ export default function MatchSchedule({
                 aria-controls={`${regionId}-detail-${match.id}`}
                 onClick={() => toggleDetails(match.id)}
               >
-                <span>
-                  {rowRisks.length}{" "}
-                  {rowRisks.length === 1 ? "нотатка" : "нотатки"}
-                </span>
+                <span className="msc-note-count">{rowRisks.length}</span>{" "}
+                <span>{rowRisks.length === 1 ? "нотатка" : "нотатки"}</span>
               </button>
             )}
             {recordedIds.has(match.id) && onOpenJournal && (

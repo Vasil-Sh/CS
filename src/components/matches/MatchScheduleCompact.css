@@ -469,6 +469,19 @@
   background: #fff;
   color: #0f172a;
 }
+.ms-page--compact-schedule .msc-marks .msc-note .msc-note-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: #ff602d;
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+}
 .ms-page--compact-schedule .msc-marks .msc-note:hover {
   background: #f8fafc;
   border-color: #94a3b8;
