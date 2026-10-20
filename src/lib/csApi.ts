@@ -66,6 +66,8 @@ function tipsGgToApiMatch(m: Record<string, unknown>): ApiMatch {
     tournamentLogo: proxyLogoUrl(m.tournamentLogo as string | null),
     predictionPercentTeam1: (m.pred1 as number) ?? null,
     predictionPercentTeam2: (m.pred2 as number) ?? null,
+    predictionSource:
+      m.predictionSource === "hltv-votes" ? "hltv-votes" : undefined,
     bettingCoefficientTeam1: (m.coeff1 as number | null) ?? null,
     bettingCoefficientTeam2: (m.coeff2 as number | null) ?? null,
     tournament: String(m.tournament || ""),

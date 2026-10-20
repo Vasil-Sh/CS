@@ -79,6 +79,7 @@ export interface Match {
   tournamentLogo?: string | null;
   predictionPercentTeam1?: number | null;
   predictionPercentTeam2?: number | null;
+  predictionSource?: "hltv-votes";
   bettingCoefficientTeam1?: number | null;
   bettingCoefficientTeam2?: number | null;
   stars?: number;
@@ -296,6 +297,7 @@ function apiMatchToMatch(
     tournamentLogo: apiMatch.tournamentLogo ?? null,
     predictionPercentTeam1: apiMatch.predictionPercentTeam1,
     predictionPercentTeam2: apiMatch.predictionPercentTeam2,
+    predictionSource: apiMatch.predictionSource,
     bettingCoefficientTeam1: apiMatch.bettingCoefficientTeam1,
     bettingCoefficientTeam2: apiMatch.bettingCoefficientTeam2,
     stars: apiMatch.stars,

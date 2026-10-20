@@ -21,6 +21,7 @@ export interface BaseApiMatch {
   logoTeam2: string | null;
   predictionPercentTeam1: number | null;
   predictionPercentTeam2: number | null;
+  predictionSource?: "hltv-votes";
   bettingCoefficientTeam1: number | null;
   bettingCoefficientTeam2: number | null;
   /** @remarks Backend may provide these from tips.gg JSON-LD */

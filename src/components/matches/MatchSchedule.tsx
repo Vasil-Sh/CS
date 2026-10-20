@@ -171,7 +171,7 @@ function SourceForecast({ match }: { match: Match }) {
             className={`msc-probability msc-probability--${index + 1}`}
             key={index}
             aria-label={`${team}: ${value === null ? "немає даних" : percentLabel(value)}`}
-            title={`${team}: ${value === null ? "немає даних" : percentLabel(value)}`}
+            title={`${team}: ${value === null ? "немає даних" : percentLabel(value)}${match.predictionSource === "hltv-votes" ? " — голосування користувачів HLTV, не ймовірність перемоги" : ""}`}
           >
             <span className="msc-probability-team" aria-hidden="true">
               {team}
