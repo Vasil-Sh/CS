@@ -80,6 +80,7 @@ export interface MatchScheduleProps {
   onResults: () => void;
   now?: Date;
   advertising?: ScheduleAdvertisementProps;
+  advertisingBottom?: ScheduleAdvertisementProps;
   journalBets?: Bet[];
   onOpenJournal?: (match: Match) => void;
 }
@@ -218,6 +219,7 @@ export default function MatchSchedule({
   onResults,
   now = new Date(),
   advertising,
+  advertisingBottom,
   journalBets = [],
   onOpenJournal,
 }: MatchScheduleProps) {
@@ -1096,6 +1098,9 @@ export default function MatchSchedule({
             </div>
             {sections.map((section) => (
               <Fragment key={section.key}>
+                {section.key === "finished" && advertisingBottom && (
+                  <ScheduleAdvertisement {...advertisingBottom} />
+                )}
                 <section
                   className={`ms-status-section ms-status-section--${section.key}`}
                   aria-labelledby={`${regionId}-section-${section.key}`}

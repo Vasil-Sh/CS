@@ -9,7 +9,7 @@ import AddToRiskyTeamsModal from "@/components/matches/AddToRiskyTeamsModal";
 import PastDaysModal from "@/components/matches/PastDaysModal";
 import MatchSchedule from "@/components/matches/MatchSchedule";
 import type { ScheduleAdCampaign } from "@/components/matches/ScheduleAdvertisement";
-import { fetchActiveBanner } from "@/lib/bannerApi";
+import { fetchActiveBanners, fetchBannerSlots } from "@/lib/bannerApi";
 import { useMatches } from "@/hooks/useMatches";
 
 export type { Match } from "@/hooks/useMatches";
@@ -19,7 +19,14 @@ export default function Matches() {
   const { bets } = useData();
   const navigate = useNavigate();
   const [noteTeam, setNoteTeam] = useState<string>();
-  const [banner, setBanner] = useState<ScheduleAdCampaign | null>(null);
+  const [banners, setBanners] = useState<{
+    top: ScheduleAdCampaign | null;
+    bottom: ScheduleAdCampaign | null;
+  }>({ top: null, bottom: null });
+  const [placeholders, setPlaceholders] = useState({
+    top: false,
+    bottom: false,
+  });
   const riskyMatch = m.selectedRiskyMatch;
   const game = riskyMatch?.game || "CS2";
   const team1RiskInfo = m.getTeamRiskInfo(riskyMatch?.team1 || "", game);
@@ -27,9 +34,16 @@ export default function Matches() {
 
   useEffect(() => {
     let cancelled = false;
-    fetchActiveBanner().then((campaign) => {
-      if (!cancelled) setBanner(campaign);
-    });
+    Promise.all([fetchActiveBanners(), fetchBannerSlots()]).then(
+      ([campaigns, slots]) => {
+        if (cancelled) return;
+        setBanners(campaigns);
+        setPlaceholders({
+          top: slots.find((s) => s.slot === 1)?.placeholderEnabled ?? false,
+          bottom: slots.find((s) => s.slot === 2)?.placeholderEnabled ?? false,
+        });
+      },
+    );
     return () => {
       cancelled = true;
     };
@@ -46,7 +60,14 @@ export default function Matches() {
               `/app/my-bets?tab=records&q=${encodeURIComponent(match.team1)}`,
             )
           }
-          advertising={{ campaign: banner }}
+          advertising={{
+            campaign: banners.top,
+            preview: placeholders.top,
+          }}
+          advertisingBottom={{
+            campaign: banners.bottom,
+            preview: placeholders.bottom,
+          }}
           onResults={() => m.setPastDaysModalOpen(true)}
           onEditNote={(match, team) => {
             setNoteTeam(team);
