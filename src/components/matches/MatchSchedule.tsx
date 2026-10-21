@@ -148,6 +148,22 @@ function teamStatusTone(
   }
 }
 
+function formTone(raw: string): "success" | "warning" | "danger" | null {
+  switch (raw) {
+    case "hot_streak":
+    case "stable":
+    case "momentum":
+      return "success";
+    case "falling":
+    case "inconsistent":
+      return "warning";
+    case "slump":
+      return "danger";
+    default:
+      return null;
+  }
+}
+
 const percentLabel = (value: number) =>
   `${new Intl.NumberFormat("uk-UA", { maximumFractionDigits: 1 }).format(value)}%`;
 
@@ -395,6 +411,7 @@ export default function MatchSchedule({
             ? team.rank
             : null,
         form: form !== "Немає даних" ? form : null,
+        formTone: form !== "Немає даних" ? formTone(team.form) : null,
         status: team.risk
           ? {
               label: team.risk.status,

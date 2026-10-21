@@ -7,7 +7,7 @@
 
   overflow: hidden;
   margin: 14px 12px;
-  background: #fff;
+  background: #eef1f6;
   border: 1px solid var(--tc-border);
   border-radius: 10px;
   color: var(--tc-text);
@@ -70,14 +70,26 @@
 }
 
 .team-comparison__table th:first-child {
-  background: var(--tc-label);
+  background: #f7f9fc;
   color: #334e73;
   text-align: left;
+}
+
+.team-comparison__table tbody th[scope="row"] {
+  background: #fff;
+  color: #0f172a;
+  text-align: center;
+  font-weight: 700;
 }
 
 .team-comparison__table td {
   text-align: center;
   font-variant-numeric: tabular-nums;
+}
+
+.team-comparison__table tbody th,
+.team-comparison__table tbody td {
+  background: #fff;
 }
 
 .team-comparison__team {

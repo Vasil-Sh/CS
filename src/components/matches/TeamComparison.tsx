@@ -17,6 +17,7 @@ export type Team = {
   placeholder?: string | null;
   rank?: number | null;
   form?: string | null;
+  formTone?: "success" | "warning" | "danger" | null;
   status?: {
     label: string;
     tone: "warning" | "danger" | "success" | "neutral";
@@ -117,7 +118,13 @@ export function TeamComparison({
               <th scope="row">Форма</th>
               {teams.map((team) => (
                 <td key={team.id}>
-                  {team.form || (
+                  {team.form ? (
+                    <span
+                      className={`team-comparison__badge team-comparison__badge--${team.formTone ?? "neutral"}`}
+                    >
+                      {team.form}
+                    </span>
+                  ) : (
                     <span className="team-comparison__muted">
                       Форма не надана
                     </span>
