@@ -7,14 +7,11 @@ import {
   CalendarDays,
   Check,
   ChevronDown,
-  CirclePlus,
   Clock3,
   ExternalLink,
   Info,
   Layers,
   Settings2,
-  Pencil,
-  Plus,
   RefreshCw,
   Search,
   ShieldAlert,
@@ -31,6 +28,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { hasJournalRecord } from "./scheduleJournal";
+import { TeamComparison, type Team } from "./TeamComparison";
 import {
   ScheduleAdvertisement,
   type ScheduleAdvertisementProps,
@@ -133,12 +131,21 @@ function TournamentLogo({
   );
 }
 
-function RiskBadge({ status }: { status: string }) {
-  return (
-    <span className={`ms-risk ms-risk--${riskTone(status)}`}>
-      {status || "Неоцінена"}
-    </span>
-  );
+function teamStatusTone(
+  status: string,
+): "warning" | "danger" | "success" | "neutral" {
+  switch (riskTone(status)) {
+    case "ban":
+    case "risk":
+      return "danger";
+    case "caution":
+      return "warning";
+    case "stable":
+    case "reliable":
+      return "success";
+    default:
+      return "neutral";
+  }
 }
 
 const percentLabel = (value: number) =>
@@ -356,17 +363,17 @@ export default function MatchSchedule({
 
   function renderDetails(match: Match) {
     const teamRisks = risks.get(match.id);
-    const teams = [
+    const placeholder =
+      match.game === "Dota2"
+        ? "/assets/team-placeholder-dota.svg"
+        : "/assets/team-placeholder-cs2.svg";
+    const sources = [
       {
         name: match.team1,
         logo: match.logoTeam1,
         risk: teamRisks?.[0],
         rank: match.positionTeam1,
         form: match.formStabilityTeam1,
-        wins: match.formWins1,
-        losses: match.formLosses1,
-        last: match.formLast1,
-        streak: match.formStreak1,
       },
       {
         name: match.team2,
@@ -374,172 +381,39 @@ export default function MatchSchedule({
         risk: teamRisks?.[1],
         rank: match.positionTeam2,
         form: match.formStabilityTeam2,
-        wins: match.formWins2,
-        losses: match.formLosses2,
-        last: match.formLast2,
-        streak: match.formStreak2,
       },
     ];
-    const noteCount = teams.filter((team) => team.risk).length;
-    const hasForm = teams.some(
-      (team) => formLabel(team.form) !== "Немає даних",
-    );
+    const teams = sources.map((team, index): Team => {
+      const form = formLabel(team.form);
+      return {
+        id: `${match.id}-${index}`,
+        name: team.name,
+        logo: proxyLogoUrl(team.logo ?? null, match.game),
+        placeholder,
+        rank:
+          team.rank != null && Number.isFinite(team.rank) && team.rank > 0
+            ? team.rank
+            : null,
+        form: form !== "Немає даних" ? form : null,
+        status: team.risk
+          ? {
+              label: team.risk.status,
+              tone: teamStatusTone(team.risk.status),
+            }
+          : null,
+        note: team.risk?.notes?.trim() ? team.risk.notes : null,
+      };
+    }) as [Team, Team];
+
     return (
-      <div
-        className="ms-detail-panel"
-        id={`${regionId}-detail-${match.id}`}
-        role="region"
-        aria-label={`Деталі: ${match.team1} — ${match.team2}`}
-      >
-        <div className="ms-detail-content">
-          <section
-            className="ms-detail-notes"
-            aria-labelledby={`${regionId}-notes-${match.id}`}
-          >
-            <h3 id={`${regionId}-notes-${match.id}`}>
-              Примітки до команд
-              <span
-                className="ms-detail-count"
-                aria-label={`Команд із примітками: ${noteCount}`}
-              >
-                {noteCount}
-              </span>
-            </h3>
-            <div className="ms-detail-cards">
-              {teams.map((team) => (
-                <article
-                  className={`ms-detail-card${team.risk ? ` ms-detail-card--${riskTone(team.risk.status)}` : ""}`}
-                  key={team.name}
-                  aria-label={`Примітка: ${team.name}`}
-                >
-                  <header className="ms-detail-card-head">
-                    <TeamLogo
-                      name={team.name}
-                      src={team.logo}
-                      game={match.game}
-                    />
-                    <strong>{team.name}</strong>
-                    {team.risk && <RiskBadge status={team.risk.status} />}
-                  </header>
-                  {team.risk?.notes?.trim() ? (
-                    <p className="ms-detail-note-text">{team.risk.notes}</p>
-                  ) : (
-                    <div className="ms-detail-note-empty">
-                      <p>
-                        {team.risk
-                          ? "Текст примітки ще не додано"
-                          : "Ще немає примітки"}
-                      </p>
-                      <span>Додайте важливе про команду.</span>
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    className="ms-detail-note-action"
-                    onClick={() => onEditNote(match, team.name)}
-                    aria-label={`${team.risk ? "Редагувати" : "Додати"} нотатку: ${team.name}`}
-                  >
-                    {team.risk ? (
-                      <Pencil size={16} aria-hidden="true" />
-                    ) : (
-                      <Plus size={16} aria-hidden="true" />
-                    )}
-                    {team.risk ? "Редагувати примітку" : "Додати примітку"}
-                  </button>
-                </article>
-              ))}
-            </div>
-          </section>
-          <section
-            className="ms-detail-form"
-            aria-labelledby={`${regionId}-form-${match.id}`}
-          >
-            <h3 id={`${regionId}-form-${match.id}`}>Форма та рейтинг</h3>
-            <div className="ms-detail-table-wrap">
-              <table className="ms-detail-table" aria-label="Рейтинг команд">
-                <thead>
-                  <tr>
-                    <th scope="col">Команда</th>
-                    <th scope="col">Рейтинг</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {teams.map((team) => (
-                    <tr key={team.name}>
-                      <th scope="row">
-                        <div className="ms-detail-ranked-team">
-                          <TeamLogo
-                            name={team.name}
-                            src={team.logo}
-                            game={match.game}
-                          />
-                          <span>
-                            <strong>{team.name}</strong>
-                            {hasForm && (
-                              <small>
-                                {formLabel(team.form) === "Немає даних"
-                                  ? "Форма не надана"
-                                  : formLabel(team.form)}
-                              </small>
-                            )}
-                          </span>
-                        </div>
-                      </th>
-                      <td>
-                        {team.rank != null &&
-                        Number.isFinite(team.rank) &&
-                        team.rank > 0 ? (
-                          <strong>#{team.rank}</strong>
-                        ) : (
-                          <span aria-label="Рейтинг відсутній">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {!hasForm && (
-              <p className="ms-detail-form-empty">
-                <Info size={19} aria-hidden="true" /> Даних про форму поки немає
-              </p>
-            )}
-          </section>
-        </div>
-        <div className="msc-detail-tools">
-          <div className="msc-detail-forecast">
-            <small>Прогноз джерела, не гарантія результату.</small>
-          </div>
-          <a
-            className="ms-button"
-            href={matchSource(match)}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Гра: ${match.team1} — ${match.team2}`}
-          >
-            <ExternalLink size={16} /> Джерело матчу
-          </a>
-          <button
-            type="button"
-            className="ms-button"
-            aria-pressed={m.selectedMatchIds.has(match.id)}
-            aria-label={`${m.selectedMatchIds.has(match.id) ? "Прибрати матч з експресу" : "Додати матч до експресу"}: ${match.team1} — ${match.team2}`}
-            onClick={() => m.toggleMatchSelection(match.id)}
-          >
-            <Layers size={16} />{" "}
-            {m.selectedMatchIds.has(match.id)
-              ? "Прибрати з експресу"
-              : "До експресу"}
-          </button>
-          <button
-            type="button"
-            className="ms-button ms-primary"
-            aria-label={`Створити запис: ${match.team1} — ${match.team2}`}
-            onClick={() => m.handleAddToBets(match)}
-          >
-            <CirclePlus size={16} /> Додати запис
-          </button>
-        </div>
+      <div id={`${regionId}-detail-${match.id}`}>
+        <TeamComparison
+          teams={teams}
+          sourceUrl={matchSource(match)}
+          onEditNote={(team) => onEditNote(match, team.name)}
+          onAddToExpress={() => m.toggleMatchSelection(match.id)}
+          onAddRecord={() => m.handleAddToBets(match)}
+        />
       </div>
     );
   }
