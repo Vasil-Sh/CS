@@ -1,11 +1,12 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogDescription,
+  DialogClose,
 } from "@/components/ui/dialog";
-import { Download, Check, Copy } from "lucide-react";
+import { Download, Check, Copy, X, Loader2 } from "lucide-react";
 import BetShareCard from "./BetShareCard";
 import type { Bet } from "@/types/betting";
 import { renderShareCard } from "./renderShareCard";
@@ -24,6 +25,14 @@ export default function BetShareModal({
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState<"download" | "copy" | null>(null);
   const [error, setError] = useState("");
+  const [format, setFormat] = useState<"horizontal" | "square">("horizontal");
+  const [showAmounts, setShowAmounts] = useState(true);
+  const generation = useRef(0);
+  useEffect(() => {
+    generation.current += 1;
+    setDone(null);
+    setError("");
+  }, [bet, open, format, showAmounts]);
 
   const exportImage = async (action: "download" | "copy") => {
     if (busy.current) return;
@@ -31,6 +40,7 @@ export default function BetShareModal({
     setSaving(true);
     setError("");
     setDone(null);
+    const currentGeneration = generation.current;
     try {
       const card = preview.current?.querySelector<HTMLElement>(".mi-share");
       if (!card) throw new Error("Missing preview");
@@ -43,27 +53,30 @@ export default function BetShareModal({
         ),
       );
       if (action === "copy") {
+        if (currentGeneration !== generation.current) return;
         if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined")
           throw new Error("Clipboard unavailable");
         await navigator.clipboard.write([
           new ClipboardItem({ "image/png": blob }),
         ]);
       } else {
+        if (currentGeneration !== generation.current) return;
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
-        link.download = `matchiq-${bet.result.toLowerCase()}-${Date.now()}.png`;
+        link.download = `matchiq-${format}-${bet.result.toLowerCase()}-${Date.now()}.png`;
         link.href = url;
         link.click();
         window.setTimeout(() => URL.revokeObjectURL(url), 10000);
       }
-      setDone(action);
+      if (currentGeneration === generation.current) setDone(action);
     } catch (err) {
       console.error("[BetShareModal] export failed", err);
-      setError(
-        action === "copy"
-          ? "Не вдалося скопіювати. Спробуйте завантажити PNG."
-          : "Не вдалося зберегти зображення. Спробуйте ще раз.",
-      );
+      if (currentGeneration === generation.current)
+        setError(
+          action === "copy"
+            ? "Не вдалося скопіювати. Спробуйте завантажити PNG."
+            : "Не вдалося зберегти зображення. Спробуйте ще раз.",
+        );
     } finally {
       busy.current = false;
       setSaving(false);
@@ -78,31 +91,14 @@ export default function BetShareModal({
         setError("");
       }}
     >
-      <DialogContent className="mi-share-dialog">
+      <DialogContent className="mi-share-dialog" hideCloseButton>
         <div className="mi-share-toolbar">
           <DialogTitle>Поділитися записом</DialogTitle>
-          <button
-            type="button"
-            title="Завантажити PNG"
-            aria-label="Завантажити PNG"
-            disabled={saving}
-            onClick={() => void exportImage("download")}
-          >
-            {done === "download" ? <Check size={18} /> : <Download size={18} />}
-          </button>
-          <button
-            type="button"
-            title="Копіювати зображення"
-            aria-label="Копіювати зображення"
-            disabled={saving}
-            onClick={() => void exportImage("copy")}
-          >
-            {done === "copy" ? <Check size={18} /> : <Copy size={18} />}
-          </button>
+          <DialogDescription>Коротко про матч і ваше рішення</DialogDescription>
+          <DialogClose className="mi-share-close" aria-label="Закрити">
+            <X size={24} />
+          </DialogClose>
         </div>
-        <DialogDescription className="sr-only">
-          Прев’ю картки. Завантажте PNG або скопіюйте зображення.
-        </DialogDescription>
         {error && (
           <p className="mi-share-error" role="alert">
             {error}
@@ -110,13 +106,76 @@ export default function BetShareModal({
         )}
         <div
           className="mi-share-preview"
+          data-format={format}
           ref={preview}
           onContextMenu={(e) => {
             e.preventDefault();
             void exportImage("copy");
           }}
         >
-          <BetShareCard bet={bet} />
+          <BetShareCard bet={bet} format={format} showAmounts={showAmounts} />
+        </div>
+        <div className="mi-share-controls">
+          <fieldset className="mi-share-format" disabled={saving}>
+            <legend className="sr-only">Формат зображення</legend>
+            <span aria-hidden="true">Формат</span>
+            <div className="mi-share-segments">
+              {(["horizontal", "square"] as const).map((value) => (
+                <label key={value}>
+                  <input
+                    type="radio"
+                    name="share-format"
+                    value={value}
+                    checked={format === value}
+                    onChange={() => setFormat(value)}
+                  />
+                  <span>
+                    {value === "horizontal" ? "Горизонтальний" : "Квадрат"}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <label className="mi-share-privacy">
+            <span>Показувати суми</span>
+            <input
+              type="checkbox"
+              role="switch"
+              checked={showAmounts}
+              disabled={saving}
+              onChange={(e) => setShowAmounts(e.target.checked)}
+            />
+            <span className="mi-share-switch" aria-hidden="true" />
+          </label>
+          <div className="mi-share-actions">
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => void exportImage("copy")}
+            >
+              {done === "copy" ? <Check size={20} /> : <Copy size={20} />}
+              {done === "copy" ? "Скопійовано" : "Копіювати зображення"}
+            </button>
+            <button
+              type="button"
+              className="mi-share-download"
+              disabled={saving}
+              onClick={() => void exportImage("download")}
+            >
+              {saving ? (
+                <Loader2 size={20} className="animate-spin" />
+              ) : done === "download" ? (
+                <Check size={20} />
+              ) : (
+                <Download size={20} />
+              )}
+              {saving
+                ? "Готуємо PNG…"
+                : done === "download"
+                  ? "Завантажено"
+                  : "Завантажити PNG"}
+            </button>
+          </div>
         </div>
         <span className="sr-only" role="status">
           {saving ? "Готуємо зображення" : done ? "Зображення готове" : ""}

@@ -68,7 +68,7 @@ describe("Share card", () => {
   ])("localizes %s events", (count, label) => {
     expect(expressEventCount(Number(count))).toBe(label);
   });
-  it("uses the separate express artwork and preserves stored summary values", () => {
+  it("uses the ticket artwork and preserves stored express summary values", () => {
     const { container } = render(
       <BetShareCard
         bet={{
@@ -85,7 +85,7 @@ describe("Share card", () => {
       />,
     );
     expect(
-      container.querySelector('svg[data-share-artwork="express"]'),
+      container.querySelector('svg[data-share-artwork="ticket"]'),
     ).toBeTruthy();
     expect(container.querySelectorAll("[data-express-row]")).toHaveLength(2);
     expect(screen.getByText("1.72")).toBeTruthy();
@@ -120,19 +120,28 @@ describe("Share card", () => {
       }
     },
   );
-  it("moves the VS badge with the inter-team gap", () => {
+  it("grows the ticket for long names without discarding text", () => {
     const { container, rerender } = render(
       <BetShareCard bet={{ ...bet, match: "Team Spirit vs ShindeN" }} />,
     );
-    const shortTransform = container
-      .querySelector("[data-poster-vs]")!
-      .getAttribute("transform");
-    rerender(<BetShareCard bet={bet} />);
-    const longTransform = container
-      .querySelector("[data-poster-vs]")!
-      .getAttribute("transform");
-    expect(shortTransform).not.toBe(longTransform);
-    expect(shortTransform).toContain("rotate(-8 48 27)");
+    const shortHeight = Number(
+      container
+        .querySelector("svg[data-share-artwork]")!
+        .getAttribute("viewBox")!
+        .split(" ")[3],
+    );
+    rerender(
+      <BetShareCard
+        bet={{ ...bet, team1: "Very long team name ".repeat(8) }}
+      />,
+    );
+    const longHeight = Number(
+      container
+        .querySelector("svg[data-share-artwork]")!
+        .getAttribute("viewBox")!
+        .split(" ")[3],
+    );
+    expect(longHeight).toBeGreaterThan(shortHeight);
   });
   it("wraps long names without discarding words", () => {
     expect(posterLines("ex-Eternal Fire Academy", 19).join(" ")).toBe(
@@ -144,7 +153,7 @@ describe("Share card", () => {
   });
   it("renders pending without a fabricated financial result", () => {
     render(<BetShareCard bet={{ ...bet, result: "Pending" }} />);
-    expect(screen.getByText("—")).toBeTruthy();
+    expect(screen.getAllByText("—").length).toBeGreaterThan(0);
     expect(screen.getByRole("img", { name: /Очікується/ })).toBeTruthy();
   });
   it("renders winning values from the record", () => {
@@ -156,9 +165,7 @@ describe("Share card", () => {
   });
   it("renders actual tournament, selection and loss", () => {
     render(<BetShareCard bet={bet} />);
-    expect(screen.getByText("UNITED21")).toBeTruthy();
-    expect(screen.getByText("SEASON 56")).toBeTruthy();
-    expect(screen.getByText("GROUP C")).toBeTruthy();
+    expect(screen.getByText("UNITED21 SEASON 56 · GROUP C")).toBeTruthy();
     expect(screen.getByText("−200 ₴")).toBeTruthy();
     expect(screen.getByText("Програш")).toBeTruthy();
     expect(
@@ -168,6 +175,45 @@ describe("Share card", () => {
   });
   it("does not invent a time for date-only records", () => {
     expect(shareDate("2026-10-02")).toEqual({ date: "02.10.2026", time: "" });
+  });
+  it("removes monetary values from the exported SVG when hidden", () => {
+    const { container } = render(
+      <BetShareCard bet={bet} showAmounts={false} />,
+    );
+    const svg = container.querySelector("svg[data-share-artwork]")!;
+    expect(svg.textContent).not.toContain("200 ₴");
+    expect(svg.querySelector("[data-ticket-amounts]")).toBeNull();
+    expect(screen.getByText("Суми приховано")).toBeTruthy();
+    expect(screen.getByText("2.00")).toBeTruthy();
+  });
+  it("renders a genuinely square export, including long express records", () => {
+    const { container } = render(
+      <BetShareCard
+        bet={{
+          ...bet,
+          format: "20x",
+          betType: `Експрес | ${Array.from({ length: 20 }, (_, i) => `${i + 1}. Team A vs Team B | Winner: Team A @1.5`).join(" • ")}`,
+        }}
+        format="square"
+      />,
+    );
+    const view = container
+      .querySelector("svg[data-share-artwork]")!
+      .getAttribute("viewBox")!
+      .split(" ");
+    expect(view[2]).toBe(view[3]);
+    expect(container.querySelectorAll("[data-express-row]")).toHaveLength(20);
+  });
+  it("uses record logos with an initials fallback", () => {
+    const { container } = render(
+      <BetShareCard bet={{ ...bet, logoTeam1: "/team.png" }} />,
+    );
+    expect(
+      container
+        .querySelector("image[data-optional-logo]")
+        ?.getAttribute("href"),
+    ).toBe("/team.png");
+    expect(container.querySelectorAll("[data-logo-fallback]")).toHaveLength(2);
   });
   it("shows a real supplied time", () =>
     expect(shareDate("2026-10-02T13:30:00").time).toBe("13:30"));

@@ -20,10 +20,23 @@ export async function renderShareCard(
     await Promise.all(
       Array.from(copy.querySelectorAll("image[data-embed-image]")).map(
         async (image) => {
-          image.setAttribute(
-            "href",
-            await posterAssetDataUrl(image.getAttribute("href")!),
-          );
+          try {
+            image.setAttribute(
+              "href",
+              await posterAssetDataUrl(image.getAttribute("href")!),
+            );
+            if (image.hasAttribute("data-optional-logo"))
+              image.parentElement
+                ?.querySelector("[data-logo-fallback]")
+                ?.setAttribute("visibility", "hidden");
+          } catch (error) {
+            // External logos may reject CORS; keep initials without failing PNG.
+            if (!image.hasAttribute("data-optional-logo")) throw error;
+            image.parentElement
+              ?.querySelector("[data-logo-fallback]")
+              ?.removeAttribute("visibility");
+            image.remove();
+          }
         },
       ),
     );

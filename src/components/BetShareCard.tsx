@@ -1,5 +1,4 @@
-import PosterShareArtwork from "./PosterShareArtwork";
-import ExpressShareArtwork from "./ExpressShareArtwork";
+import TicketShareArtwork from "./TicketShareArtwork";
 import { getBetTypeLabel } from "@/lib/displayHelpers";
 import type { Bet } from "@/types/betting";
 import "./BetShareCard.css";
@@ -7,6 +6,8 @@ import "./BetShareCard.css";
 interface BetShareCardProps {
   bet: Bet;
   compact?: boolean;
+  format?: "horizontal" | "square";
+  showAmounts?: boolean;
 }
 
 export function shareMoney(value: number, currency = "UAH", signed = false) {
@@ -46,7 +47,11 @@ export function shareDate(value: string) {
   };
 }
 
-export default function BetShareCard({ bet }: BetShareCardProps) {
+export default function BetShareCard({
+  bet,
+  format = "horizontal",
+  showAmounts = true,
+}: BetShareCardProps) {
   const game = bet.game?.toLowerCase() === "dota2" ? "dota2" : "cs2";
   const teams = bet.match.split(/\s+vs\.?\s+/i);
   const team1 = bet.team1 || teams[0] || "Команда 1";
@@ -85,41 +90,32 @@ export default function BetShareCard({ bet }: BetShareCardProps) {
   return (
     <article
       id="bet-share-card-inner"
-      className="mi-share mi-share-poster"
+      className="mi-share mi-share-ticket"
+      data-format={format}
       data-result={bet.result}
       aria-label="Картка запису для поширення"
     >
-      {express ? (
-        <ExpressShareArtwork
-          events={events}
-          format={bet.format}
-          game={game === "dota2" ? "Dota 2" : "CS2"}
-          date={date.date}
-          odds={bet.odds}
-          amount={shareMoney(bet.originalAmount ?? bet.amount, bet.currency)}
-          result={result == null ? "—" : shareMoney(result, bet.currency, true)}
-          status={status}
-          state={bet.result}
-        />
-      ) : (
-        <PosterShareArtwork
-          team1={team1}
-          team2={team2}
-          tournament={tournament}
-          game={game === "dota2" ? "Dota 2" : "CS2"}
-          format={bet.format}
-          date={date}
-          market={express ? "Експрес" : market}
-          selection={express ? bet.match : selection || "Не вказано"}
-          odds={bet.odds}
-          amount={shareMoney(bet.originalAmount ?? bet.amount, bet.currency)}
-          result={result == null ? "—" : shareMoney(result, bet.currency, true)}
-          status={status}
-          state={bet.result}
-          express={express}
-          events={events}
-        />
-      )}
+      <TicketShareArtwork
+        layout={format}
+        showAmounts={showAmounts}
+        team1={team1}
+        team2={team2}
+        logo1={bet.logoTeam1}
+        logo2={bet.logoTeam2}
+        tournament={tournament.join(" · ")}
+        game={game === "dota2" ? "Dota 2" : "CS2"}
+        format={bet.format}
+        date={date}
+        market={express ? "Експрес" : market}
+        selection={express ? bet.match : selection || "Не вказано"}
+        odds={bet.odds}
+        amount={shareMoney(bet.originalAmount ?? bet.amount, bet.currency)}
+        result={result == null ? "—" : shareMoney(result, bet.currency, true)}
+        status={status}
+        state={bet.result}
+        express={express}
+        events={events}
+      />
       <span className="sr-only">{status}</span>
     </article>
   );
