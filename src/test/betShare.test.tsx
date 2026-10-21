@@ -120,6 +120,33 @@ describe("Share card", () => {
       }
     },
   );
+  it.each(["horizontal", "square"] as const)(
+    "centers the tournament above teams in %s",
+    (format) => {
+      const { container } = render(<BetShareCard bet={bet} format={format} />);
+      const tournament = container.querySelector("[data-ticket-tournament]")!;
+      const teams = container.querySelectorAll("[data-ticket-team]");
+      expect(tournament.getAttribute("text-anchor")).toBe("middle");
+      for (const team of teams) {
+        expect(Number(tournament.getAttribute("y"))).toBeLessThan(
+          Number(team.getAttribute("y")),
+        );
+      }
+      expect(screen.getByText("VS")).toBeTruthy();
+    },
+  );
+  it("uses a level solid red loss badge with white text", () => {
+    const { container } = render(
+      <BetShareCard bet={{ ...bet, result: "Loss" }} />,
+    );
+    const status = container.querySelector("[data-poster-status]")!;
+    expect(status.getAttribute("transform")).not.toContain("rotate");
+    expect(status.querySelector("rect")?.getAttribute("fill")).toBe("#df263b");
+    expect(status.querySelector("rect")?.hasAttribute("fill-opacity")).toBe(
+      false,
+    );
+    expect(status.querySelector("text")?.getAttribute("fill")).toBe("#ffffff");
+  });
   it("grows the ticket for long names without discarding text", () => {
     const { container, rerender } = render(
       <BetShareCard bet={{ ...bet, match: "Team Spirit vs ShindeN" }} />,

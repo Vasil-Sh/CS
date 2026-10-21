@@ -102,6 +102,7 @@ export default function BetShareCard({
         team2={team2}
         logo1={bet.logoTeam1}
         logo2={bet.logoTeam2}
+        tournamentLogo={bet.tournamentLogo}
         tournament={tournament.join(" · ")}
         game={game === "dota2" ? "Dota 2" : "CS2"}
         format={bet.format}

@@ -10,6 +10,7 @@ interface Props {
   team2: string;
   logo1?: string | null;
   logo2?: string | null;
+  tournamentLogo?: string | null;
   tournament: string;
   game: string;
   format?: string;
@@ -81,6 +82,50 @@ function TeamMark({
   );
 }
 
+function TournamentMark({
+  logo,
+  game,
+  x,
+  y,
+  size = 24,
+}: {
+  logo?: string | null;
+  game: string;
+  x: number;
+  y: number;
+  size?: number;
+}) {
+  const [failed, setFailed] = useState<string>();
+  const fallback = game.toLowerCase().includes("dota")
+    ? "/assets/game-dota2.svg"
+    : "/assets/game-cs2.svg";
+  const showLogo = !!logo && failed !== logo;
+  return (
+    <g transform={`translate(${x} ${y})`} aria-hidden="true">
+      <g data-logo-fallback="">
+        <image
+          data-embed-image=""
+          href={fallback}
+          width={size}
+          height={size}
+          preserveAspectRatio="xMidYMid meet"
+        />
+      </g>
+      {showLogo && (
+        <image
+          data-embed-image=""
+          data-optional-logo=""
+          href={logo}
+          width={size}
+          height={size}
+          preserveAspectRatio="xMidYMid meet"
+          onError={() => setFailed(logo)}
+        />
+      )}
+    </g>
+  );
+}
+
 /** Explicit SVG layout is shared by the preview and export, with no HTML capture. */
 export default function TicketShareArtwork(p: Props) {
   const id = useId().replace(/:/g, "");
@@ -91,13 +136,23 @@ export default function TicketShareArtwork(p: Props) {
   const right = width - 44;
   const area = right - left;
   const teamSize = square ? 29 : 38;
-  const first = posterLines(p.team1, square ? 15 : 17);
-  const second = posterLines(p.team2, square ? 15 : 17);
+  const first = posterLines(p.team1, square ? 15 : 14);
+  const second = posterLines(p.team2, square ? 15 : 14);
   const teamLines = Math.max(first.length, second.length);
-  const nameY = square ? 166 : 102;
   const tournament = posterLines(p.tournament, square ? 40 : 62);
-  const tournamentY = nameY + teamLines * (teamSize + 6) + 7;
-  const headerEnd = p.express ? 145 : tournamentY + tournament.length * 27 + 22;
+  const tournamentY = 46;
+  const tournamentMax = Math.max(...tournament.map((line) => line.length), 1);
+  const logoY = tournamentY + tournament.length * 27 + 12;
+  const nameY = logoY + (square ? 117 : 53);
+  const teamTextWidth = area / 2 - (square ? 40 : 140);
+  const fitTeam = (lines: string[]) =>
+    Math.min(
+      teamSize,
+      teamTextWidth / (Math.max(...lines.map((line) => line.length), 1) * 0.72),
+    );
+  const headerEnd = p.express
+    ? 145
+    : nameY + (teamLines - 1) * (teamSize + 6) + 64;
   const market = posterLines(p.market.toUpperCase(), square ? 30 : 40);
   const selection = posterLines(p.selection, square ? 20 : 27);
   const rows = expressShareRows(p.events, p.format);
@@ -121,7 +176,7 @@ export default function TicketShareArtwork(p: Props) {
       24 +
       (square ? 150 : 0);
   const oddsTop = square ? predictionEnd - 145 : headerEnd;
-  const footerY = Math.max(square ? 580 : 320, predictionEnd);
+  const footerY = Math.max(square ? 580 : 350, predictionEnd);
   const naturalHeight = footerY + (square ? 230 : 136);
   const height = square ? Math.max(width, naturalHeight) : naturalHeight;
   // Square remains genuinely square even when an express has many events.
@@ -166,7 +221,7 @@ export default function TicketShareArtwork(p: Props) {
         fontFamily="'MI Poster Sans', sans-serif"
         fill="#0d1116"
       >
-        <rect width={canvasWidth} height={height} fill="#faf9f5" />
+        <rect width={canvasWidth} height={height} fill="#ffffff" />
         <rect width={offset + stub} height={height} fill="#202422" />
         <rect width={canvasWidth} height={height} fill={`url(#${id}-paper)`} />
         <g transform={`translate(${offset} 0)`}>
@@ -246,21 +301,22 @@ export default function TicketShareArtwork(p: Props) {
               <TeamMark
                 name={p.team1}
                 url={p.logo1}
-                x={left}
-                y={square ? 47 : 54}
+                x={square ? left : left + 20}
+                y={logoY}
               />
               <TeamMark
                 name={p.team2}
                 url={p.logo2}
-                x={right - 72}
-                y={square ? 47 : 54}
+                x={square ? right - 72 : right - 92}
+                y={logoY}
               />
               {first.map((line, i) => (
                 <text
                   key={i}
-                  x={square ? left : left + 92}
+                  data-ticket-team=""
+                  x={square ? left : left + 118}
                   y={nameY + i * (teamSize + 6)}
-                  fontSize={teamSize}
+                  fontSize={fitTeam(first)}
                   fontWeight="850"
                   letterSpacing="-1.2"
                 >
@@ -271,18 +327,23 @@ export default function TicketShareArtwork(p: Props) {
                 x={left + area / 2}
                 y={nameY}
                 textAnchor="middle"
-                fontSize="32"
+                fontSize="21"
                 fill="#838782"
               >
-                —
+                VS
               </text>
+              <path
+                d={`M${left + area / 2 - 65} ${nameY - 7}h32M${left + area / 2 + 33} ${nameY - 7}h32`}
+                stroke="#b9bcb6"
+              />
               {second.map((line, i) => (
                 <text
                   key={i}
-                  x={square ? right : right - 92}
+                  data-ticket-team=""
+                  x={square ? right : right - 118}
                   textAnchor="end"
                   y={nameY + i * (teamSize + 6)}
-                  fontSize={teamSize}
+                  fontSize={fitTeam(second)}
                   fontWeight="850"
                   letterSpacing="-1.2"
                 >
@@ -292,7 +353,9 @@ export default function TicketShareArtwork(p: Props) {
               {tournament.map((line, i) => (
                 <text
                   key={i}
-                  x={left}
+                  data-ticket-tournament=""
+                  x={left + area / 2}
+                  textAnchor="middle"
                   y={tournamentY + i * 27}
                   fontSize="20"
                   fill="#626873"
@@ -300,13 +363,23 @@ export default function TicketShareArtwork(p: Props) {
                   {line}
                 </text>
               ))}
+              {tournament.length > 0 && (
+                <TournamentMark
+                  logo={p.tournamentLogo}
+                  game={p.game}
+                  x={left + area / 2 - tournamentMax * 10 - 32}
+                  y={tournamentY - 18}
+                />
+              )}
             </>
           )}
-          <path
-            d={`M${left} ${headerEnd}H${right}`}
-            stroke="#b9bcb6"
-            strokeWidth="1.5"
-          />
+          {p.express && (
+            <path
+              d={`M${left} ${headerEnd}H${right}`}
+              stroke="#b9bcb6"
+              strokeWidth="1.5"
+            />
+          )}
           {p.express ? (
             <>
               {events.length ? (
@@ -448,6 +521,12 @@ export default function TicketShareArtwork(p: Props) {
               >
                 {p.result}
               </text>
+              {!square && (
+                <path
+                  d={`M${right - 210} ${footerY + 26}v66`}
+                  stroke="#b9bcb6"
+                />
+              )}
             </g>
           ) : (
             <text x={left} y={footerY + 65} fontSize="21" fill="#626873">
@@ -456,7 +535,7 @@ export default function TicketShareArtwork(p: Props) {
           )}
           <g
             data-poster-status=""
-            transform={`translate(${right - 193} ${footerY + (square ? 137 : 34)}) rotate(-5 96 30)`}
+            transform={`translate(${right - 193} ${footerY + (square ? 137 : 34)})`}
           >
             <rect
               width="193"
@@ -465,13 +544,12 @@ export default function TicketShareArtwork(p: Props) {
               stroke={color}
               strokeWidth="2"
               fill={color}
-              fillOpacity=".04"
             />
             <text
               x="96.5"
               y="40"
               textAnchor="middle"
-              fill={color}
+              fill="#ffffff"
               fontFamily="'MI Poster Condensed', sans-serif"
               fontWeight="650"
               fontSize="30"

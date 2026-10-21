@@ -41,6 +41,7 @@ export interface MatchPrefillData {
   odds?: string;
   logoTeam1?: string | null;
   logoTeam2?: string | null;
+  tournamentLogo?: string | null;
   game?: "CS2" | "Dota2";
 }
 
@@ -97,6 +98,7 @@ export interface BetRecord {
   createdAt?: string | number;
   logoTeam1?: string | null;
   logoTeam2?: string | null;
+  tournamentLogo?: string | null;
   expressLogos?: { logoTeam1?: string | null; logoTeam2?: string | null }[];
 }
 
@@ -265,6 +267,7 @@ export function useBettingForm({
   const prefillLogosRef = useRef<{
     logoTeam1?: string | null;
     logoTeam2?: string | null;
+    tournamentLogo?: string | null;
   }>({});
   const prefillTimeRef = useRef<string | undefined>(undefined);
   const strategyLoadedRef = useRef(false);
@@ -409,6 +412,7 @@ export function useBettingForm({
     prefillLogosRef.current = {
       logoTeam1: prefillData.logoTeam1,
       logoTeam2: prefillData.logoTeam2,
+      tournamentLogo: prefillData.tournamentLogo,
     };
     prefillTimeRef.current = prefillData.time;
     const formatMap: Record<string, string> = {
@@ -867,6 +871,10 @@ export function useBettingForm({
           formData.betCategory === "Експрес"
             ? undefined
             : prefillLogosRef.current.logoTeam2,
+        tournamentLogo:
+          formData.betCategory === "Експрес"
+            ? undefined
+            : prefillLogosRef.current.tournamentLogo,
         expressLogos:
           formData.betCategory === "Експрес"
             ? expressEvents.map((e) => ({
@@ -921,6 +929,8 @@ export function useBettingForm({
           bodyToSend.winProbability = record.winProbability;
         if (record.logoTeam1) bodyToSend.logoTeam1 = record.logoTeam1;
         if (record.logoTeam2) bodyToSend.logoTeam2 = record.logoTeam2;
+        if (record.tournamentLogo)
+          bodyToSend.tournamentLogo = record.tournamentLogo;
         const created = await UserDataService.createBet(
           bodyToSend as Parameters<typeof UserDataService.createBet>[0],
         );
