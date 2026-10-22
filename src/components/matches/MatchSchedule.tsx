@@ -120,15 +120,13 @@ function TournamentLogo({
   game: Match["game"];
 }) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
-  const placeholder =
-    game === "Dota2"
-      ? "/assets/team-placeholder-dota.svg"
-      : "/assets/team-placeholder-cs2.svg";
+  const fallback =
+    game === "Dota2" ? "/assets/game-dota2.svg" : "/assets/game-cs2.svg";
   // tournamentLogo is already proxied by the API client (/api/v1/.../logo/external/...)
   return src && src !== failedUrl ? (
     <img src={src} alt="" loading="lazy" onError={() => setFailedUrl(src)} />
   ) : (
-    <img src={placeholder} alt="" aria-hidden="true" />
+    <img src={fallback} alt="" aria-hidden="true" />
   );
 }
 

@@ -208,6 +208,8 @@ export default function TicketShareArtwork(p: Props) {
   );
   const naturalHeight = footerY + (square && !squareCard ? 230 : 136);
   const height = square ? Math.max(width, naturalHeight) : naturalHeight;
+  // Vertical center of the sidebar — used to center the game/format block.
+  const sideCenter = height / 2;
   // Square remains genuinely square even when an express has many events.
   const canvasWidth = square ? height : width;
   const offset = (canvasWidth - width) / 2;
@@ -335,13 +337,13 @@ export default function TicketShareArtwork(p: Props) {
                 Match<tspan fill="#ff541f">IQ</tspan>
               </text>
               <path
-                d={`M32 136H${stub - 32}M32 264H${stub - 32}`}
+                d={`M32 ${sideCenter - 66}H${stub - 32}M32 ${sideCenter + 68}H${stub - 32}`}
                 stroke="#626663"
               />
-              <text x="32" y="193" fontSize="30" fontWeight="800">
+              <text x="32" y={sideCenter - 18} fontSize="30" fontWeight="800">
                 {p.game}
               </text>
-              <text x="32" y="228" fontSize="23" fill="#b7bcb8">
+              <text x="32" y={sideCenter + 17} fontSize="23" fill="#b7bcb8">
                 {p.express ? "ЕКСПРЕС" : p.format || "—"}
               </text>
               <rect
