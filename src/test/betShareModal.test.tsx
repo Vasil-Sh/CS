@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   cleanup,
+  act,
   fireEvent,
   render,
   screen,
@@ -31,6 +32,56 @@ afterEach(() => {
 });
 
 describe("Ticket share dialog", () => {
+  it("resizes the preview and reflows its export source on narrow containers", () => {
+    let notify: ResizeObserverCallback = () => {};
+    const disconnect = vi.fn();
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        constructor(callback: ResizeObserverCallback) {
+          notify = callback;
+        }
+        observe() {}
+        disconnect = disconnect;
+      },
+    );
+    const { container, unmount } = render(
+      <BetShareModal bet={bet} open onClose={() => {}} />,
+    );
+    const slider = screen.getByRole("slider", { name: "Розмір квитка" });
+    fireEvent.change(slider, { target: { value: "500" } });
+    expect(
+      (
+        container.ownerDocument.querySelector(
+          ".mi-ticket-resize",
+        ) as HTMLElement
+      ).style.width,
+    ).toBe("500px");
+    act(() =>
+      notify(
+        [{ contentRect: { width: 500 } } as ResizeObserverEntry],
+        {} as ResizeObserver,
+      ),
+    );
+    expect(
+      document
+        .querySelector("svg[data-share-artwork]")
+        ?.getAttribute("data-arrangement"),
+    ).toBe("stacked");
+    act(() =>
+      notify(
+        [{ contentRect: { width: 900 } } as ResizeObserverEntry],
+        {} as ResizeObserver,
+      ),
+    );
+    expect(
+      document
+        .querySelector("svg[data-share-artwork]")
+        ?.getAttribute("data-arrangement"),
+    ).toBe("wide");
+    unmount();
+    expect(disconnect).toHaveBeenCalled();
+  });
   it("switches formats and hides sums in the actual export source", () => {
     render(<BetShareModal bet={bet} open onClose={() => {}} />);
     expect(

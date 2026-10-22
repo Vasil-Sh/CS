@@ -27,12 +27,29 @@ export default function BetShareModal({
   const [error, setError] = useState("");
   const [format, setFormat] = useState<"horizontal" | "square">("horizontal");
   const [showAmounts, setShowAmounts] = useState(true);
+  const [ticketWidth, setTicketWidth] = useState(800);
+  const [measuredWidth, setMeasuredWidth] = useState(800);
+  const resizeFrame = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const frame = resizeFrame.current;
+    if (!open || !frame || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry && entry.contentRect.width > 0)
+        setMeasuredWidth(Math.round(entry.contentRect.width));
+    });
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, [open]);
+  const changeWidth = (value: number) => {
+    setTicketWidth(value);
+    if (resizeFrame.current) resizeFrame.current.style.width = `${value}px`;
+  };
   const generation = useRef(0);
   useEffect(() => {
     generation.current += 1;
     setDone(null);
     setError("");
-  }, [bet, open, format, showAmounts]);
+  }, [bet, open, format, showAmounts, measuredWidth]);
 
   const exportImage = async (action: "download" | "copy") => {
     if (busy.current) return;
@@ -113,7 +130,43 @@ export default function BetShareModal({
             void exportImage("copy");
           }}
         >
-          <BetShareCard bet={bet} format={format} showAmounts={showAmounts} />
+          <div
+            className="mi-ticket-resize"
+            ref={resizeFrame}
+            style={{ width: ticketWidth }}
+            data-saving={saving}
+          >
+            <BetShareCard
+              bet={bet}
+              format={format}
+              showAmounts={showAmounts}
+              compact={measuredWidth < 620}
+            />
+          </div>
+        </div>
+        <div className="mi-ticket-size-controls">
+          <label htmlFor="mi-ticket-width">Розмір квитка</label>
+          <input
+            id="mi-ticket-width"
+            type="range"
+            min="280"
+            max="1120"
+            step="10"
+            value={Math.min(1120, Math.max(280, measuredWidth))}
+            disabled={saving}
+            onChange={(e) => changeWidth(Number(e.target.value))}
+          />
+          <output htmlFor="mi-ticket-width">{measuredWidth} px</output>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() => changeWidth(format === "square" ? 420 : 800)}
+          >
+            Скинути
+          </button>
+          <span>
+            Потягніть нижній правий кут квитка · вузький екран перебудовує блоки
+          </span>
         </div>
         <div className="mi-share-controls">
           <fieldset className="mi-share-format" disabled={saving}>
@@ -127,7 +180,10 @@ export default function BetShareModal({
                     name="share-format"
                     value={value}
                     checked={format === value}
-                    onChange={() => setFormat(value)}
+                    onChange={() => {
+                      setFormat(value);
+                      changeWidth(value === "square" ? 420 : 800);
+                    }}
                   />
                   <span>
                     {value === "horizontal" ? "Горизонтальний" : "Квадрат"}

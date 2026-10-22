@@ -56,7 +56,7 @@ div[data-state="open"]:has(+ .mi-share-dialog) {
 .mi-share-preview {
   border-radius: 13px;
   background: #edeef0;
-  padding: clamp(16px, 3vw, 44px);
+  padding: clamp(16px, 2vw, 28px);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -70,13 +70,57 @@ div[data-state="open"]:has(+ .mi-share-dialog) {
 .mi-share-ticket {
   filter: drop-shadow(0 10px 10px #0002);
 }
+.mi-share-preview[data-format="horizontal"] .mi-share {
+  max-width: none;
+}
+.mi-share-preview[data-format="horizontal"] {
+  padding: clamp(16px, 2vw, 28px);
+}
 .mi-share-ticket svg {
   display: block;
   width: 100%;
   height: auto;
 }
 .mi-share-preview[data-format="square"] .mi-share {
-  max-width: min(580px, 56dvh);
+  max-width: none;
+}
+.mi-ticket-resize {
+  max-width: 100%;
+  min-width: min(280px, 100%);
+  flex: 0 0 auto;
+  resize: horizontal;
+  overflow: hidden;
+  padding-bottom: 16px;
+}
+.mi-ticket-resize[data-saving="true"] {
+  resize: none;
+}
+.mi-ticket-size-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 4px 0;
+  font-size: 13px;
+  color: #535b67;
+}
+.mi-ticket-size-controls input {
+  width: 180px;
+  max-width: 100%;
+  accent-color: #ff541f;
+}
+.mi-ticket-size-controls output {
+  font-variant-numeric: tabular-nums;
+  min-width: 52px;
+}
+.mi-ticket-size-controls button {
+  padding: 5px 10px;
+  border: 1px solid #d8dde4;
+  border-radius: 6px;
+}
+.mi-ticket-size-controls > span {
+  color: #737b87;
+  font-size: 12px;
 }
 .mi-share-controls {
   display: flex;

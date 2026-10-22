@@ -49,6 +49,7 @@ export function shareDate(value: string) {
 
 export default function BetShareCard({
   bet,
+  compact = false,
   format = "horizontal",
   showAmounts = true,
 }: BetShareCardProps) {
@@ -96,6 +97,7 @@ export default function BetShareCard({
       aria-label="Картка запису для поширення"
     >
       <TicketShareArtwork
+        compact={compact}
         layout={format}
         showAmounts={showAmounts}
         team1={team1}

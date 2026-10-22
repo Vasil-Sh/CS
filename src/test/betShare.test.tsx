@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import { afterEach } from "vitest";
 import BetShareCard, {
   shareMoney,
@@ -147,6 +147,48 @@ describe("Share card", () => {
     );
     expect(status.querySelector("text")?.getAttribute("fill")).toBe("#ffffff");
   });
+  it("gives square singles a top stub and inline odds", () => {
+    const { container } = render(<BetShareCard bet={bet} format="square" />);
+    expect(container.querySelector("[data-ticket-square-header]")).toBeTruthy();
+    expect(
+      container.querySelector("[data-ticket-stub]")?.getAttribute("height"),
+    ).toBe("128");
+    expect(
+      Number(container.querySelector("[data-poster-odds]")?.getAttribute("x")),
+    ).toBeGreaterThan(500);
+    const view = container
+      .querySelector("svg[data-share-artwork]")!
+      .getAttribute("viewBox")!
+      .split(" ");
+    expect(view[2]).toBe(view[3]);
+  });
+  it("uses a compact horizontal canvas", () => {
+    const { container } = render(<BetShareCard bet={bet} />);
+    expect(
+      container
+        .querySelector("svg[data-share-artwork]")
+        ?.getAttribute("viewBox")
+        ?.split(" ")[2],
+    ).toBe("1060");
+  });
+  it("shows the tournament logo and restores a trophy when it fails", () => {
+    const { container } = render(
+      <BetShareCard bet={{ ...bet, tournamentLogo: "/tournament.png" }} />,
+    );
+    const mark = container.querySelector("[data-ticket-tournament-icon]")!;
+    const logo = mark.querySelector("image")!;
+    expect(logo.getAttribute("href")).toBe("/tournament.png");
+    fireEvent.load(logo);
+    expect(
+      mark.querySelector("[data-logo-fallback]")?.getAttribute("visibility"),
+    ).toBe("hidden");
+    fireEvent.error(logo);
+    expect(mark.querySelector("image")).toBeNull();
+    expect(
+      mark.querySelector("[data-logo-fallback]")?.getAttribute("visibility"),
+    ).toBe("visible");
+    expect(mark.querySelector("path")).toBeTruthy();
+  });
   it("grows the ticket for long names without discarding text", () => {
     const { container, rerender } = render(
       <BetShareCard bet={{ ...bet, match: "Team Spirit vs ShindeN" }} />,
@@ -240,7 +282,7 @@ describe("Share card", () => {
         .querySelector("image[data-optional-logo]")
         ?.getAttribute("href"),
     ).toBe("/team.png");
-    expect(container.querySelectorAll("[data-logo-fallback]")).toHaveLength(2);
+    expect(container.querySelectorAll("[data-logo-fallback]")).toHaveLength(3);
   });
   it("shows a real supplied time", () =>
     expect(shareDate("2026-10-02T13:30:00").time).toBe("13:30"));
