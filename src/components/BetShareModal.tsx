@@ -29,9 +29,9 @@ export default function BetShareModal({
   const [showAmounts, setShowAmounts] = useState(true);
   const [ticketWidth, setTicketWidth] = useState(800);
   const [measuredWidth, setMeasuredWidth] = useState(800);
-  const resizeFrame = useRef<HTMLDivElement>(null);
+  const [frameNode, setFrameNode] = useState<HTMLDivElement | null>(null);
   useEffect(() => {
-    const frame = resizeFrame.current;
+    const frame = frameNode;
     if (!open || !frame || typeof ResizeObserver === "undefined") return;
     const observer = new ResizeObserver(([entry]) => {
       if (entry && entry.contentRect.width > 0)
@@ -39,10 +39,10 @@ export default function BetShareModal({
     });
     observer.observe(frame);
     return () => observer.disconnect();
-  }, [open]);
+  }, [open, frameNode]);
   const changeWidth = (value: number) => {
     setTicketWidth(value);
-    if (resizeFrame.current) resizeFrame.current.style.width = `${value}px`;
+    if (frameNode) frameNode.style.width = `${value}px`;
   };
   const generation = useRef(0);
   useEffect(() => {
@@ -132,7 +132,7 @@ export default function BetShareModal({
         >
           <div
             className="mi-ticket-resize"
-            ref={resizeFrame}
+            ref={setFrameNode}
             style={{ width: ticketWidth }}
             data-saving={saving}
           >
