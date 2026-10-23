@@ -448,6 +448,9 @@
 .analytics-period-summary dd.analytics-positive {
   color: #079455;
 }
+.analytics-period-summary dd.analytics-negative {
+  color: #dc2626;
+}
 .analytics-method-note {
   grid-column: 1/-1;
   margin: 0;

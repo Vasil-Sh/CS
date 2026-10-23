@@ -68,7 +68,8 @@ div[data-state="open"]:has(+ .mi-share-dialog) {
   min-width: 0;
 }
 .mi-share-ticket {
-  filter: drop-shadow(0 10px 10px #0002);
+  /* Keep the perforation truly clear instead of shadowing its transparent holes. */
+  filter: none;
 }
 .mi-share-preview[data-format="horizontal"] .mi-share {
   max-width: none;

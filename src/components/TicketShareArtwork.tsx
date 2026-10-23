@@ -137,8 +137,390 @@ function TournamentMark({
   );
 }
 
+/** Cut through the whole artwork, not just its background, for PNG alpha. */
+function TicketPerforation({
+  seam,
+  length,
+  horizontal = false,
+}: {
+  seam: number;
+  length: number;
+  horizontal?: boolean;
+}) {
+  return (
+    <g data-ticket-perforation="">
+      <circle
+        cx={horizontal ? 0 : seam}
+        cy={horizontal ? seam : 0}
+        r="20"
+        fill="black"
+      />
+      <circle
+        cx={horizontal ? length : seam}
+        cy={horizontal ? seam : length}
+        r="20"
+        fill="black"
+      />
+      <path
+        d={
+          horizontal
+            ? `M24 ${seam}H${length - 24}`
+            : `M${seam} 24V${length - 24}`
+        }
+        fill="none"
+        stroke="black"
+        strokeWidth="4"
+        strokeDasharray="10 10"
+      />
+    </g>
+  );
+}
+
+/** The approved compact ticket: one neutral surface and a local status badge. */
+function SingleTicketArtwork(p: Props) {
+  const id = useId().replace(/:/g, "");
+  const square = p.layout === "square";
+  const stacked = square || !!p.compact;
+  const width = stacked ? 800 : 1120;
+  const stub = 210;
+  const left = stacked ? 48 : stub + 36;
+  const right = width - (stacked ? 48 : 36);
+  const area = right - left;
+  const first = posterLines(p.team1, stacked ? 15 : 14);
+  const second = posterLines(p.team2, stacked ? 15 : 14);
+  const tournament = posterLines(p.tournament, stacked ? 46 : 58);
+  const tournamentY = stacked ? 178 : 52;
+  const tournamentWidth = Math.min(
+    area - 70,
+    Math.max(...tournament.map((line) => line.length), 1) * 11.5,
+  );
+  const teamY = tournamentY + (tournament.length - 1) * 28 + 42;
+  const nameY = teamY + (stacked ? 124 : 52);
+  const teamFont = 46;
+  const teamTextWidth = stacked ? area / 2 - 30 : area / 2 - 122;
+  const fitTeam = (lines: string[]) =>
+    Math.min(
+      teamFont,
+      teamTextWidth / (Math.max(...lines.map((line) => line.length), 1) * 0.6),
+    );
+  const teamBottom = Math.max(
+    teamY + 78,
+    nameY + (Math.max(first.length, second.length) - 1) * 54 + 12,
+  );
+  const predictionY = teamBottom + 36;
+  const predictionWidth = stacked ? area : area - (p.showAmounts ? 330 : 170);
+  const market = posterLines(p.market.toUpperCase(), stacked ? 46 : 28);
+  const selection = posterLines(p.selection, stacked ? 30 : 24);
+  const selectionSize = Math.min(
+    48,
+    predictionWidth /
+      (Math.max(...selection.map((line) => line.length), 1) * 0.6),
+  );
+  const choiceY = predictionY + market.length * 26 + 36;
+  const detailBottom = choiceY + (selection.length - 1) * 54 + 12;
+  const metricY = stacked ? detailBottom + 36 : predictionY;
+  const oddsX = stacked ? left : right - (p.showAmounts ? 300 : 146);
+  const amountX = stacked ? left + area / 2 : right - 146;
+  const footerY = Math.max(
+    (stacked ? metricY + 68 : detailBottom) + 30,
+    square ? 660 : 0,
+  );
+  const height = square ? Math.max(width, footerY + 124) : footerY + 124;
+  const canvasWidth = square ? height : width;
+  const offset = (canvasWidth - width) / 2;
+  const odds = Number.isFinite(p.odds) && p.odds > 0 ? p.odds.toFixed(2) : "—";
+  const color =
+    p.state === "Win" ? "#009c68" : p.state === "Loss" ? "#df263b" : "#b97708";
+  const moneySize = (value: string, available: number) =>
+    Math.min(52, available / (Math.max(value.length, 1) * 0.62));
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      data-share-artwork="ticket"
+      data-arrangement={stacked ? "stacked" : "wide"}
+      viewBox={`0 0 ${canvasWidth} ${height}`}
+      role="img"
+      aria-label={`${p.team1} — ${p.team2}. ${p.status}. Коефіцієнт ${odds}`}
+    >
+      <defs>
+        <style data-poster-fonts="">{posterFontCss}</style>
+        <mask
+          id={`${id}-cut`}
+          data-ticket-cut-mask=""
+          maskUnits="userSpaceOnUse"
+          x="0"
+          y="0"
+          width={canvasWidth}
+          height={height}
+          style={{ maskType: "luminance" }}
+        >
+          <rect width={canvasWidth} height={height} rx="32" fill="white" />
+          <TicketPerforation
+            seam={stacked ? 128 : offset + stub}
+            length={stacked ? canvasWidth : height}
+            horizontal={stacked}
+          />
+        </mask>
+      </defs>
+      <g
+        mask={`url(#${id}-cut)`}
+        fontFamily="'MI Poster Sans', sans-serif"
+        fill="#0d1116"
+      >
+        <rect width={canvasWidth} height={height} fill="#ffffff" />
+        <rect
+          data-ticket-stub=""
+          width={stacked ? canvasWidth : offset + stub}
+          height={stacked ? 128 : height}
+          fill="#202422"
+        />
+        <g transform={`translate(${offset} 0)`}>
+          {stacked ? (
+            <g fill="#fff" data-ticket-square-header="">
+              <text
+                x={left}
+                y="76"
+                fontSize="38"
+                fontWeight="800"
+                letterSpacing="-1.5"
+              >
+                Match<tspan fill="#ff541f">IQ</tspan>
+              </text>
+              <text
+                x="400"
+                y="59"
+                textAnchor="middle"
+                fontSize="30"
+                fontWeight="800"
+              >
+                {p.game}
+              </text>
+              <text
+                x="400"
+                y="91"
+                textAnchor="middle"
+                fontSize="22"
+                fill="#b7bcb8"
+              >
+                {p.format || "—"}
+              </text>
+              <text x={right} y="59" textAnchor="end" fontSize="22">
+                {p.date.date}
+              </text>
+              <text
+                x={right}
+                y="91"
+                textAnchor="end"
+                fontSize="22"
+                fill="#b7bcb8"
+              >
+                {p.date.time}
+              </text>
+            </g>
+          ) : (
+            <g fill="#fff">
+              <text
+                x="30"
+                y="78"
+                fontSize="38"
+                fontWeight="800"
+                letterSpacing="-1.5"
+              >
+                Match<tspan fill="#ff541f">IQ</tspan>
+              </text>
+              <text x="30" y={height / 2 - 25} fontSize="46" fontWeight="800">
+                {p.game}
+              </text>
+              <text x="30" y={height / 2 + 12} fontSize="24" fill="#b7bcb8">
+                {p.format || "—"}
+              </text>
+              <rect
+                x="30"
+                y={height - 142}
+                width="18"
+                height="18"
+                rx="4"
+                fill="#ff541f"
+              />
+              <text x="30" y={height - 88} fontSize="22">
+                {p.date.date}
+              </text>
+              <text x="30" y={height - 56} fontSize="22" fill="#b7bcb8">
+                {p.date.time}
+              </text>
+            </g>
+          )}
+          {tournament.map((line, index) => (
+            <text
+              key={index}
+              data-ticket-tournament=""
+              x={left + area / 2 + 26}
+              y={tournamentY + index * 28}
+              textAnchor="middle"
+              fontSize="22"
+              fill="#707a84"
+              textLength={Math.min(tournamentWidth, line.length * 11.5)}
+              lengthAdjust="spacingAndGlyphs"
+            >
+              {line}
+            </text>
+          ))}
+          <TournamentMark
+            logo={p.tournamentLogo}
+            x={left + area / 2 + 26 - tournamentWidth / 2 - 60}
+            y={tournamentY - 30}
+            size={36}
+          />
+          <TeamMark
+            name={p.team1}
+            url={p.logo1}
+            x={stacked ? left + area / 4 - 36 : left}
+            y={teamY}
+          />
+          <TeamMark
+            name={p.team2}
+            url={p.logo2}
+            x={stacked ? right - area / 4 - 36 : right - 72}
+            y={teamY}
+          />
+          {first.map((line, index) => (
+            <text
+              key={index}
+              data-ticket-team=""
+              x={stacked ? left + area / 4 : left + 88}
+              y={nameY + index * 54}
+              textAnchor={stacked ? "middle" : "start"}
+              fontSize={fitTeam(first)}
+              fontWeight="800"
+              letterSpacing="-1.2"
+            >
+              {line}
+            </text>
+          ))}
+          <text
+            x={left + area / 2}
+            y={nameY}
+            textAnchor="middle"
+            fontSize="22"
+            fill="#838c94"
+          >
+            VS
+          </text>
+          {second.map((line, index) => (
+            <text
+              key={index}
+              data-ticket-team=""
+              x={stacked ? right - area / 4 : right - 88}
+              y={nameY + index * 54}
+              textAnchor={stacked ? "middle" : "end"}
+              fontSize={fitTeam(second)}
+              fontWeight="800"
+              letterSpacing="-1.2"
+            >
+              {line}
+            </text>
+          ))}
+          {market.map((line, index) => (
+            <text
+              key={index}
+              x={left}
+              y={predictionY + index * 26}
+              fontSize={Math.min(22, predictionWidth / (line.length * 0.62))}
+              fill="#5d6872"
+              fontWeight="700"
+            >
+              {line}
+            </text>
+          ))}
+          {selection.map((line, index) => (
+            <text
+              key={index}
+              x={left}
+              y={choiceY + index * 54}
+              fontSize={selectionSize}
+              fontWeight="800"
+            >
+              {line}
+            </text>
+          ))}
+          <text x={oddsX} y={metricY} fontSize="22" fill="#707a84">
+            Коефіцієнт
+          </text>
+          <text
+            x={oddsX}
+            y={metricY + 62}
+            fontSize={moneySize(odds, 146)}
+            fontWeight="800"
+            data-poster-odds=""
+          >
+            {odds}
+          </text>
+          {p.showAmounts && (
+            <g data-ticket-stake="">
+              <text x={amountX} y={metricY} fontSize="22" fill="#707a84">
+                Сума ставки
+              </text>
+              <text
+                x={amountX}
+                y={metricY + 62}
+                fontSize={moneySize(p.amount, stacked ? area / 2 : 146)}
+                fontWeight="800"
+              >
+                {p.amount}
+              </text>
+            </g>
+          )}
+          {p.showAmounts ? (
+            <g data-ticket-amounts="">
+              <text x={left} y={footerY + 28} fontSize="22" fill="#707a84">
+                Чистий результат
+              </text>
+              <text
+                x={left}
+                y={footerY + 86}
+                fontSize={moneySize(p.result, area - 240)}
+                fontWeight="800"
+              >
+                {p.result}
+              </text>
+            </g>
+          ) : (
+            <text x={left} y={footerY + 62} fontSize="22" fill="#707a84">
+              Суми приховано
+            </text>
+          )}
+          <g
+            data-poster-status=""
+            transform={`translate(${right - 210} ${footerY + 12})`}
+          >
+            <rect width="210" height="88" rx="12" fill={color} />
+            <text
+              x="105"
+              y="55"
+              textAnchor="middle"
+              fill="#ffffff"
+              fontSize="26"
+              fontWeight="800"
+            >
+              {p.status.toUpperCase()}
+            </text>
+          </g>
+        </g>
+      </g>
+    </svg>
+  );
+}
+
 /** Explicit SVG layout is shared by the preview and export, with no HTML capture. */
 export default function TicketShareArtwork(p: Props) {
+  return p.express ? (
+    <ExpressTicketArtwork {...p} />
+  ) : (
+    <SingleTicketArtwork {...p} />
+  );
+}
+
+function ExpressTicketArtwork(p: Props) {
   const id = useId().replace(/:/g, "");
   const square = p.layout === "square";
   const squareCard = (square || p.compact) && !p.express;
@@ -242,19 +624,21 @@ export default function TicketShareArtwork(p: Props) {
         >
           <circle cx="2" cy="3" r="0.5" fill="#79756b" opacity=".08" />
         </pattern>
-        <mask id={`${id}-cut`}>
+        <mask
+          id={`${id}-cut`}
+          data-ticket-cut-mask=""
+          maskUnits="userSpaceOnUse"
+          x="0"
+          y="0"
+          width={canvasWidth}
+          height={height}
+          style={{ maskType: "luminance" }}
+        >
           <rect width={canvasWidth} height={height} rx="22" fill="white" />
-          <circle
-            cx={squareCard ? 0 : offset + stub}
-            cy={squareCard ? 128 : 0}
-            r={squareCard ? 16 : 20}
-            fill="black"
-          />
-          <circle
-            cx={squareCard ? canvasWidth : offset + stub}
-            cy={squareCard ? 128 : height}
-            r={squareCard ? 16 : 20}
-            fill="black"
+          <TicketPerforation
+            seam={squareCard ? 128 : offset + stub}
+            length={squareCard ? canvasWidth : height}
+            horizontal={squareCard}
           />
         </mask>
       </defs>
@@ -272,16 +656,6 @@ export default function TicketShareArtwork(p: Props) {
         />
         <rect width={canvasWidth} height={height} fill={`url(#${id}-paper)`} />
         <g transform={`translate(${offset} 0)`}>
-          <path
-            d={
-              squareCard
-                ? `M24 128H${width - 24}`
-                : `M${stub} 27V${height - 27}`
-            }
-            stroke="#eeede9"
-            strokeWidth="3"
-            strokeDasharray="9 8"
-          />
           {squareCard ? (
             <g fill="#fff" data-ticket-square-header="">
               <text

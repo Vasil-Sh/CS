@@ -147,7 +147,7 @@ describe("Share card", () => {
     );
     expect(status.querySelector("text")?.getAttribute("fill")).toBe("#ffffff");
   });
-  it("gives square singles a top stub and inline odds", () => {
+  it("gives square singles a top stub and a separate metrics row", () => {
     const { container } = render(<BetShareCard bet={bet} format="square" />);
     expect(container.querySelector("[data-ticket-square-header]")).toBeTruthy();
     expect(
@@ -155,7 +155,7 @@ describe("Share card", () => {
     ).toBe("128");
     expect(
       Number(container.querySelector("[data-poster-odds]")?.getAttribute("x")),
-    ).toBeGreaterThan(500);
+    ).toBe(48);
     const view = container
       .querySelector("svg[data-share-artwork]")!
       .getAttribute("viewBox")!
@@ -169,7 +169,51 @@ describe("Share card", () => {
         .querySelector("svg[data-share-artwork]")
         ?.getAttribute("viewBox")
         ?.split(" ")[2],
-    ).toBe("1060");
+    ).toBe("1120");
+  });
+  it.each(["horizontal", "square"] as const)(
+    "cuts transparent perforations through the %s artwork",
+    (format) => {
+      const { container } = render(<BetShareCard bet={bet} format={format} />);
+      const mask = container.querySelector("mask[data-ticket-cut-mask]")!;
+      const perforation = mask.querySelector("[data-ticket-perforation]")!;
+      expect(mask.getAttribute("maskUnits")).toBe("userSpaceOnUse");
+      expect(perforation.querySelectorAll('circle[fill="black"]')).toHaveLength(
+        2,
+      );
+      const path = perforation.querySelector("path")!;
+      expect(path.getAttribute("stroke")).toBe("black");
+      expect(path.getAttribute("stroke-dasharray")).toBe("10 10");
+      expect(container.querySelector("g[mask]")?.getAttribute("mask")).toBe(
+        `url(#${mask.id})`,
+      );
+      expect(
+        container.querySelector("g[mask] path[stroke-dasharray]"),
+      ).toBeNull();
+    },
+  );
+  it("keeps the compact single ticket free of separators with only a local status fill", () => {
+    const { container } = render(
+      <BetShareCard
+        bet={{
+          ...bet,
+          match: "Lavked vs ex-6666",
+          betType: "Match Winner - Lavked",
+        }}
+      />,
+    );
+    const svg = container.querySelector("svg[data-share-artwork]")!;
+    expect(svg.querySelector('g[mask] path[stroke="#b9bcb6"]')).toBeNull();
+    expect(svg.querySelector('g[mask] path[stroke="#626663"]')).toBeNull();
+    expect(svg.querySelectorAll('rect[fill="#df263b"]')).toHaveLength(1);
+    expect(svg.textContent).not.toContain("Вибір:");
+    const stake = svg.querySelector("[data-ticket-stake] text")!;
+    const result = svg.querySelector("[data-ticket-amounts] text")!;
+    expect(Number(stake.getAttribute("y"))).toBeLessThan(
+      Number(result.getAttribute("y")),
+    );
+    const height = Number(svg.getAttribute("viewBox")!.split(" ")[3]);
+    expect(height).toBeLessThan(520);
   });
   it("shows the tournament logo and restores a trophy when it fails", () => {
     const { container } = render(

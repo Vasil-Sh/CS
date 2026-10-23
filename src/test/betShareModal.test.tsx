@@ -49,17 +49,25 @@ describe("Ticket share dialog", () => {
       <BetShareModal bet={bet} open onClose={() => {}} />,
     );
     const slider = screen.getByRole("slider", { name: "Розмір квитка" });
-    fireEvent.change(slider, { target: { value: "500" } });
+    expect(
+      (document.querySelector(".mi-ticket-resize") as HTMLElement).style.width,
+    ).toBe("560px");
+    expect(
+      document
+        .querySelector("svg[data-share-artwork]")
+        ?.getAttribute("data-arrangement"),
+    ).toBe("wide");
+    fireEvent.change(slider, { target: { value: "380" } });
     expect(
       (
         container.ownerDocument.querySelector(
           ".mi-ticket-resize",
         ) as HTMLElement
       ).style.width,
-    ).toBe("500px");
+    ).toBe("380px");
     act(() =>
       notify(
-        [{ contentRect: { width: 500 } } as ResizeObserverEntry],
+        [{ contentRect: { width: 380 } } as ResizeObserverEntry],
         {} as ResizeObserver,
       ),
     );
@@ -79,6 +87,10 @@ describe("Ticket share dialog", () => {
         .querySelector("svg[data-share-artwork]")
         ?.getAttribute("data-arrangement"),
     ).toBe("wide");
+    fireEvent.click(screen.getByRole("button", { name: "Скинути" }));
+    expect(
+      (document.querySelector(".mi-ticket-resize") as HTMLElement).style.width,
+    ).toBe("560px");
     unmount();
     expect(disconnect).toHaveBeenCalled();
   });

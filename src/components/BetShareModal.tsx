@@ -27,8 +27,8 @@ export default function BetShareModal({
   const [error, setError] = useState("");
   const [format, setFormat] = useState<"horizontal" | "square">("horizontal");
   const [showAmounts, setShowAmounts] = useState(true);
-  const [ticketWidth, setTicketWidth] = useState(800);
-  const [measuredWidth, setMeasuredWidth] = useState(800);
+  const [ticketWidth, setTicketWidth] = useState(560);
+  const [measuredWidth, setMeasuredWidth] = useState(560);
   const [frameNode, setFrameNode] = useState<HTMLDivElement | null>(null);
   useEffect(() => {
     const frame = frameNode;
@@ -42,6 +42,11 @@ export default function BetShareModal({
   }, [open, frameNode]);
   const changeWidth = (value: number) => {
     setTicketWidth(value);
+    setMeasuredWidth(
+      frameNode
+        ? Math.min(value, frameNode.parentElement?.clientWidth || value)
+        : value,
+    );
     if (frameNode) frameNode.style.width = `${value}px`;
   };
   const generation = useRef(0);
@@ -140,7 +145,7 @@ export default function BetShareModal({
               bet={bet}
               format={format}
               showAmounts={showAmounts}
-              compact={measuredWidth < 620}
+              compact={measuredWidth < 420}
             />
           </div>
         </div>
@@ -160,7 +165,7 @@ export default function BetShareModal({
           <button
             type="button"
             disabled={saving}
-            onClick={() => changeWidth(format === "square" ? 420 : 800)}
+            onClick={() => changeWidth(format === "square" ? 420 : 560)}
           >
             Скинути
           </button>
@@ -182,7 +187,7 @@ export default function BetShareModal({
                     checked={format === value}
                     onChange={() => {
                       setFormat(value);
-                      changeWidth(value === "square" ? 420 : 800);
+                      changeWidth(value === "square" ? 420 : 560);
                     }}
                   />
                   <span>
