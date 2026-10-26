@@ -53,7 +53,7 @@ export function ProfitChart({
         className="public-horizontal-chart"
         style={{ "--zero": `${zero}%` } as CSSProperties}
       >
-        {rows.map((row, index) => {
+        {rows.map((row) => {
           const value = row.value!;
           const end = ((value - min) / extent) * 100;
           return (
@@ -68,7 +68,6 @@ export function ProfitChart({
                     {
                       left: `${Math.min(zero, end)}%`,
                       width: `${Math.abs(end - zero)}%`,
-                      "--bar-delay": `${Math.min(index, 8) * 35}ms`,
                     } as CSSProperties
                   }
                 />

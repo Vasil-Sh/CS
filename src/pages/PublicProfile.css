@@ -31,6 +31,9 @@
   --public-ink: #15191d;
   --public-muted: #69707d;
   --public-line: #e6e7eb;
+  --public-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --public-press-duration: 120ms;
+  --public-state-duration: 180ms;
   background: #f4f5f6;
   color: var(--public-ink);
   font-family: "Public Inter", Inter, system-ui, sans-serif;
@@ -56,6 +59,19 @@
 }
 .public-profile button {
   cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.public-profile a {
+  touch-action: manipulation;
+}
+.public-profile :is(button, .public-login):active {
+  transform: scale(0.97);
+}
+.public-profile :is(button, .public-login) > svg {
+  flex-shrink: 0;
 }
 .public-profile :focus-visible {
   outline: 3px solid #ce3f13;
@@ -102,10 +118,14 @@
   border-radius: 7px;
   font-weight: 600;
   font-size: 14px;
-  transition: background 180ms;
+  transition:
+    background var(--public-state-duration) ease,
+    transform var(--public-press-duration) var(--public-ease-out);
 }
-.public-login:hover {
-  background: #bb3109;
+@media (hover: hover) and (pointer: fine) {
+  .public-login:hover {
+    background: #bb3109;
+  }
 }
 .public-layout {
   display: grid;
@@ -147,7 +167,7 @@
   object-fit: cover;
   object-position: 50% 34%;
   opacity: 0;
-  transition: opacity 240ms ease;
+  transition: opacity 200ms var(--public-ease-out);
   pointer-events: none;
 }
 .public-cover.is-active {
@@ -252,21 +272,44 @@
   font-weight: 700 !important;
   padding: 12px 16px;
   transition:
-    background 160ms,
-    transform 160ms,
-    box-shadow 160ms;
+    background var(--public-state-duration) ease,
+    transform var(--public-press-duration) var(--public-ease-out),
+    box-shadow var(--public-state-duration) ease;
 }
-.public-primary:hover {
-  background: #ed4914;
-  box-shadow: 0 5px 20px #ff571f25;
-  transform: translateY(-1px);
-}
-.public-primary:active {
-  transform: translateY(0);
+@media (hover: hover) and (pointer: fine) {
+  .public-primary:hover {
+    background: #ed4914;
+    box-shadow: 0 3px 12px #ff571f20;
+  }
 }
 .public-share {
   width: 100%;
   margin-top: 24px;
+}
+.public-share-content {
+  display: grid;
+}
+.public-share-state {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition:
+    opacity var(--public-state-duration) var(--public-ease-out),
+    transform var(--public-state-duration) var(--public-ease-out);
+}
+.public-share-success {
+  opacity: 0;
+  transform: translateY(4px);
+}
+.public-share[data-copied="true"] .public-share-idle {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+.public-share[data-copied="true"] .public-share-success {
+  opacity: 1;
+  transform: translateY(0);
 }
 .public-disclosure {
   display: flex;
@@ -353,12 +396,15 @@
   font-size: 14px;
   font-weight: 550;
   transition:
-    background 160ms,
-    color 160ms;
+    background var(--public-state-duration) ease,
+    color var(--public-state-duration) ease,
+    transform var(--public-press-duration) var(--public-ease-out);
 }
-.public-game-filter button:hover {
-  background: #f5f5f5;
-  color: #24282e;
+@media (hover: hover) and (pointer: fine) {
+  .public-game-filter button:hover {
+    background: #f5f5f5;
+    color: #24282e;
+  }
 }
 .public-game-filter button[aria-pressed="true"] {
   background: #fff0e9;
@@ -416,15 +462,18 @@
   font-size: 13px;
   min-height: 40px;
   transition:
-    background 160ms,
-    color 160ms;
+    background var(--public-state-duration) ease,
+    color var(--public-state-duration) ease,
+    transform var(--public-press-duration) var(--public-ease-out);
 }
 .public-currency button[aria-pressed="true"] {
   background: #ce3d12;
   color: white;
 }
-.public-currency button:hover:not([aria-pressed="true"]) {
-  background: #e9eaed;
+@media (hover: hover) and (pointer: fine) {
+  .public-currency button:hover:not([aria-pressed="true"]) {
+    background: #e9eaed;
+  }
 }
 .public-panel {
   background: white;
@@ -506,7 +555,7 @@
 }
 .public-kpis dl > div > span {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--public-muted);
   margin-top: 8px;
   line-height: 1.5;
@@ -527,7 +576,7 @@
   flex-wrap: wrap;
   padding: 10px 2px 18px;
   color: var(--public-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .public-conversion-warning {
   font-size: 13px;
@@ -580,6 +629,7 @@
 }
 .public-chart-scroll {
   overflow: auto;
+  overscroll-behavior: contain;
   max-height: 340px;
   scrollbar-width: thin;
   margin-block: auto;
@@ -627,19 +677,11 @@
   top: 4px;
   height: 26px;
   background: #69727d;
-  min-width: 1px;
-  transform-origin: left;
-  animation: public-bar-enter 440ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
-  animation-delay: var(--bar-delay);
-  transition: opacity 160ms;
+  min-width: 0;
   border-radius: 0 2px 2px 0;
 }
 .public-chart-bar.is-negative {
   background: #b87673;
-  transform-origin: right;
-}
-.public-chart-track:hover .public-chart-bar {
-  opacity: 0.8;
 }
 .public-chart-row > span:last-child {
   font-size: 12px;
@@ -684,7 +726,7 @@
   font-variant-numeric: tabular-nums;
 }
 .public-summary > p {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--public-muted);
   margin-top: 16px;
 }
@@ -693,6 +735,7 @@
 }
 .public-table-scroll {
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   scrollbar-width: thin;
 }
 .public-profile table {
@@ -725,11 +768,10 @@
 .public-profile tbody tr:last-child td {
   border-bottom: 0;
 }
-.public-profile tbody tr {
-  transition: background 160ms;
-}
-.public-profile tbody tr:hover {
-  background: #fafbfc;
+@media (hover: hover) and (pointer: fine) {
+  .public-profile tbody tr:hover {
+    background: #fafbfc;
+  }
 }
 .public-profile td {
   font-variant-numeric: tabular-nums;
@@ -751,6 +793,8 @@
   align-items: center;
   gap: 9px;
   font-size: 14px;
+  overflow-wrap: anywhere;
+  max-width: 100%;
 }
 .public-match-team img {
   width: 36px;
@@ -831,10 +875,14 @@
   padding: 9px 16px;
   background: white;
   color: #303641;
-  transition: background 180ms;
+  transition:
+    background var(--public-state-duration) ease,
+    transform var(--public-press-duration) var(--public-ease-out);
 }
-.public-button:hover {
-  background: #f1f3f5;
+@media (hover: hover) and (pointer: fine) {
+  .public-button:hover {
+    background: #f1f3f5;
+  }
 }
 .public-empty,
 .public-state {
@@ -893,9 +941,6 @@
 .public-spinner {
   animation: public-spin 1s linear infinite;
 }
-.public-data-enter {
-  animation: public-enter 220ms ease-out both;
-}
 .public-footer {
   display: flex;
   align-items: center;
@@ -931,24 +976,6 @@
   border-radius: 6px;
   padding: 12px;
   color: #16191d;
-}
-@keyframes public-enter {
-  from {
-    opacity: 0;
-    transform: translateY(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@keyframes public-bar-enter {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
 }
 @keyframes public-spin {
   to {
@@ -1168,8 +1195,8 @@
     position: static;
   }
   .public-player-card {
-    height: 360px;
-    min-height: 0;
+    height: auto;
+    min-height: 260px;
   }
   .public-cover {
     object-position: 50% 30%;
@@ -1268,17 +1295,17 @@
     font-size: 27px;
   }
   .public-kpis dt {
-    font-size: 11px;
+    font-size: 12px;
     min-height: 34px;
   }
   .public-kpis dl > div > span {
-    font-size: 10px;
+    font-size: 12px;
   }
   .public-kpis dl > div {
     padding-left: 12px;
   }
   .public-scope-note {
-    font-size: 10px;
+    font-size: 12px;
     padding-bottom: 14px;
   }
   .public-results-grid {
@@ -1289,7 +1316,7 @@
     padding-left: 12px;
   }
   .public-summary dt {
-    font-size: 11px;
+    font-size: 12px;
   }
   .public-horizontal-chart {
     min-width: 260px;
@@ -1369,7 +1396,7 @@
     font-size: 18px;
   }
   .public-player-card {
-    height: 340px;
+    min-height: 250px;
   }
   .public-profile h1 {
     font-size: 26px;
@@ -1380,9 +1407,28 @@
     font-size: clamp(31px, 10vw, 43px);
   }
   .public-kpis dd {
-    white-space: nowrap;
     font-size: clamp(21px, 6.6vw, 27px);
   }
+}
+/* Touch controls need real targets and 16px inputs, not disabled browser zoom. */
+@media (pointer: coarse) {
+  .public-profile :is(button, .public-login) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .public-profile :is(select, input) {
+    font-size: 16px;
+  }
+}
+/* Keyboard interaction is immediate; keep all feedback visible without motion. */
+.public-profile[data-input="keyboard"] *,
+.public-profile[data-input="keyboard"] *::before,
+.public-profile[data-input="keyboard"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+.public-profile[data-input="keyboard"] :is(button, .public-login):active {
+  transform: none;
 }
 @media (prefers-reduced-motion: reduce) {
   .public-profile *,
@@ -1391,5 +1437,9 @@
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+  .public-profile :is(button, .public-login):active,
+  .public-profile .public-share-state {
+    transform: none !important;
   }
 }

@@ -1,27 +1,25 @@
-import { useState, type ReactNode } from "react";
-import { Link } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
 import {
-  AnimatedFAQ,
-  AnimatedNumber,
-  ArenaImage,
-  DataOwnership,
-  HeroTitle,
-  LandingMotion,
-  ProductExplorer,
-  StrategyCheck,
-  useJourneyScroll,
-  useLandingReducedMotion,
-} from "./LandingExperience";
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { Link } from "react-router-dom";
+import { Terrain, Drawer, Loupe } from "@lucasmarkes/hairline/react";
+import { MotionConfig, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowDown,
   ArrowUpRight,
   Check,
-  ChevronRight,
-  Flag,
+  ChevronDown,
+  Download,
+  FileJson,
   Menu,
+  Pause,
+  Play,
   ShieldCheck,
-  Target,
   X,
 } from "lucide-react";
 import { SEO } from "@/components/SEO";
@@ -30,71 +28,89 @@ import {
   OrganizationStructuredData,
   WebAppStructuredData,
 } from "@/components/StructuredData";
-import "./Landing.css";
+import "./LandingLumora.css";
 
-const DEMO = "/login-digesto-demo";
+const ReducedMotion = createContext(false);
+const figures = { terrain: Terrain, drawer: Drawer, loupe: Loupe };
+function HairlineFigure({ kind }: { kind: keyof typeof figures }) {
+  const reduced = useContext(ReducedMotion);
+  const Figure = figures[kind];
+  return (
+    <div
+      className={`mq-hairline mq-hairline-${kind}`}
+      aria-hidden="true"
+      data-paused={reduced}
+    >
+      <Figure
+        key={reduced ? "still" : "moving"}
+        theme="light"
+        intensity={0.45}
+        play={!reduced}
+      />
+    </div>
+  );
+}
 const description =
-  "Трекер ставок на CS2 та Dota 2. Веди історію, контролюй банкрол і аналізуй власні результати.";
-const faqs = [
+  "MatchIQ — журнал ставок на CS2 та Dota 2. Зберігай контекст рішень, аналізуй результати та контролюй власні правила.";
+const faq = [
+  {
+    question: "Що саме робить MatchIQ?",
+    answer:
+      "Допомагає вести власний журнал ставок на CS2 та Dota 2: зберігати суму, коефіцієнт, результат і нотатки, стежити за банкролом та порівнювати стратегії. Це облік і аналіз твоїх рішень.",
+  },
+  {
+    question: "Чи можна тут зробити ставку?",
+    answer:
+      "Ні. MatchIQ не приймає ставки, не зберігає кошти та не проводить платежі. У застосунку ти лише записуєш і аналізуєш свої ставки.",
+  },
   {
     question: "Як потрапити в демо?",
     answer:
-      "Кнопка «Увійти в демо» відкриває форму входу до демо-облікового запису. Для входу потрібні його логін і пароль. Поки не маєш доступу — досліди інтерактивні приклади на цій сторінці: вони працюють без входу.",
+      "Кнопка «Увійти в демо» відкриває форму входу. Для доступу потрібні логін і пароль демо-облікового запису. Інтерактивні приклади на цьому лендінгу можна дослідити без входу.",
   },
   {
-    question: "Чи можна зробити ставку в MatchIQ?",
+    question: "Чи гарантують розрахунки та AI результат?",
     answer:
-      "Ні. MatchIQ не приймає ставки й не проводить платежі. Це інструмент для обліку: ти записуєш власні ставки, фіксуєш результати та аналізуєш свої рішення.",
+      "Ні. EV і критерій Келлі залежать від твоїх припущень про ймовірність. AI-рекомендації можуть помилятися. Це додатковий контекст для аналізу, а не гарантія виграшу.",
   },
   {
-    question: "Звідки беруться дані матчів?",
-    answer:
-      "MatchIQ отримує дані CS2 та Dota 2 із зовнішніх джерел, зокрема cstest API та tips.gg. Розклад, рахунки й коефіцієнти можуть оновлюватися із затримкою.",
-  },
-  {
-    question: "Як фіксувати результати?",
-    answer:
-      "Додай ставку вручну або почни з матчу у списку. Після завершення познач виграш чи програш. Додай нотатку, щоб зберегти контекст свого рішення; для програшу коментар обов’язковий.",
-  },
-  {
-    question: "Для чого AI-рекомендації?",
-    answer:
-      "Вони дають додатковий погляд на матч: аргументи, оцінку впевненості та ризику. AI може помилятися, а його оцінки не гарантують результату. Рішення залишаються за тобою.",
-  },
-  {
-    question: "Чи можна експортувати записи?",
+    question: "Чи можна забрати свої дані?",
     answer:
       "Так. У профілі можна експортувати ставки у CSV для роботи з таблицями та створити JSON-бекап даних.",
   },
 ];
-const steps = [
+const journey = [
   {
-    title: "Обери матч",
-    caption: "CS2 або Dota 2. Усі деталі — перед очима.",
+    title: "Знайди свій матч",
+    body: "Почни з розкладу CS2 або Dota 2. Перевір команди, турнір і формат зустрічі.",
     label: "01 / МАТЧ",
-    heading: "NAVI — Team Spirit",
-    detail: "CS2 · Best of 3 · Демонстраційний матч",
+    main: "NAVI — Team Spirit",
+    detail: "CS2 · Best of 3 · Демо-матч",
+    value: "BO3",
   },
   {
-    title: "Запиши ставку",
-    caption: "Зафіксуй суму, коефіцієнт і свою стратегію.",
+    title: "Збережи причину рішення",
+    body: "Запиши суму та коефіцієнт. Додай стратегію й нотатку — вони збережуть контекст, коли емоції минуть.",
     label: "02 / ЗАПИС",
-    heading: "Рішення має контекст",
-    detail: "500 ₴ · коефіцієнт 1.80 · перемога NAVI",
+    main: "Не тільки цифри",
+    detail: "500 ₴ · 1.80 · Основна стратегія",
+    value: "500 ₴",
   },
   {
-    title: "Додай результат",
-    caption: "Збережи підсумок і те, що варто пам’ятати.",
+    title: "Зафіксуй результат",
+    body: "Познач виграш або програш. Для програшу додай коментар: що спрацювало не так і що варто врахувати наступного разу.",
     label: "03 / РЕЗУЛЬТАТ",
-    heading: "Програш — теж дані",
-    detail: "−500 ₴ · Відхилився від своєї стратегії",
+    main: "Програш — теж дані",
+    detail: "«Не врахував формат матчу. Перевірю наступного разу.»",
+    value: "−500 ₴",
   },
   {
-    title: "Побач зміни",
-    caption: "Від одного запису — до повної картини.",
+    title: "Повернись із висновками",
+    body: "Оціни зміну банкролу, порівняй стратегії та знайди повторювані рішення. Один запис стає частиною повної картини.",
     label: "04 / ВИСНОВОК",
-    heading: "Тепер це частина історії",
-    detail: "Банкрол: 12 000 ₴ → 11 500 ₴",
+    main: "Історія стає досвідом",
+    detail: "Банкрол до запису: 12 000 ₴ → після результату: 11 500 ₴",
+    value: "11 500 ₴",
   },
 ];
 
@@ -107,13 +123,13 @@ function Reveal({
   className?: string;
   delay?: number;
 }) {
-  const reduced = useLandingReducedMotion();
+  const reduced = useContext(ReducedMotion);
   return (
     <motion.div
       className={className}
-      initial={reduced ? false : { opacity: 0, y: 28 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.12 }}
+      initial={reduced ? false : { opacity: 0, transform: "translateY(24px)" }}
+      whileInView={{ opacity: 1, transform: "translateY(0)" }}
+      viewport={{ once: true, amount: 0.1 }}
       transition={{
         duration: reduced ? 0 : 0.65,
         delay: reduced ? 0 : delay,
@@ -124,724 +140,868 @@ function Reveal({
     </motion.div>
   );
 }
-function DemoLink({
-  dark = false,
-  children = "Увійти в демо",
-}: {
-  dark?: boolean;
-  children?: ReactNode;
-}) {
+function Mark() {
   return (
-    <Link to={DEMO} className={`lp-button ${dark ? "lp-button-dark" : ""}`}>
-      {children}
-      <ArrowUpRight size={20} aria-hidden="true" />
+    <span className="mq-brand">
+      <span aria-hidden="true">✦</span> MatchIQ
+    </span>
+  );
+}
+function Pill({ children }: { children: ReactNode }) {
+  return <span className="mq-pill">{children}</span>;
+}
+function DemoBadge() {
+  return (
+    <span className="mq-demo-badge">
+      <i /> Демо-дані
+    </span>
+  );
+}
+function DemoLink() {
+  return (
+    <Link className="mq-button" to="/login-digesto-demo">
+      Увійти в демо <ArrowUpRight size={18} aria-hidden="true" />
     </Link>
   );
 }
-function Brand() {
+function SectionHeading({
+  label,
+  title,
+  children,
+}: {
+  label: string;
+  title: ReactNode;
+  children?: ReactNode;
+}) {
   return (
-    <span className="lp-brand">
-      Match<span>IQ</span>
-    </span>
-  );
-}
-function Eyebrow({ children }: { children: ReactNode }) {
-  return <p className="lp-eyebrow">{children}</p>;
-}
-function DemoLabel() {
-  return (
-    <span className="lp-demo-label">
-      <span /> Демо-дані
-    </span>
-  );
-}
-function LineChart({ loss = false }: { loss?: boolean }) {
-  const reduced = useLandingReducedMotion();
-  const path = loss
-    ? "M0 36 L20 40 L40 28 L60 35 L80 23 L100 41 L120 36 L140 52 L160 42 L180 62 L200 57 L220 74 L240 66 L260 89 L280 77 L300 110 L320 103 L340 126 L360 135"
-    : "M0 102 L20 93 L40 107 L60 80 L80 86 L100 66 L120 78 L140 57 L160 67 L180 43 L200 56 L220 40 L240 62 L260 32 L280 42 L300 25 L320 39 L340 15 L360 24";
-  return (
-    <svg
-      className="lp-line-chart"
-      viewBox="0 0 360 160"
-      role="img"
-      aria-label={
-        loss
-          ? "Приклад зменшення банкролу після програшу"
-          : "Ілюстративна динаміка банкролу"
-      }
-    >
-      {[30, 70, 110, 150].map((y) => (
-        <line
-          key={y}
-          x1="0"
-          y1={y}
-          x2="360"
-          y2={y}
-          stroke="currentColor"
-          strokeOpacity=".12"
-        />
-      ))}
-      <motion.path
-        d={path}
-        fill="none"
-        stroke="#ff693b"
-        strokeWidth="2.5"
-        initial={reduced ? false : { pathLength: 0 }}
-        whileInView={{ pathLength: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: reduced ? 0 : 1.5, ease: "easeInOut" }}
-      />
-    </svg>
-  );
-}
-function JourneyPreview({ active }: { active: number }) {
-  const reduced = useLandingReducedMotion();
-  return (
-    <div className="lp-journey-preview">
-      <div className="lp-preview-top">
-        <span>MatchIQ / журнал рішень</span>
-        <DemoLabel />
+    <Reveal className="mq-section-heading">
+      <div>
+        <p className="mq-kicker">{label}</p>
+        <h2>{title}</h2>
       </div>
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={active}
-          initial={reduced ? false : { opacity: 0, y: 18, filter: "blur(4px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          exit={{ opacity: 0, y: reduced ? 0 : -12 }}
-          transition={{ duration: reduced ? 0 : 0.28 }}
-          className="lp-journey-content"
-          aria-live="polite"
+      {children && <p>{children}</p>}
+    </Reveal>
+  );
+}
+function Switch({
+  label,
+  values,
+  value,
+  onChange,
+}: {
+  label: string;
+  values: string[];
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="mq-switch" role="group" aria-label={label}>
+      {values.map((item) => (
+        <button
+          key={item}
+          type="button"
+          aria-pressed={value === item}
+          onClick={() => onChange(item)}
         >
-          <Eyebrow>{steps[active].label}</Eyebrow>
-          <h3>{steps[active].heading}</h3>
-          <p className="lp-preview-description">{steps[active].detail}</p>
-          {active === 0 && (
-            <div className="lp-match-demo">
-              <div>
-                <b className="lp-team-mark">N</b>
-                <strong>NAVI</strong>
-              </div>
-              <span>
-                VS<small>BO3</small>
-              </span>
-              <div>
-                <b className="lp-team-mark lp-team-mark-light">TS</b>
-                <strong>Team Spirit</strong>
-              </div>
-            </div>
-          )}
-          {active === 1 && (
-            <div className="lp-record-demo">
-              <div>
-                <span>Сума ставки</span>
-                <strong>
-                  500 <small>₴</small>
-                </strong>
-              </div>
-              <div>
-                <span>Коефіцієнт</span>
-                <strong>1.80</strong>
-              </div>
-              <div className="lp-record-wide">
-                <span>Стратегія</span>
-                <strong>
-                  Основна <ShieldCheck size={18} />
-                </strong>
-              </div>
-            </div>
-          )}
-          {active === 2 && (
-            <div className="lp-result-demo">
-              <span className="lp-loss-tag">Програш</span>
-              <strong>
-                −500 <small>₴</small>
-              </strong>
-              <blockquote>
-                «Відхилився від своєї стратегії. Наступного разу перевірю межі
-                коефіцієнтів перед записом.»
-              </blockquote>
-            </div>
-          )}
-          {active === 3 && (
-            <div className="lp-bank-demo">
-              <span>Поточний банкрол</span>
-              <strong>
-                <AnimatedNumber value={11500} /> <small>₴</small>
-              </strong>
-              <LineChart loss />
-              <div className="lp-axis">
-                <span>До ставки</span>
-                <span>Після результату</span>
-              </div>
-            </div>
-          )}
-        </motion.div>
-      </AnimatePresence>
-      <div className="lp-preview-bottom">
-        <span>Один приклад. Чотири кроки.</span>
-        <span>0{active + 1} / 04</span>
-      </div>
+          {item}
+        </button>
+      ))}
     </div>
   );
 }
-function MonthlyChart() {
-  const reduced = useLandingReducedMotion();
-  const [game, setGame] = useState("CS2");
-  const baseBars = [
-    32, 48, -25, 68, 28, -52, 38, -24, -75, 42, 60, -32, 22, -45, 56, -66, 32,
-    -40, 23, -55,
-  ];
-  const bars =
-    game === "CS2"
-      ? baseBars
-      : baseBars.map((v, i) => (i % 3 === 0 ? -v : Math.abs(v)));
+function Hero() {
+  const [menu, setMenu] = useState(false);
+  const menuButton = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!menu) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenu(false);
+        menuButton.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [menu]);
   return (
-    <div className="lp-stat-visual">
-      <div className="lp-stat-top">
-        <span>Результат за місяць</span>
-        <DemoLabel />
+    <section className="mq-hero" aria-labelledby="mq-title">
+      <div className="mq-hero-art" aria-hidden="true">
+        <img
+          src="/assets/profile/profile-player-hero.png"
+          alt=""
+          width="2172"
+          height="724"
+          fetchPriority="high"
+        />
+        <div />
       </div>
-      <div className="lp-stat-value">
-        <AnimatedNumber value={game === "CS2" ? -320 : 460} /> <small>₴</small>
-        <span>Чистий результат</span>
-      </div>
-      <div
-        className="lp-segmented lp-chart-filter"
-        aria-label="Гра на демонстраційному графіку"
-      >
-        {["CS2", "Dota 2"].map((value) => (
-          <button
-            key={value}
-            type="button"
-            aria-pressed={game === value}
-            onClick={() => setGame(value)}
-          >
-            {value}
-          </button>
-        ))}
-      </div>
-      <div
-        className="lp-bars"
-        role="img"
-        aria-label="Демонстраційний графік виграшних і програшних днів"
-      >
-        {bars.map((value, i) => (
-          <div key={i} className="lp-bar-slot">
-            <motion.span
-              key={game}
-              className={value > 0 ? "lp-bar-up" : "lp-bar-down"}
-              style={{ height: `${Math.abs(value)}%` }}
-              initial={reduced ? false : { scaleY: 0 }}
-              whileInView={{ scaleY: 1 }}
-              viewport={{ once: true }}
-              transition={{
-                duration: reduced ? 0 : 0.65,
-                delay: reduced ? 0 : i * 0.025,
-              }}
-            />
+      <header className="mq-header">
+        <Link to="/" aria-label="MatchIQ — головна">
+          <Mark />
+        </Link>
+        <nav aria-label="Основна навігація">
+          <a href="#possibilities">Можливості</a>
+          <a href="#how-it-works">Як це працює</a>
+          <a href="#tools">Інструменти</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+        <Link to="/login" className="mq-login">
+          Увійти <ArrowUpRight size={16} />
+        </Link>
+        <button
+          ref={menuButton}
+          className="mq-menu-button"
+          type="button"
+          aria-label={menu ? "Закрити меню" : "Відкрити меню"}
+          aria-expanded={menu}
+          aria-controls="mq-mobile-menu"
+          onClick={() => setMenu(!menu)}
+        >
+          {menu ? <X size={20} /> : <Menu size={20} />}
+        </button>
+      </header>
+      {menu && (
+        <nav
+          id="mq-mobile-menu"
+          className="mq-mobile-menu"
+          aria-label="Мобільна навігація"
+        >
+          <a href="#possibilities" onClick={() => setMenu(false)}>
+            Можливості
+          </a>
+          <a href="#how-it-works" onClick={() => setMenu(false)}>
+            Як це працює
+          </a>
+          <a href="#tools" onClick={() => setMenu(false)}>
+            Інструменти
+          </a>
+          <a href="#faq" onClick={() => setMenu(false)}>
+            FAQ
+          </a>
+          <Link to="/login">Увійти ↗</Link>
+        </nav>
+      )}
+      <div className="mq-hero-layout">
+        <div className="mq-hero-copy">
+          <p className="mq-kicker">
+            <i /> Для тих, хто думає далі
+          </p>
+          <h1 id="mq-title">
+            <span>Гра має емоції.</span>
+            <span>
+              Рішення — <em>контекст.</em>
+            </span>
+          </h1>
+          <p className="mq-lead">
+            Твій журнал ставок на CS2 та Dota 2.
+            <br />
+            Від першого запису до розуміння власної гри.
+          </p>
+          <div className="mq-hero-actions">
+            <a className="mq-button" href="#possibilities">
+              Дослідити MatchIQ <ArrowUpRight size={18} />
+            </a>
+            <a className="mq-outline-button" href="#how-it-works">
+              Як це працює
+            </a>
           </div>
-        ))}
+          <p className="mq-legal-note">
+            Облік та аналітика. Без приймання ставок.
+          </p>
+        </div>
       </div>
-      <div className="lp-axis">
-        <span>01 вер</span>
-        <span>15 вер</span>
-        <span>30 вер</span>
+      <div className="mq-hero-signature" aria-hidden="true">
+        MatchIQ<span>✦</span>
       </div>
-    </div>
-  );
-}
-function Comparison({ games = false }: { games?: boolean }) {
-  const rows = games
-    ? [
-        ["CS2", "38", "−6.1%"],
-        ["Dota 2", "22", "+5.8%"],
-      ]
-    : [
-        ["Основна", "28", "+12.4%"],
-        ["Лайв", "16", "−8.7%"],
-        ["Експрес", "12", "−15.3%"],
-      ];
-  return (
-    <div className="lp-stat-visual">
-      <div className="lp-stat-top">
-        <span>{games ? "Результати за іграми" : "Порівняння стратегій"}</span>
-        <DemoLabel />
+      <div className="mq-hero-meta">
+        <div>
+          <Pill>CS2</Pill>
+          <Pill>Dota 2</Pill>
+        </div>
+        <p>Ті самі матчі. Інший погляд.</p>
+        <a href="#about" aria-label="Дізнатись більше про MatchIQ">
+          <ArrowDown size={20} />
+        </a>
       </div>
-      <table className="lp-data-table">
-        <caption className="lp-sr-only">
-          Ілюстративне порівняння {games ? "ігор" : "стратегій"}
-        </caption>
-        <thead>
-          <tr>
-            <th>{games ? "Гра" : "Стратегія"}</th>
-            <th>Ставок</th>
-            <th>ROI</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row[0]}>
-              <th scope="row">{row[0]}</th>
-              <td>{row[1]}</td>
-              <td
-                className={
-                  row[2].startsWith("+") ? "lp-positive" : "lp-negative"
-                }
-              >
-                {row[2]}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    </section>
   );
 }
 
-function LandingContent() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [activeStep, setActiveStep] = useState(0);
-  const journeyRef = useJourneyScroll(setActiveStep);
-  const reduced = useLandingReducedMotion();
+function MatchesDemo() {
+  const [game, setGame] = useState("CS2");
+  const rows =
+    game === "CS2"
+      ? [
+          ["NAVI", "Team Spirit"],
+          ["Vitality", "G2"],
+          ["FaZe", "MOUZ"],
+        ]
+      : [
+          ["Team Liquid", "Tundra"],
+          ["Team Spirit", "Falcons"],
+          ["BetBoom", "Aurora"],
+        ];
   return (
-    <div className="matchiq-landing">
-      <SEO
-        title="Трекер ставок на CS2 та Dota 2"
-        description={description}
-        canonical="https://matchiq.pro/"
-      />
-      <OrganizationStructuredData description={description} />
-      <WebAppStructuredData
-        description={description}
-        image="https://matchiq.pro/assets/og-image.svg"
-      />
-      <FAQStructuredData questions={faqs} />
-      <a className="lp-skip" href="#landing-main">
-        Перейти до вмісту
-      </a>
-      <div className="lp-hero-shell">
-        <ArenaImage />
-        <header className="lp-header">
-          <Link to="/" aria-label="MatchIQ — головна">
-            <Brand />
-          </Link>
-          <nav className="lp-desktop-nav" aria-label="Основна навігація">
-            <a href="#possibilities">Можливості</a>
-            <a href="#how-it-works">Як це працює</a>
-            <a href="#faq">FAQ</a>
-          </nav>
-          <Link className="lp-login" to="/login">
-            Увійти <ArrowUpRight size={17} />
-          </Link>
-          <button
-            type="button"
-            className="lp-menu-button"
-            aria-label={menuOpen ? "Закрити меню" : "Відкрити меню"}
-            aria-expanded={menuOpen}
-            aria-controls="landing-mobile-nav"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            {menuOpen ? <X /> : <Menu />}
-          </button>
-        </header>
-        <AnimatePresence>
-          {menuOpen && (
-            <motion.nav
-              initial={{ opacity: 0, y: reduced ? 0 : -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: reduced ? 0 : -12 }}
-              transition={{ duration: reduced ? 0 : 0.22 }}
-              id="landing-mobile-nav"
-              className="lp-mobile-nav"
-              aria-label="Мобільна навігація"
-            >
-              <a href="#possibilities" onClick={() => setMenuOpen(false)}>
-                Можливості
-              </a>
-              <a href="#how-it-works" onClick={() => setMenuOpen(false)}>
-                Як це працює
-              </a>
-              <a href="#faq" onClick={() => setMenuOpen(false)}>
-                FAQ
-              </a>
-              <Link to="/login">
-                Увійти <ArrowUpRight size={18} />
-              </Link>
-            </motion.nav>
-          )}
-        </AnimatePresence>
-        <main id="landing-main">
-          <section className="lp-hero" aria-labelledby="hero-title">
-            <div className="lp-hero-copy">
-              <Reveal>
-                <Eyebrow>
-                  <span className="lp-signal" /> ДАНІ. ДИСЦИПЛІНА. ТВОЯ ГРА.
-                </Eyebrow>
-                <HeroTitle />
-              </Reveal>
-              <Reveal delay={0.12}>
-                <p className="lp-hero-description">
-                  Трекер ставок на CS2 та Dota 2.
-                  <br />
-                  Веди історію, контролюй банкрол
-                  <br className="lp-desktop-break" /> і аналізуй власні
-                  результати.
-                </p>
-                <div className="lp-hero-actions">
-                  <a href="#possibilities" className="lp-button">
-                    Дослідити можливості <ArrowUpRight size={20} />
-                  </a>
-                  <a href="#how-it-works" className="lp-text-link">
-                    Як це працює <ArrowDown size={17} />
-                  </a>
-                </div>
-                <p className="lp-hero-note">
-                  Облік та аналітика. Без приймання ставок.
-                </p>
-              </Reveal>
-            </div>
-            <aside className="lp-orange-rail" aria-hidden="true">
-              <span>
-                БІЛЬШЕ
-                <br />
-                КОНТЕКСТУ.
-                <br />
-                БІЛЬШЕ
-                <br />
-                КОНТРОЛЮ.
-              </span>
-              <div />
-              <span>
-                ДЛЯ ТИХ,
-                <br />
-                ХТО ДУМАЄ
-                <br />
-                ДАЛІ.
-              </span>
-              <ArrowDown />
-            </aside>
-            <div className="lp-hero-bottom">
-              <div className="lp-games">
-                <span>
-                  <img src="/assets/game-cs2.svg" alt="" /> CS2
-                </span>
-                <i />
-                <span>
-                  <img src="/assets/game-dota2.svg" alt="" /> Dota 2
-                </span>
-              </div>
-              <p>
-                Ті самі матчі.
-                <br />
-                <strong>Інший погляд на свої рішення.</strong>
-              </p>
-              <a href="#how-it-works" aria-label="Дізнатись, як працює MatchIQ">
-                <ArrowDown size={22} />
-              </a>
-            </div>
-          </section>
-          <section
-            className="lp-section lp-journey"
-            id="how-it-works"
-            aria-labelledby="journey-title"
-          >
-            <Reveal className="lp-section-heading">
-              <div>
-                <Eyebrow>01 / ВІД ЗАПИСУ ДО ВИСНОВКУ</Eyebrow>
-                <h2 id="journey-title">
-                  Одна ставка.
-                  <br />
-                  Повна історія.
-                </h2>
-              </div>
-              <p>
-                Збережи не лише результат,
-                <br />а й причину свого рішення.
-                <br />
-                <span>Подивись, як це працює.</span>
-              </p>
-            </Reveal>
-            <div className="lp-journey-grid" ref={journeyRef}>
-              <Reveal className="lp-steps">
-                {steps.map((step, index) => (
-                  <button
-                    type="button"
-                    key={step.label}
-                    className={`lp-step ${activeStep === index ? "is-active" : ""}`}
-                    aria-pressed={activeStep === index}
-                    onClick={() => setActiveStep(index)}
-                  >
-                    <span className="lp-step-number">0{index + 1}</span>
-                    <span>
-                      <strong>{step.title}</strong>
-                      <small>{step.caption}</small>
-                    </span>
-                    <ChevronRight size={20} aria-hidden="true" />
-                  </button>
-                ))}
-              </Reveal>
-              <div className="lp-journey-sticky">
-                <JourneyPreview active={activeStep} />
-              </div>
-            </div>
-            <p className="lp-example-note">
-              Ілюстративний приклад інтерфейсу. Усі суми та результати —
-              демонстраційні.
-            </p>
-          </section>
-          <ProductExplorer />
-          <section
-            className="lp-section lp-analytics lp-dark"
-            id="features"
-            aria-labelledby="analytics-title"
-          >
-            <div className="lp-analytics-grid">
-              <Reveal className="lp-analytics-intro">
-                <Eyebrow>03 / АНАЛІТИКА</Eyebrow>
-                <h2 id="analytics-title">
-                  Не просто
-                  <br />
-                  цифри.
-                  <br />
-                  <span>Відповіді.</span>
-                </h2>
-                <p>
-                  Побач закономірності, які губляться між окремими ставками.
-                </p>
-                <div className="lp-intro-rule" />
-                <span className="lp-small-label">
-                  МЕНШЕ ЗДОГАДОК.
-                  <br />
-                  БІЛЬШЕ ВЛАСНИХ ДАНИХ.
-                </span>
-              </Reveal>
-              <div className="lp-analytics-rows">
-                <Reveal className="lp-analytics-row">
-                  <div>
-                    <span className="lp-row-index">/ 01</span>
-                    <h3>
-                      Який результат
-                      <br />
-                      за місяць?
-                    </h3>
-                    <p>
-                      Прибуток і збитки, динаміка банкролу та історія твоєї гри.
-                    </p>
-                  </div>
-                  <MonthlyChart />
-                </Reveal>
-                <Reveal className="lp-analytics-row">
-                  <div>
-                    <span className="lp-row-index">/ 02</span>
-                    <h3>
-                      Яка стратегія
-                      <br />
-                      працює краще?
-                    </h3>
-                    <p>
-                      Порівнюй результати стратегій на основі власних записів.
-                    </p>
-                  </div>
-                  <Comparison />
-                </Reveal>
-                <Reveal className="lp-analytics-row">
-                  <div>
-                    <span className="lp-row-index">/ 03</span>
-                    <h3>
-                      Де я втрачаю
-                      <br />
-                      найбільше?
-                    </h3>
-                    <p>
-                      Досліджуй результати за грою та типом ставки. Знаходь те,
-                      що варто переглянути.
-                    </p>
-                  </div>
-                  <Comparison games />
-                </Reveal>
-              </div>
-            </div>
-          </section>
-          <section
-            className="lp-section lp-discipline"
-            aria-labelledby="discipline-title"
-          >
-            <div className="lp-discipline-grid">
-              <Reveal>
-                <Eyebrow>04 / ДИСЦИПЛІНА</Eyebrow>
-                <h2 id="discipline-title">
-                  Твої правила.
-                  <br />
-                  Перед кожною
-                  <br />
-                  ставкою.
-                </h2>
-                <p className="lp-section-description">
-                  Менше імпульсивних рішень.
-                  <br />
-                  Більше усвідомлених.
-                </p>
-                <ul className="lp-benefits">
-                  <li>
-                    <ShieldCheck />
-                    <div>
-                      <h3>Перевірка стратегії</h3>
-                      <p>Зіставляй ставку зі своїми правилами.</p>
-                    </div>
-                  </li>
-                  <li>
-                    <Flag />
-                    <div>
-                      <h3>Ризикові команди</h3>
-                      <p>Тримай власні застереження перед очима.</p>
-                    </div>
-                  </li>
-                  <li>
-                    <Target />
-                    <div>
-                      <h3>Прогрес цілей</h3>
-                      <p>Пов’язуй записи з особистими цілями.</p>
-                    </div>
-                  </li>
-                </ul>
-              </Reveal>
-              <Reveal className="lp-discipline-preview" delay={0.1}>
-                <div className="lp-preview-top">
-                  <span>Перед збереженням ставки</span>
-                  <DemoLabel />
-                </div>
-                <StrategyCheck />
-                <div className="lp-risk-block">
-                  <Flag />
-                  <div>
-                    <h3>Команда у списку ризикових</h3>
-                    <p>Твоя позначка: «Обережно»</p>
-                  </div>
-                </div>
-                <div className="lp-goal-block">
-                  <div>
-                    <Target />
-                    <span>Особиста ціль</span>
-                    <strong>35%</strong>
-                  </div>
-                  <p>Прибуток за місяць · 2 000 ₴</p>
-                  <div className="lp-goal-track">
-                    <motion.span
-                      initial={reduced ? false : { scaleX: 0 }}
-                      whileInView={{ scaleX: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: reduced ? 0 : 1 }}
-                      style={{ transformOrigin: "left" }}
-                    />
-                  </div>
-                  <div className="lp-axis">
-                    <span>700 ₴ / 2 000 ₴</span>
-                    <span>У процесі</span>
-                  </div>
-                </div>
-                <div className="lp-discipline-foot">
-                  <Check size={15} /> Правила задаєш ти. MatchIQ допомагає їх
-                  помітити.
-                </div>
-              </Reveal>
-            </div>
-          </section>
-          <DataOwnership />
-          <section
-            className="lp-demo-section lp-dark"
-            aria-labelledby="demo-title"
-          >
-            <div className="lp-demo-photo" />
-            <Reveal className="lp-demo-copy">
-              <Eyebrow>06 / СПРОБУЙ MATCHIQ</Eyebrow>
-              <h2 id="demo-title">
-                Пройди цей
-                <br />
-                шлях сам.
-              </h2>
-              <p>
-                Переглянь матчі, спробуй облік ставок
-                <br />і досліди аналітику в демо.
-              </p>
-              <DemoLink />
-              <p className="lp-demo-access">
-                Потрібні логін і пароль демо-облікового запису.
-                <br />
-                Без доступу?{" "}
-                <a href="#possibilities">Досліди приклади вище ↗</a>
-              </p>
-            </Reveal>
-            <p className="lp-demo-aside">
-              ТІ САМІ МАТЧІ.
-              <br />
-              ІНШИЙ ПОГЛЯД.
-            </p>
-          </section>
-          <section
-            className="lp-section lp-faq"
-            id="faq"
-            aria-labelledby="faq-title"
-          >
-            <Reveal>
-              <Eyebrow>07 / FAQ</Eyebrow>
-              <h2 id="faq-title">
-                Перед
-                <br />
-                початком.
-              </h2>
-              <p>
-                Короткі відповіді
-                <br />
-                на важливі питання.
-              </p>
-            </Reveal>
-            <AnimatedFAQ items={faqs} />
-          </section>
-          <section className="lp-final" aria-labelledby="final-title">
-            <Reveal>
-              <h2 id="final-title">
-                Більше контексту.
-                <br />
-                Зваженіші рішення.
-              </h2>
-            </Reveal>
-            <Reveal>
-              <p>
-                Твій кіберспорт.
-                <br />
-                Твоя історія. Твій контроль.
-              </p>
-              <DemoLink dark />
-            </Reveal>
-          </section>
-        </main>
+    <div className="mq-match-demo">
+      <div className="mq-demo-toolbar">
+        <Switch
+          label="Гра в прикладі матчів"
+          values={["CS2", "Dota 2"]}
+          value={game}
+          onChange={setGame}
+        />
+        <DemoBadge />
       </div>
-      <footer className="lp-footer">
-        <Link to="/" aria-label="MatchIQ — головна">
-          <Brand />
-        </Link>
-        <p>Трекер та аналітика.</p>
-        <nav aria-label="Навігація у футері">
-          <a href="#possibilities">Можливості</a>
-          <a href="#how-it-works">Як це працює</a>
-          <a href="#faq">FAQ</a>
-          <Link to="/login">Увійти</Link>
-        </nav>
-        <small>
-          © {new Date().getFullYear()} MatchIQ
-          <br />
-          CS2 / Dota 2
-        </small>
-      </footer>
+      <div className="mq-match-list" key={game}>
+        {rows.map(([a, b], i) => (
+          <div key={a}>
+            <time>{16 + i}:00</time>
+            <span>
+              <b>{a}</b>
+              <small>vs {b}</small>
+            </span>
+            <Pill>BO3</Pill>
+          </div>
+        ))}
+      </div>
     </div>
+  );
+}
+function JournalDemo() {
+  const [kind, setKind] = useState("Ординар");
+  return (
+    <div className="mq-journal-demo">
+      <div className="mq-demo-toolbar">
+        <Switch
+          label="Тип запису в прикладі"
+          values={["Ординар", "Експрес"]}
+          value={kind}
+          onChange={setKind}
+        />
+        <DemoBadge />
+      </div>
+      <div className="mq-paper-ticket">
+        <div>
+          <span>МІЙ ЗАПИС / CS2</span>
+          <ShieldCheck size={18} />
+        </div>
+        <h4>NAVI — Team Spirit</h4>
+        <p className="mq-ticket-extra">
+          {kind === "Експрес"
+            ? "+ Vitality — G2"
+            : "Перемога NAVI · Основна стратегія"}
+        </p>
+        <div className="mq-ticket-values">
+          <span>
+            <small>Сума</small>
+            <b>500 ₴</b>
+          </span>
+          <span>
+            <small>Коефіцієнт</small>
+            <b>{kind === "Експрес" ? "2.70" : "1.80"}</b>
+          </span>
+        </div>
+        <p className="mq-ticket-note">
+          «Перевірив формат матчу та власні правила перед записом.»
+        </p>
+      </div>
+    </div>
+  );
+}
+function AnalyticsDemo() {
+  const [game, setGame] = useState("CS2");
+  const reduced = useContext(ReducedMotion);
+  const cs2 = game === "CS2";
+  return (
+    <div className="mq-analytics-demo">
+      <div className="mq-demo-toolbar">
+        <Switch
+          label="Гра в прикладі аналітики"
+          values={["CS2", "Dota 2"]}
+          value={game}
+          onChange={setGame}
+        />
+        <DemoBadge />
+      </div>
+      <div className="mq-result">
+        <span>Результат за період</span>
+        <strong>
+          {cs2 ? "−320" : "+460"}
+          <small> ₴</small>
+        </strong>
+      </div>
+      <svg
+        viewBox="0 0 500 120"
+        role="img"
+        aria-label={`Ілюстративна динаміка ${game}`}
+      >
+        <path
+          d="M0 30H500 M0 70H500 M0 110H500"
+          stroke="#ffffff15"
+          fill="none"
+        />
+        <motion.path
+          key={game}
+          d={
+            cs2
+              ? "M0 30L30 42L60 28L90 45L120 32L150 58L180 38L210 65L240 59L270 76L300 55L330 85L360 68L390 95L420 82L460 99L500 94"
+              : "M0 100L30 92L60 104L90 83L120 90L150 65L180 79L210 61L240 70L270 42L300 55L330 36L360 51L390 28L420 41L460 19L500 25"
+          }
+          fill="none"
+          stroke={cs2 ? "#ff906d" : "#c4d7b4"}
+          strokeWidth="2.5"
+          initial={reduced ? false : { pathLength: 0 }}
+          whileInView={{ pathLength: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: reduced ? 0 : 0.8 }}
+        />
+      </svg>
+      <div className="mq-chart-axis">
+        <span>Початок періоду</span>
+        <span>Кінець періоду</span>
+      </div>
+    </div>
+  );
+}
+function RulesDemo() {
+  const [odds, setOdds] = useState(1.8);
+  const valid = odds >= 1.4 && odds <= 1.7;
+  return (
+    <div className="mq-rules-demo">
+      <div className="mq-demo-toolbar">
+        <span>Основна стратегія</span>
+        <DemoBadge />
+      </div>
+      <div
+        className={`mq-rule-status ${valid ? "is-valid" : ""}`}
+        aria-live="polite"
+      >
+        <ShieldCheck size={30} strokeWidth={1.3} />
+        <h4>{valid ? "У межах твоїх правил." : "Є привід зупинитись."}</h4>
+        <p>
+          {valid
+            ? "Коефіцієнт відповідає заданому діапазону."
+            : "Коефіцієнт виходить за заданий діапазон."}
+        </p>
+      </div>
+      <label htmlFor="mq-rule-odds">
+        Перевір коефіцієнт{" "}
+        <output htmlFor="mq-rule-odds">{odds.toFixed(2)}</output>
+      </label>
+      <input
+        id="mq-rule-odds"
+        type="range"
+        min="1.2"
+        max="2"
+        step="0.05"
+        value={odds}
+        onChange={(event) => setOdds(Number(event.target.value))}
+      />
+      <div className="mq-chart-axis">
+        <span>1.20</span>
+        <span>Твоє правило: 1.40–1.70</span>
+        <span>2.00</span>
+      </div>
+    </div>
+  );
+}
+function WorkCard({
+  id,
+  number,
+  title,
+  text,
+  tags,
+  children,
+}: {
+  id: string;
+  number: string;
+  title: string;
+  text: string;
+  tags: string[];
+  children: ReactNode;
+}) {
+  return (
+    <Reveal className="mq-work-wrap">
+      <article className="mq-work-card" id={id}>
+        <div className="mq-card-top">
+          <span>{number} / МОЖЛИВОСТІ</span>
+          <a href="#how-it-works" aria-label={`Як працює: ${title}`}>
+            <ArrowUpRight size={18} />
+          </a>
+        </div>
+        <div className="mq-card-demo">{children}</div>
+        <div className="mq-card-description">
+          <h3>{title}</h3>
+          <p>{text}</p>
+          <div className="mq-card-tags">
+            {tags.map((tag) => (
+              <Pill key={tag}>{tag}</Pill>
+            ))}
+          </div>
+        </div>
+      </article>
+    </Reveal>
+  );
+}
+function Journey() {
+  const [active, setActive] = useState(0);
+  const item = journey[active];
+  return (
+    <section className="mq-section mq-journey" id="how-it-works">
+      <SectionHeading
+        label="02 / ВІД ЗАПИСУ ДО ВИСНОВКУ"
+        title={
+          <>
+            Невеликі кроки.
+            <br />
+            Повна картина.
+          </>
+        }
+      >
+        Один демонстраційний запис — від вибору матчу до особистого висновку.
+      </SectionHeading>
+      <div className="mq-journey-layout">
+        <div className="mq-process-list">
+          {journey.map((step, i) => (
+            <div className={active === i ? "is-active" : ""} key={step.title}>
+              <h3>
+                <button
+                  type="button"
+                  aria-expanded={active === i}
+                  aria-controls={`mq-step-${i}`}
+                  onClick={() => setActive(i)}
+                >
+                  <span>0{i + 1}</span>
+                  {step.title}
+                  <ArrowUpRight size={20} />
+                </button>
+              </h3>
+              <p id={`mq-step-${i}`} hidden={active !== i}>
+                {step.body}
+              </p>
+            </div>
+          ))}
+        </div>
+        <div className="mq-journey-stage" aria-live="polite">
+          <div>
+            <span>{item.label}</span>
+            <DemoBadge />
+          </div>
+          <h3>{item.main}</h3>
+          <strong>{item.value}</strong>
+          <p>{item.detail}</p>
+          <div className="mq-stage-progress" aria-hidden="true">
+            {journey.map((_, i) => (
+              <i key={i} className={i <= active ? "is-active" : ""} />
+            ))}
+          </div>
+          <small>Ілюстрація сценарію, не реальні результати.</small>
+        </div>
+      </div>
+    </section>
+  );
+}
+function Tools() {
+  const [probability, setProbability] = useState(55);
+  const ev = ((probability / 100) * 1.8 - 1) * 100;
+  return (
+    <section className="mq-section mq-tools" id="tools">
+      <SectionHeading
+        label="03 / БІЛЬШЕ КОНТЕКСТУ"
+        title={
+          <>
+            Менше припущень.
+            <br />
+            <span>Більше розуміння.</span>
+          </>
+        }
+      >
+        Інструменти допомагають перевірити логіку рішення. Остаточний вибір
+        залишається за тобою.
+      </SectionHeading>
+      <div className="mq-tools-grid">
+        <Reveal className="mq-calculator">
+          <div className="mq-demo-toolbar">
+            <Pill>Інтерактивний приклад</Pill>
+            <span>EV / 01</span>
+          </div>
+          <h3>А якщо ймовірність інша?</h3>
+          <p>
+            Зміни свою оцінку й подивись, як вона впливає на очікуване значення
+            за коефіцієнта 1.80.
+          </p>
+          <label htmlFor="mq-probability">
+            Твоя оцінка ймовірності{" "}
+            <output htmlFor="mq-probability">{probability}%</output>
+          </label>
+          <input
+            id="mq-probability"
+            type="range"
+            min="30"
+            max="75"
+            value={probability}
+            onChange={(event) => setProbability(Number(event.target.value))}
+          />
+          <div className="mq-ev" aria-live="polite">
+            <strong>
+              {ev >= 0 ? "+" : ""}
+              {ev.toFixed(1)}%
+            </strong>
+            <span>
+              Очікуване значення
+              <br />
+              EV = p × 1.80 − 1
+            </span>
+          </div>
+          <small>
+            Залежить від точності твоєї оцінки. Не є прогнозом виграшу.
+          </small>
+        </Reveal>
+        <div className="mq-tool-notes">
+          <div>
+            <span>01</span>
+            <h3>Ймовірність, а не обіцянка.</h3>
+            <p>
+              Value Bet, EV і критерій Келлі допомагають працювати з
+              припущеннями та розміром ризику. Жодна формула не усуває
+              невизначеність.
+            </p>
+          </div>
+          <div>
+            <span>02</span>
+            <h3>AI — додатковий погляд.</h3>
+            <p>
+              Аргументи, оцінка впевненості й ризику доповнюють аналіз матчу.
+              Рекомендації можуть помилятися та не гарантують результату.
+            </p>
+          </div>
+          <div>
+            <span>03</span>
+            <h3>Історія залишається твоєю.</h3>
+            <p>
+              Експортуй ставки у CSV для власного аналізу або створи JSON-бекап
+              у профілі застосунку.
+            </p>
+            <div className="mq-export-tags">
+              <Pill>
+                <Download size={13} /> CSV
+              </Pill>
+              <Pill>
+                <FileJson size={13} /> JSON
+              </Pill>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+function FAQ() {
+  const [open, setOpen] = useState<number | null>(0);
+  return (
+    <section
+      className="mq-section mq-faq"
+      id="faq"
+      aria-labelledby="mq-faq-title"
+    >
+      <div className="mq-faq-intro">
+        <p className="mq-kicker">04 / КОРОТКО ПРО ГОЛОВНЕ</p>
+        <h2 id="mq-faq-title">Перед початком.</h2>
+        <p className="mq-faq-description">
+          Без дрібного шрифту та зайвих обіцянок.
+        </p>
+        <HairlineFigure kind="loupe" />
+      </div>
+      <div className="mq-faq-list">
+        {faq.map((item, i) => (
+          <div key={item.question} className="mq-faq-item">
+            <h3>
+              <button
+                type="button"
+                aria-expanded={open === i}
+                aria-controls={`mq-faq-${i}`}
+                onClick={() => setOpen(open === i ? null : i)}
+              >
+                <span>{item.question}</span>
+                <ChevronDown size={18} aria-hidden="true" />
+              </button>
+            </h3>
+            <div id={`mq-faq-${i}`} hidden={open !== i}>
+              <p>{item.answer}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CapabilityRows() {
+  const rows = [
+    [
+      "Матчі та контекст",
+      "Розклад CS2 і Dota 2, команди та формати зустрічей.",
+      "#matches",
+    ],
+    [
+      "Журнал рішень",
+      "Суми, коефіцієнти й причини — в одному записі.",
+      "#journal",
+    ],
+    [
+      "Особиста аналітика",
+      "Банкрол, ROI та порівняння власних стратегій.",
+      "#analytics",
+    ],
+    [
+      "Правила та дисципліна",
+      "Перевірка коефіцієнтів і контроль ризикових рішень.",
+      "#discipline",
+    ],
+  ];
+  return (
+    <section
+      className="mq-section mq-capabilities"
+      aria-labelledby="mq-capabilities-title"
+    >
+      <h2 id="mq-capabilities-title">Що дає тобі MatchIQ</h2>
+      <div className="mq-capability-list">
+        {rows.map(([title, text, href], i) => (
+          <a className="mq-capability-row" href={href} key={href}>
+            <span className="mq-capability-number">0{i + 1}</span>
+            <h3>{title}</h3>
+            <p>{text}</p>
+            <span className="mq-row-arrow" aria-hidden="true">
+              <ArrowUpRight size={18} />
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+function ProductNumbers() {
+  return (
+    <section className="mq-numbers" aria-labelledby="mq-numbers-title">
+      <p className="mq-kicker">• MATCHIQ У ЦИФРАХ</p>
+      <h2 id="mq-numbers-title">
+        Усе потрібне.
+        <br />В одному просторі.
+      </h2>
+      <dl>
+        {[
+          ["2", "Гри: CS2 та Dota 2"],
+          ["2", "Типи записів: ординар та експрес"],
+          ["2", "Валюти обліку: UAH та USD"],
+          ["2", "Формати експорту: CSV та JSON"],
+        ].map(([value, label]) => (
+          <div key={label}>
+            <dt>{label}</dt>
+            <dd>{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
   );
 }
 
 export default function Landing() {
+  const systemReduced = useReducedMotion();
+  const [paused, setPaused] = useState(false);
+  const reduced = Boolean(systemReduced || paused);
   return (
-    <LandingMotion>
-      <LandingContent />
-    </LandingMotion>
+    <ReducedMotion.Provider value={reduced}>
+      <MotionConfig reducedMotion={reduced ? "always" : "never"}>
+        <div className={`mq-site${reduced ? " mq-reduced" : ""}`}>
+          <SEO
+            title="Твій журнал ставок на CS2 та Dota 2"
+            description={description}
+            canonical="https://matchiq.pro/"
+          />
+          <OrganizationStructuredData description={description} />
+          <WebAppStructuredData description={description} />
+          <FAQStructuredData questions={faq} />
+          <a href="#mq-main" className="mq-skip">
+            Перейти до вмісту
+          </a>
+          <Hero />
+          <main id="mq-main">
+            <section className="mq-section mq-about" id="about">
+              <Reveal>
+                <p className="mq-kicker">
+                  <i /> ЦЕ MATCHIQ
+                </p>
+                <h2>
+                  Матч закінчується.
+                  <br />
+                  <span>Твоя історія — ні.</span>
+                </h2>
+                <div className="mq-about-bottom">
+                  <HairlineFigure kind="terrain" />
+                  <p>
+                    Ми не підказуємо, на кого ставити. Ми допомагаємо бачити,{" "}
+                    <strong>як ти приймаєш рішення.</strong> Зберігай контекст,
+                    помічай закономірності й повертайся до гри зі своїми
+                    висновками.
+                  </p>
+                </div>
+              </Reveal>
+            </section>
+            <CapabilityRows />
+            <ProductNumbers />
+            <section className="mq-section mq-work" id="possibilities">
+              <SectionHeading
+                label="01 / ТВОЯ ГРА, ЗІБРАНА ДОКУПИ"
+                title={
+                  <>
+                    Один простір.
+                    <br />
+                    Різні сторони гри.
+                  </>
+                }
+              >
+                Натискай перемикачі й досліджуй приклади. Це ілюстрації
+                можливостей, не фінальні скріншоти застосунку.
+              </SectionHeading>
+              <div className="mq-work-grid">
+                <WorkCard
+                  id="matches"
+                  number="01"
+                  title="Матч починається з контексту."
+                  text="Розклад CS2 та Dota 2, формати й результати зустрічей. Знайди потрібний матч і почни з нього власний запис."
+                  tags={["CS2 / Dota 2", "Пошук", "Розклад"]}
+                >
+                  <MatchesDemo />
+                </WorkCard>
+                <WorkCard
+                  id="journal"
+                  number="02"
+                  title="За кожним записом — рішення."
+                  text="Ординари й експреси, суми у UAH або USD з конвертацією, коефіцієнти та нотатки. Збережи не тільки підсумок, а й свої аргументи."
+                  tags={["Журнал", "Стратегії", "Нотатки"]}
+                >
+                  <JournalDemo />
+                </WorkCard>
+                <WorkCard
+                  id="analytics"
+                  number="03"
+                  title="Цифри, які складаються в історію."
+                  text="Стеж за банкролом і результатами. Порівнюй ігри та стратегії, щоб помічати те, що губиться між окремими ставками."
+                  tags={["Банкрол", "ROI", "Порівняння"]}
+                >
+                  <AnalyticsDemo />
+                </WorkCard>
+                <WorkCard
+                  id="discipline"
+                  number="04"
+                  title="Власні правила — перед очима."
+                  text="Перевіряй відповідність стратегії, позначай ризикові команди та пов’язуй записи з цілями. Контроль починається з твоїх правил."
+                  tags={["Правила", "Ризикові команди", "Цілі"]}
+                >
+                  <RulesDemo />
+                </WorkCard>
+              </div>
+            </section>
+            <section
+              className="mq-section mq-journal-story"
+              aria-labelledby="mq-journal-story-title"
+            >
+              <HairlineFigure kind="drawer" />
+              <Reveal>
+                <p className="mq-kicker">ТВІЙ ЖУРНАЛ РІШЕНЬ</p>
+                <h2 id="mq-journal-story-title">
+                  Збережи запис.
+                  <br />
+                  Повернись до причини.
+                </h2>
+                <p>
+                  Рахунок показує результат. Нотатка нагадує, чому ти обрав цей
+                  матч, коефіцієнт і стратегію. Разом вони дають матеріал для
+                  наступного рішення.
+                </p>
+                <a className="mq-outline-button" href="#journal">
+                  Дослідити приклад запису <ArrowUpRight size={16} />
+                </a>
+              </Reveal>
+            </section>
+            <Journey />
+            <Tools />
+            <FAQ />
+          </main>
+          <footer className="mq-footer">
+            <div className="mq-footer-cta">
+              <h2>
+                Твоя наступна гра.
+                <br />
+                Більш усвідомлене
+                <br />
+                рішення.
+              </h2>
+              <div>
+                <DemoLink />
+                <p>Для демо потрібні логін і пароль.</p>
+              </div>
+            </div>
+            <div className="mq-footer-columns">
+              <div className="mq-footer-brand">
+                <Link to="/" aria-label="MatchIQ — головна">
+                  <Mark />
+                </Link>
+                <p>
+                  Особистий журнал ставок на кіберспорт. Зберігай контекст,
+                  аналізуй рішення, помічай закономірності.
+                </p>
+              </div>
+              <nav aria-label="Про MatchIQ">
+                <h3>ПРО ПРОДУКТ</h3>
+                <a href="#about">Про MatchIQ</a>
+                <a href="#how-it-works">Як це працює</a>
+                <a href="#tools">Інструменти</a>
+                <a href="#faq">Запитання</a>
+              </nav>
+              <nav aria-label="Можливості MatchIQ">
+                <h3>МОЖЛИВОСТІ</h3>
+                <a href="#matches">Матчі</a>
+                <a href="#journal">Журнал</a>
+                <a href="#analytics">Аналітика</a>
+                <a href="#discipline">Дисципліна</a>
+              </nav>
+              <div className="mq-footer-access">
+                <h3>ТВІЙ ПРОСТІР</h3>
+                <Link to="/login">Увійти в акаунт ↗</Link>
+                <a href="#possibilities">Інтерактивні приклади</a>
+                <button
+                  type="button"
+                  className="mq-motion-button"
+                  disabled={Boolean(systemReduced)}
+                  aria-pressed={reduced}
+                  aria-label={
+                    reduced ? "Увімкнути анімації" : "Зупинити анімації"
+                  }
+                  onClick={() => setPaused(!paused)}
+                >
+                  {reduced ? <Play size={14} /> : <Pause size={14} />}
+                  {systemReduced
+                    ? "Рух вимкнено системою"
+                    : reduced
+                      ? "Рух вимкнено"
+                      : "Зупинити рух"}
+                </button>
+              </div>
+            </div>
+            <div className="mq-footer-wordmark" aria-hidden="true">
+              MATCHIQ
+            </div>
+            <div className="mq-footer-bottom">
+              <span>© {new Date().getFullYear()} MatchIQ</span>
+              <span>
+                <Check size={12} /> Облік. Аналітика. Без приймання ставок.
+              </span>
+              <span>CS2 / DOTA 2</span>
+            </div>
+          </footer>
+        </div>
+      </MotionConfig>
+    </ReducedMotion.Provider>
   );
 }

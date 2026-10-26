@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@lucasmarkes/hairline':
+        specifier: 0.5.1
+        version: 0.5.1(react@19.2.8)
       '@radix-ui/react-alert-dialog':
         specifier: ^1.1.1
         version: 1.1.20(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -1245,6 +1248,14 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@lucasmarkes/hairline@0.5.1':
+    resolution: {integrity: sha512-zjY3bdMC3As/+enKitZ1X+D1HjpesQiAKzG1sbCFsOrb5xIuJEoepkJTBIO4jmFh6JXOQlGGylhV71nr9ipNpQ==}
+    peerDependencies:
+      react: '>=18'
+    peerDependenciesMeta:
+      react:
+        optional: true
 
   '@metagptx/vite-plugin-source-locator@0.0.19':
     resolution: {integrity: sha512-vszrhk4c72zMg+byVy6tI99Ki6Ow2ryYOeDxbIbJo9s34JOEiQoQ2JEg+B45W2z04owQR5MkRpO1XAo2HPNisw==}
@@ -5940,6 +5951,10 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@lucasmarkes/hairline@0.5.1(react@19.2.8)':
+    optionalDependencies:
+      react: 19.2.8
 
   '@metagptx/vite-plugin-source-locator@0.0.19(rollup@4.62.2)(vite@5.4.21(@types/node@22.20.1)(terser@5.49.0))':
     dependencies:

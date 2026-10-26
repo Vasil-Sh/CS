@@ -104,6 +104,57 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 describe("Public profile screen", () => {
+  it("uses immediate keyboard feedback and restores pointer motion on touch or mouse", async () => {
+    mount();
+    await screen.findByText("100%");
+    const filter = screen.getByRole("button", { name: "CS2" });
+    fireEvent.keyDown(filter, { key: "Tab" });
+    expect(document.querySelector(".public-profile")).toHaveAttribute(
+      "data-input",
+      "keyboard",
+    );
+    fireEvent.pointerDown(filter, { pointerType: "touch" });
+    expect(document.querySelector(".public-profile")).toHaveAttribute(
+      "data-input",
+      "pointer",
+    );
+  });
+  it("preserves the data region footprint while a new filter is loading", async () => {
+    mount();
+    await screen.findByText("100%");
+    const region = document.querySelector(".public-data-region")!;
+    Object.defineProperty(region, "offsetHeight", {
+      value: 720,
+      configurable: true,
+    });
+    vi.mocked(fetch).mockImplementationOnce(() => new Promise(() => {}));
+    fireEvent.click(screen.getByRole("button", { name: "CS2" }));
+    expect(region).toHaveAttribute("aria-busy", "true");
+    expect(region).toHaveStyle({ minHeight: "720px" });
+    expect(screen.queryByText("100%")).not.toBeInTheDocument();
+  });
+  it("keeps long identity text and a pending count readable without inventing results", async () => {
+    const username = "Oleksandr_Kovalenko_Analytics";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          ...fixture,
+          username,
+          stats: { ...fixture.stats, pendingBets: 1 },
+        }),
+      }),
+    );
+    mount();
+    expect(
+      await screen.findByRole("heading", { name: `@${username}` }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Очікують результату: 1")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Поділитися" }),
+    ).toBeInTheDocument();
+  });
   it("renders real stats, all-game identity and readable match records", async () => {
     mount();
     expect(await screen.findByText("100%")).toBeInTheDocument();
@@ -196,7 +247,7 @@ describe("Public profile screen", () => {
     );
     mount("/user/admin?game=dota2");
     expect(
-      await screen.findByText(/перезапустити сервер API/),
+      await screen.findByText(/Статистика тимчасово недоступна/),
     ).toBeInTheDocument();
     expect(screen.queryByText("100%")).not.toBeInTheDocument();
   });

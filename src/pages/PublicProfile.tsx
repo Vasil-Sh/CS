@@ -34,12 +34,16 @@ export default function PublicProfile() {
   const [retry, setRetry] = useState(0);
   const [copied, setCopied] = useState(false);
   const [shareError, setShareError] = useState(false);
+  const [inputMode, setInputMode] = useState<"pointer" | "keyboard">("pointer");
+  const regionRef = useRef<HTMLDivElement>(null);
+  const [loadingHeight, setLoadingHeight] = useState<number>();
   const requestKey = `${username}:${game}:${period}:${retry}`;
   const data = response?.key === requestKey ? response.data : null;
   const currentError = error?.key === requestKey ? error : null;
   const loading = !data && !currentError;
 
   function updateFilter(key: string, value: string) {
+    if (regionRef.current) setLoadingHeight(regionRef.current.offsetHeight);
     const next = new URLSearchParams(filterParams.current);
     if (value === "all" || (key === "currency" && value === "UAH"))
       next.delete(key);
@@ -76,7 +80,7 @@ export default function PublicProfile() {
           result.filters?.period !== period
         ) {
           throw new Error(
-            "Для нового екрана потрібно перезапустити сервер API з оновленим кодом.",
+            "Статистика тимчасово недоступна. Спробуйте оновити її трохи пізніше.",
           );
         }
         if (!controller.signal.aborted)
@@ -126,7 +130,12 @@ export default function PublicProfile() {
   const activePeriod = periodOptions.find((item) => item.value === period)!;
   const name = data?.username || username;
   return (
-    <div className="public-profile">
+    <div
+      className="public-profile"
+      data-input={inputMode}
+      onKeyDownCapture={() => setInputMode("keyboard")}
+      onPointerDownCapture={() => setInputMode("pointer")}
+    >
       <a className="public-skip" href="#public-statistics">
         Перейти до статистики
       </a>
@@ -249,7 +258,16 @@ export default function PublicProfile() {
               </div>
             </div>
           </div>
-          <div className="public-data-region" aria-busy={loading}>
+          <div
+            ref={regionRef}
+            className="public-data-region"
+            aria-busy={loading}
+            style={
+              loading && loadingHeight
+                ? { minHeight: loadingHeight }
+                : undefined
+            }
+          >
             {loading ? (
               <div className="public-loading" role="status">
                 <Loader2 className="public-spinner" size={25} />
@@ -279,7 +297,7 @@ export default function PublicProfile() {
               </section>
             ) : (
               data && (
-                <div key={`${game}-${period}`} className="public-data-enter">
+                <div className="public-data-content">
                   <section
                     className="public-panel public-kpis"
                     aria-label="Ключові показники"
@@ -299,8 +317,8 @@ export default function PublicProfile() {
                         {profit !== null && <small> {unit}</small>}
                       </strong>
                       <p>
-                        {signedNumber(data.stats.profitUAH)} ₴ <span> / </span>{" "}
-                        {signedNumber(data.stats.profitUSD)} $
+                        Складові: {signedNumber(data.stats.profitUAH)} ₴{" "}
+                        <span> / </span> {signedNumber(data.stats.profitUSD)} $
                       </p>
                     </div>
                     <dl>
@@ -338,7 +356,7 @@ export default function PublicProfile() {
                         <dd>{formatNumber(data.stats.completedBets)}</dd>
                         <span>
                           {data.stats.pendingBets
-                            ? `${data.stats.pendingBets} очікують результату`
+                            ? `Очікують результату: ${data.stats.pendingBets}`
                             : activePeriod.label}
                         </span>
                       </div>

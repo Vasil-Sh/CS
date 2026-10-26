@@ -48,9 +48,17 @@ export function PlayerCard({
           type="button"
           className="public-primary public-share"
           onClick={onShare}
+          aria-label={copied ? "Скопійовано" : "Поділитися"}
+          data-copied={copied}
         >
-          {copied ? <Check size={21} /> : <Link2 size={21} />}
-          {copied ? "Скопійовано" : "Поділитися"}
+          <span className="public-share-content" aria-hidden="true">
+            <span className="public-share-state public-share-idle">
+              <Link2 size={21} /> Поділитися
+            </span>
+            <span className="public-share-state public-share-success">
+              <Check size={21} /> Скопійовано
+            </span>
+          </span>
         </button>
       </div>
     </section>
