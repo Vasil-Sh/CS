@@ -64,16 +64,16 @@ function setup() {
 describe("Lumora landing", () => {
   it("mounts Hairline illustrations and restores them after pausing", () => {
     const { container } = setup();
-    expect(container.querySelectorAll(".mq-hairline svg")).toHaveLength(4);
+    expect(container.querySelectorAll(".mq-hairline svg")).toHaveLength(5);
     fireEvent.click(screen.getByRole("button", { name: "Зупинити анімації" }));
     expect(
       container.querySelectorAll('.mq-hairline[data-paused="true"]'),
-    ).toHaveLength(4);
-    expect(container.querySelectorAll(".mq-hairline svg")).toHaveLength(4);
+    ).toHaveLength(5);
+    expect(container.querySelectorAll(".mq-hairline svg")).toHaveLength(5);
     fireEvent.click(screen.getByRole("button", { name: "Увімкнути анімації" }));
     expect(
       container.querySelectorAll('.mq-hairline[data-paused="false"]'),
-    ).toHaveLength(4);
+    ).toHaveLength(5);
   });
   it("includes reference rows, product numbers and a unified footer CTA", () => {
     const { container } = setup();
@@ -110,12 +110,10 @@ describe("Lumora landing", () => {
     expect(
       container.querySelector('.mq-hero img[src*="profile-player-hero"]'),
     ).toBeNull();
+    expect(container.querySelector(".mq-capabilities .mq-hairline")).toBeNull();
     expect(
-      container.querySelector(
-        ".mq-capabilities .mq-hairline, .mq-numbers .mq-hairline",
-      ),
-    ).toBeNull();
-    expect(container.querySelector("#how-it-works .mq-hairline")).toBeNull();
+      container.querySelector("#how-it-works .mq-hairline-exploded svg"),
+    ).not.toBeNull();
     for (const selector of ["#tools .mq-hairline-hub"])
       expect(container.querySelector(`${selector} svg`)).not.toBeNull();
     expect(screen.getByRole("heading", { level: 1 }).textContent).toContain(

@@ -15,8 +15,27 @@ vi.mock("@/contexts/AuthContext", () => ({ useAuth: () => ({ login }) }));
 vi.mock("@/components/SEO", () => ({ SEO: () => null }));
 beforeEach(() => {
   login.mockReset();
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: false,
+    media: query,
+    addEventListener() {},
+    removeEventListener() {},
+    addListener() {},
+    removeListener() {},
+  }));
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
 });
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 function setup(demo = false) {
   return render(
     <MemoryRouter initialEntries={["/login"]}>

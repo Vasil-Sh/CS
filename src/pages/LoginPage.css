@@ -85,7 +85,7 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: #f78a60;
+  background: #f5a064;
 }
 .mq-auth h1 {
   font-size: clamp(32px, 3.4vw, 52px);
@@ -133,7 +133,7 @@
 }
 .mq-auth-field input:focus {
   border-color: #ba5a35;
-  box-shadow: 0 0 0 3px #f78a6024;
+  box-shadow: 0 0 0 3px #f5a06424;
 }
 .mq-auth-field input:disabled {
   opacity: 0.65;
@@ -182,7 +182,7 @@
   min-height: 54px;
   padding: 7px 8px 7px 22px;
   margin-top: 28px;
-  background: #f78a60;
+  background: #f5a064;
   color: #171819;
   border: 0;
   border-radius: 50px;
@@ -391,4 +391,26 @@
     animation: none !important;
     transition: none !important;
   }
+}
+
+.mq-auth-padlock {
+  width: min(100%, 240px);
+  aspect-ratio: 5 / 4;
+  margin: 0 0 24px;
+  --hairline-hi: #f5a064;
+  --hairline-edge: #e7b68d;
+}
+
+.mq-auth-story-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 0.55fr);
+  align-items: center;
+  gap: 16px;
+}
+.mq-auth-story-heading h2 {
+  font-size: clamp(30px, 3vw, 52px);
+}
+.mq-auth-story-heading .mq-auth-padlock {
+  width: 100%;
+  margin: 0;
 }

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Padlock } from "@lucasmarkes/hairline/react";
+import { useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -17,6 +19,7 @@ interface LoginPageProps {
 }
 
 export default function LoginPage({ demo = false }: LoginPageProps) {
+  const reducedMotion = useReducedMotion();
   const {
     username,
     setUsername,
@@ -167,12 +170,19 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
           <span>01 — 03</span>
         </div>
         <div className="mq-auth-story-content">
-          <p className="mq-auth-eyebrow">ТРЕКЕР СТАВОК НА КІБЕРСПОРТ</p>
-          <h2 id="mq-auth-story-title">
-            Кожен запис.
-            <br />
-            Більше <span>розуміння.</span>
-          </h2>
+          <div className="mq-auth-story-heading">
+            <div>
+              <p className="mq-auth-eyebrow">ТРЕКЕР СТАВОК НА КІБЕРСПОРТ</p>
+              <h2 id="mq-auth-story-title">
+                Кожен запис.
+                <br />
+                Більше <span>розуміння.</span>
+              </h2>
+            </div>
+            <div className="mq-auth-padlock" aria-hidden="true">
+              <Padlock theme="dark" intensity={0.55} play={!reducedMotion} />
+            </div>
+          </div>
           <p>
             Зберігай не лише результат, а й причину рішення. Повертайся до
             фактів, коли емоції минуть.

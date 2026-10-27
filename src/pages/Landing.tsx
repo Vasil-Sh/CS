@@ -7,7 +7,13 @@ import {
   type ReactNode,
 } from "react";
 import { Link } from "react-router-dom";
-import { Settle, Riffle, Query, Hub } from "@lucasmarkes/hairline/react";
+import {
+  Settle,
+  Riffle,
+  Query,
+  Hub,
+  Exploded,
+} from "@lucasmarkes/hairline/react";
 import { MotionConfig, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowDown,
@@ -36,6 +42,7 @@ const figures = {
   riffle: Riffle,
   query: Query,
   hub: Hub,
+  exploded: Exploded,
 };
 function HairlineFigure({ kind }: { kind: keyof typeof figures }) {
   const reduced = useContext(ReducedMotion);
@@ -562,6 +569,7 @@ function Journey() {
   return (
     <section className="mq-section mq-journey" id="how-it-works">
       <SectionHeading
+        figure="exploded"
         label="02 / ВІД ЗАПИСУ ДО ВИСНОВКУ"
         title={
           <>
@@ -621,7 +629,7 @@ function Tools() {
     <section className="mq-section mq-tools" id="tools">
       <SectionHeading
         figure="hub"
-        label="03 / БІЛЬШЕ КОНТЕКСТУ"
+        label="04 / БІЛЬШЕ КОНТЕКСТУ"
         title={
           <>
             Менше припущень.
@@ -720,7 +728,7 @@ function FAQ() {
       aria-labelledby="mq-faq-title"
     >
       <div className="mq-faq-intro">
-        <p className="mq-kicker">04 / КОРОТКО ПРО ГОЛОВНЕ</p>
+        <p className="mq-kicker">05 / КОРОТКО ПРО ГОЛОВНЕ</p>
         <h2 id="mq-faq-title">Перед початком.</h2>
         <p className="mq-faq-description">
           Без дрібного шрифту та зайвих обіцянок.
@@ -780,7 +788,7 @@ function CapabilityRows() {
       aria-labelledby="mq-capabilities-title"
     >
       <div className="mq-capabilities-heading">
-        <p className="mq-kicker">02 / ВІД ЗАПИСУ ДО ВИСНОВКУ</p>
+        <p className="mq-kicker">03 / МОЖЛИВОСТІ MATCHIQ</p>
         <h2 id="mq-capabilities-title">Що дає тобі MatchIQ</h2>
       </div>
       <div className="mq-capability-list">
@@ -960,9 +968,15 @@ export default function Landing() {
                   Повернись до причини.
                 </h2>
                 <p>
-                  Рахунок показує результат. Нотатка нагадує, чому ти обрав цей
-                  матч, коефіцієнт і стратегію. Разом вони дають матеріал для
-                  наступного рішення.
+                  Журнал зберігає кожну ставку разом із її контекстом: матч,
+                  суму, коефіцієнт, стратегію та твою нотатку. Запиши, чому
+                  обрав саме це рішення, поки аргументи ще свіжі.
+                </p>
+                <p>
+                  Після матчу зафіксуй результат і повернися до запису. Порівняй
+                  початкові очікування з тим, що сталося, та додай висновок. Так
+                  історія ставок допомагає помічати повторювані помилки й
+                  перевіряти власні правила на фактах.
                 </p>
                 <a className="mq-outline-button" href="#journal">
                   Дослідити приклад запису <ArrowUpRight size={16} />
@@ -970,8 +984,8 @@ export default function Landing() {
               </Reveal>
             </section>
             <Journey />
-            <CapabilityRows />
             <ProductOverview />
+            <CapabilityRows />
             <Tools />
             <FAQ />
           </main>
@@ -982,7 +996,7 @@ export default function Landing() {
                 <br />
                 починається тут.
               </h2>
-              <div>
+              <div className="mq-footer-actions">
                 <a
                   className="mq-button"
                   href="https://t.me/cs2beet"
