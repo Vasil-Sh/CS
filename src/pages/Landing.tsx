@@ -7,8 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { Link } from "react-router-dom";
-import { Settle, Riffle, Loupe, Hub } from "@lucasmarkes/hairline/react";
-import StepsFigure from "@/components/HairlineStepsFigure";
+import { Settle, Riffle, Query, Hub } from "@lucasmarkes/hairline/react";
 import { MotionConfig, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowDown,
@@ -35,9 +34,8 @@ const ReducedMotion = createContext(false);
 const figures = {
   settle: Settle,
   riffle: Riffle,
-  loupe: Loupe,
+  query: Query,
   hub: Hub,
-  steps: StepsFigure,
 };
 function HairlineFigure({ kind }: { kind: keyof typeof figures }) {
   const reduced = useContext(ReducedMotion);
@@ -77,9 +75,9 @@ const faq = [
       "Ні. MatchIQ не приймає ставки, не зберігає кошти та не проводить платежі. У застосунку ти ведеш облік, аналізуєш матчі та результати власних ставок.",
   },
   {
-    question: "Як потрапити в демо?",
+    question: "Чи можна спробувати без акаунта?",
     answer:
-      "Кнопка «Увійти в демо» відкриває форму входу. Для доступу потрібні логін і пароль демо-облікового запису. Інтерактивні приклади на цьому лендінгу можна дослідити без входу.",
+      "Так. Інтерактивні приклади на цій сторінці доступні без реєстрації: перемикай ігри, змінюй коефіцієнт і перевіряй правила стратегії. Це демонстраційні дані, зміни не зберігаються в акаунті. Для входу в сам застосунок потрібні логін і пароль.",
   },
   {
     question: "Чи гарантують розрахунки та AI результат?",
@@ -168,13 +166,6 @@ function DemoBadge() {
     <span className="mq-demo-badge">
       <i /> Демо-дані
     </span>
-  );
-}
-function DemoLink() {
-  return (
-    <Link className="mq-button" to="/login-digesto-demo">
-      Увійти в демо <ArrowUpRight size={18} aria-hidden="true" />
-    </Link>
   );
 }
 function SectionHeading({
@@ -308,19 +299,26 @@ function Hero() {
             </span>
           </h1>
           <p className="mq-lead">
-            Записуй ставки й причини своїх рішень. Дивись, що приносить прибуток
-            або збитки, стеж за банкролом — бюджетом на ставки — та перевіряй
-            власні правила.
+            Веди журнал ставок, бач свої прибутки й збитки та перевіряй рішення
+            за власною стратегією. Матчі, нотатки, банкрол — бюджет на ставки —
+            і статистика в одному місці.
           </p>
           <div className="mq-hero-actions">
-            <a className="mq-button" href="#possibilities">
-              Дослідити MatchIQ <ArrowUpRight size={18} />
+            <a
+              className="mq-button"
+              href="https://t.me/cs2beet"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Отримати доступ <ArrowUpRight size={18} />
             </a>
-            <a className="mq-outline-button" href="#how-it-works">
-              Як це працює
+            <a className="mq-outline-button" href="#possibilities">
+              Спробувати на прикладі <ArrowUpRight size={18} />
             </a>
           </div>
           <p className="mq-legal-note">
+            Доступ — через Telegram @cs2beet. Приклади — без реєстрації.
+            <br />
             MatchIQ не приймає ставки та не зберігає кошти.
           </p>
         </div>
@@ -564,7 +562,6 @@ function Journey() {
   return (
     <section className="mq-section mq-journey" id="how-it-works">
       <SectionHeading
-        figure="steps"
         label="02 / ВІД ЗАПИСУ ДО ВИСНОВКУ"
         title={
           <>
@@ -728,7 +725,7 @@ function FAQ() {
         <p className="mq-faq-description">
           Без дрібного шрифту та зайвих обіцянок.
         </p>
-        <HairlineFigure kind="loupe" />
+        <HairlineFigure kind="query" />
       </div>
       <div className="mq-faq-list">
         {faq.map((item, i) => (
@@ -783,6 +780,7 @@ function CapabilityRows() {
       aria-labelledby="mq-capabilities-title"
     >
       <div className="mq-capabilities-heading">
+        <p className="mq-kicker">02 / ВІД ЗАПИСУ ДО ВИСНОВКУ</p>
         <h2 id="mq-capabilities-title">Що дає тобі MatchIQ</h2>
       </div>
       <div className="mq-capability-list">
@@ -876,18 +874,21 @@ export default function Landing() {
                   <i /> ЦЕ MATCHIQ
                 </p>
                 <h2>
-                  Матч закінчується.
+                  Для тих, хто хоче
                   <br />
-                  <span>Твоя історія — ні.</span>
+                  <span>бачити свої результати.</span>
                 </h2>
                 <div className="mq-about-bottom">
                   <HairlineFigure kind="settle" />
                   <p>
-                    MatchIQ — це{" "}
-                    <strong>трекер ставок на CS2 та Dota 2.</strong> Записуй
-                    свої ставки, стеж за банкролом і порівнюй стратегії. Розклад
-                    матчів, розрахунки та AI-рекомендації доповнюють аналіз —
-                    остаточне рішення залишається за тобою.
+                    Якщо ти вже робиш ставки на кіберспорт і ведеш облік у
+                    таблицях чи нотатках, MatchIQ збирає його в одному місці.
+                    <strong>
+                      {" "}
+                      Зберігай не лише результат, а й причину ставки.
+                    </strong>{" "}
+                    Після матчу ти зможеш повернутися до своїх аргументів,
+                    перевірити стратегію й побачити, як змінився банкрол.
                   </p>
                 </div>
               </Reveal>
@@ -897,9 +898,9 @@ export default function Landing() {
                 label="01 / ТВОЯ ГРА, ЗІБРАНА ДОКУПИ"
                 title={
                   <>
-                    Один простір.
+                    Що ти зможеш
                     <br />
-                    Різні сторони гри.
+                    робити в MatchIQ.
                   </>
                 }
               >
@@ -930,7 +931,7 @@ export default function Landing() {
                   id="analytics"
                   number="03"
                   title="Банкрол і результати — перед очима."
-                  text="Стеж за банкролом, прибутком, часткою виграшів і ROI — результатом відносно суми ставок. Порівнюй ігри та стратегії, щоб бачити власні закономірності."
+                  text="Скільки ти виграв або втратив? Яка стратегія дає збитки? Порівнюй ігри й стратегії, стеж за банкролом та ROI — результатом відносно суми ставок."
                   tags={["Банкрол", "ROI", "Порівняння"]}
                 >
                   <AnalyticsDemo />
@@ -969,23 +970,37 @@ export default function Landing() {
               </Reveal>
             </section>
             <Journey />
-            <Tools />
             <CapabilityRows />
             <ProductOverview />
+            <Tools />
             <FAQ />
           </main>
           <footer className="mq-footer">
             <div className="mq-footer-cta">
               <h2>
-                Твоя наступна гра.
+                Твій журнал ставок
                 <br />
-                Більш усвідомлене
-                <br />
-                рішення.
+                починається тут.
               </h2>
               <div>
-                <DemoLink />
-                <p>Для демо потрібні логін і пароль.</p>
+                <a
+                  className="mq-button"
+                  href="https://t.me/cs2beet"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Отримати доступ <ArrowUpRight size={18} />
+                </a>
+                <p>
+                  Напиши @cs2beet у Telegram, щоб дізнатися умови й отримати
+                  акаунт.
+                </p>
+                <a className="mq-outline-button" href="#possibilities">
+                  Спробувати на прикладі <ArrowUpRight size={18} />
+                </a>
+                <Link className="mq-outline-button" to="/login">
+                  У мене вже є акаунт <ArrowUpRight size={16} />
+                </Link>
               </div>
             </div>
             <div className="mq-footer-columns">
@@ -1014,6 +1029,13 @@ export default function Landing() {
               </nav>
               <div className="mq-footer-access">
                 <h3>ТВІЙ ПРОСТІР</h3>
+                <a
+                  href="https://t.me/cs2beet"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Запитати про доступ ↗
+                </a>
                 <Link to="/login">Увійти в акаунт ↗</Link>
                 <a href="#possibilities">Інтерактивні приклади</a>
                 <button

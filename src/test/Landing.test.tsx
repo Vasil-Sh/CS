@@ -64,16 +64,16 @@ function setup() {
 describe("Lumora landing", () => {
   it("mounts Hairline illustrations and restores them after pausing", () => {
     const { container } = setup();
-    expect(container.querySelectorAll(".mq-hairline svg")).toHaveLength(5);
+    expect(container.querySelectorAll(".mq-hairline svg")).toHaveLength(4);
     fireEvent.click(screen.getByRole("button", { name: "Зупинити анімації" }));
     expect(
       container.querySelectorAll('.mq-hairline[data-paused="true"]'),
-    ).toHaveLength(5);
-    expect(container.querySelectorAll(".mq-hairline svg")).toHaveLength(5);
+    ).toHaveLength(4);
+    expect(container.querySelectorAll(".mq-hairline svg")).toHaveLength(4);
     fireEvent.click(screen.getByRole("button", { name: "Увімкнути анімації" }));
     expect(
       container.querySelectorAll('.mq-hairline[data-paused="false"]'),
-    ).toHaveLength(5);
+    ).toHaveLength(4);
   });
   it("includes reference rows, product numbers and a unified footer CTA", () => {
     const { container } = setup();
@@ -84,9 +84,9 @@ describe("Lumora landing", () => {
     const footer = screen.getByRole("contentinfo");
     expect(
       within(footer)
-        .getByRole("link", { name: "Увійти в демо" })
+        .getByRole("link", { name: "Спробувати на прикладі" })
         .getAttribute("href"),
-    ).toBe("/login-digesto-demo");
+    ).toBe("#possibilities");
     expect(footer.querySelectorAll("nav")).toHaveLength(2);
     expect(container.querySelector(".mq-closing")).toBeNull();
   });
@@ -100,7 +100,7 @@ describe("Lumora landing", () => {
     const index = (selector: string) =>
       sections.indexOf(container.querySelector(selector)!);
     expect(index("#possibilities")).toBeLessThan(index(".mq-capabilities"));
-    expect(index("#tools")).toBeLessThan(index(".mq-capabilities"));
+    expect(index(".mq-capabilities")).toBeLessThan(index("#faq"));
     expect(index(".mq-numbers")).toBeLessThan(index("#faq"));
     expect(screen.queryByText(/Ми не підказуємо, на кого ставити/)).toBeNull();
   });
@@ -111,11 +111,11 @@ describe("Lumora landing", () => {
       container.querySelector('.mq-hero img[src*="profile-player-hero"]'),
     ).toBeNull();
     expect(
-      container.querySelector(".mq-hairline-query, .mq-numbers .mq-hairline"),
+      container.querySelector(
+        ".mq-capabilities .mq-hairline, .mq-numbers .mq-hairline",
+      ),
     ).toBeNull();
-    expect(
-      container.querySelector("#how-it-works .mq-hairline-steps svg"),
-    ).not.toBeNull();
+    expect(container.querySelector("#how-it-works .mq-hairline")).toBeNull();
     for (const selector of ["#tools .mq-hairline-hub"])
       expect(container.querySelector(`${selector} svg`)).not.toBeNull();
     expect(screen.getByRole("heading", { level: 1 }).textContent).toContain(
@@ -128,14 +128,16 @@ describe("Lumora landing", () => {
       container.querySelector(".mq-journal-story .mq-hairline-riffle svg"),
     ).not.toBeNull();
     expect(
-      container.querySelector(".mq-faq-intro .mq-hairline-loupe svg"),
+      container.querySelector(".mq-faq-intro .mq-hairline-query svg"),
     ).not.toBeNull();
     expect(screen.queryByText("Спробуй перед входом.")).toBeNull();
     expect(container.querySelector(".matchiq-landing")).toBeNull();
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(
-      screen.getByRole("link", { name: "Увійти в демо" }).getAttribute("href"),
-    ).toBe("/login-digesto-demo");
+      within(screen.getByRole("contentinfo"))
+        .getByRole("link", { name: "Спробувати на прикладі" })
+        .getAttribute("href"),
+    ).toBe("#possibilities");
     for (const link of container.querySelectorAll<HTMLAnchorElement>(
       'a[href^="#"]',
     ))
