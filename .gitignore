@@ -13,6 +13,9 @@ node_modules/
 # HLTV team logos (downloaded locally, not tracked)
 hltv_logos/
 
+# Hairline figure workbench (generated .html + intermediate .js previews, not tracked)
+hairline-work/
+
 # Atoms.dev / MatchIQ config
 .mgx/
 .atoms/

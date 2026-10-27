@@ -7,7 +7,8 @@ import {
   type ReactNode,
 } from "react";
 import { Link } from "react-router-dom";
-import { Terrain, Drawer, Loupe } from "@lucasmarkes/hairline/react";
+import { Settle, Riffle, Loupe, Hub } from "@lucasmarkes/hairline/react";
+import StepsFigure from "@/components/HairlineStepsFigure";
 import { MotionConfig, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowDown,
@@ -31,20 +32,32 @@ import {
 import "./LandingLumora.css";
 
 const ReducedMotion = createContext(false);
-const figures = { terrain: Terrain, drawer: Drawer, loupe: Loupe };
+const figures = {
+  settle: Settle,
+  riffle: Riffle,
+  loupe: Loupe,
+  hub: Hub,
+  steps: StepsFigure,
+};
 function HairlineFigure({ kind }: { kind: keyof typeof figures }) {
   const reduced = useContext(ReducedMotion);
   const Figure = figures[kind];
   return (
     <div
       className={`mq-hairline mq-hairline-${kind}`}
-      aria-hidden="true"
+      aria-hidden={kind === "riffle" ? undefined : true}
+      inert={reduced && kind === "riffle"}
       data-paused={reduced}
     >
       <Figure
         key={reduced ? "still" : "moving"}
-        theme="light"
-        intensity={0.45}
+        theme={kind === "hub" ? "dark" : "light"}
+        label={
+          kind === "riffle"
+            ? "Картки записів: переміщуйся клавішами зі стрілками"
+            : undefined
+        }
+        intensity={["settle", "hub"].includes(kind) ? 0.85 : 0.45}
         play={!reduced}
       />
     </div>
@@ -56,12 +69,12 @@ const faq = [
   {
     question: "Що саме робить MatchIQ?",
     answer:
-      "Допомагає вести власний журнал ставок на CS2 та Dota 2: зберігати суму, коефіцієнт, результат і нотатки, стежити за банкролом та порівнювати стратегії. Це облік і аналіз твоїх рішень.",
+      "MatchIQ — трекер ставок на CS2 та Dota 2. Зберігай суми, коефіцієнти, результати й нотатки, стеж за банкролом і порівнюй стратегії. Розклад матчів, розрахунки EV та Келлі й AI-рекомендації допомагають доповнити власний аналіз.",
   },
   {
     question: "Чи можна тут зробити ставку?",
     answer:
-      "Ні. MatchIQ не приймає ставки, не зберігає кошти та не проводить платежі. У застосунку ти лише записуєш і аналізуєш свої ставки.",
+      "Ні. MatchIQ не приймає ставки, не зберігає кошти та не проводить платежі. У застосунку ти ведеш облік, аналізуєш матчі та результати власних ставок.",
   },
   {
     question: "Як потрапити в демо?",
@@ -143,7 +156,7 @@ function Reveal({
 function Mark() {
   return (
     <span className="mq-brand">
-      <span aria-hidden="true">✦</span> MatchIQ
+      <img src="/favicon.svg" width="30" height="30" alt="" /> MatchIQ
     </span>
   );
 }
@@ -168,18 +181,29 @@ function SectionHeading({
   label,
   title,
   children,
+  figure,
 }: {
   label: string;
   title: ReactNode;
   children?: ReactNode;
+  figure?: keyof typeof figures;
 }) {
   return (
-    <Reveal className="mq-section-heading">
+    <Reveal
+      className={`mq-section-heading${figure ? " mq-heading-illustrated" : ""}`}
+    >
       <div>
         <p className="mq-kicker">{label}</p>
         <h2>{title}</h2>
+        {figure && children && (
+          <p className="mq-heading-description">{children}</p>
+        )}
       </div>
-      {children && <p>{children}</p>}
+      {figure ? (
+        <HairlineFigure kind={figure} />
+      ) : (
+        children && <p>{children}</p>
+      )}
     </Reveal>
   );
 }
@@ -225,16 +249,6 @@ function Hero() {
   }, [menu]);
   return (
     <section className="mq-hero" aria-labelledby="mq-title">
-      <div className="mq-hero-art" aria-hidden="true">
-        <img
-          src="/assets/profile/profile-player-hero.png"
-          alt=""
-          width="2172"
-          height="724"
-          fetchPriority="high"
-        />
-        <div />
-      </div>
       <header className="mq-header">
         <Link to="/" aria-label="MatchIQ — головна">
           <Mark />
@@ -284,18 +298,19 @@ function Hero() {
       <div className="mq-hero-layout">
         <div className="mq-hero-copy">
           <p className="mq-kicker">
-            <i /> Для тих, хто думає далі
+            <i /> ОБЛІК ТА АНАЛІЗ СТАВОК · CS2 / DOTA 2
           </p>
           <h1 id="mq-title">
-            <span>Гра має емоції.</span>
             <span>
-              Рішення — <em>контекст.</em>
+              Трекер ставок
+              <br />
+              на CS2 та Dota 2.
             </span>
           </h1>
           <p className="mq-lead">
-            Твій журнал ставок на CS2 та Dota 2.
-            <br />
-            Від першого запису до розуміння власної гри.
+            Записуй ставки й причини своїх рішень. Дивись, що приносить прибуток
+            або збитки, стеж за банкролом — бюджетом на ставки — та перевіряй
+            власні правила.
           </p>
           <div className="mq-hero-actions">
             <a className="mq-button" href="#possibilities">
@@ -306,12 +321,12 @@ function Hero() {
             </a>
           </div>
           <p className="mq-legal-note">
-            Облік та аналітика. Без приймання ставок.
+            MatchIQ не приймає ставки та не зберігає кошти.
           </p>
         </div>
       </div>
       <div className="mq-hero-signature" aria-hidden="true">
-        MatchIQ<span>✦</span>
+        MatchIQ
       </div>
       <div className="mq-hero-meta">
         <div>
@@ -549,6 +564,7 @@ function Journey() {
   return (
     <section className="mq-section mq-journey" id="how-it-works">
       <SectionHeading
+        figure="steps"
         label="02 / ВІД ЗАПИСУ ДО ВИСНОВКУ"
         title={
           <>
@@ -607,6 +623,7 @@ function Tools() {
   return (
     <section className="mq-section mq-tools" id="tools">
       <SectionHeading
+        figure="hub"
         label="03 / БІЛЬШЕ КОНТЕКСТУ"
         title={
           <>
@@ -669,10 +686,11 @@ function Tools() {
           </div>
           <div>
             <span>02</span>
-            <h3>AI — додатковий погляд.</h3>
+            <h3>AI-рекомендації до матчів.</h3>
             <p>
-              Аргументи, оцінка впевненості й ризику доповнюють аналіз матчу.
-              Рекомендації можуть помилятися та не гарантують результату.
+              Прогноз, аргументи, оцінка впевненості й ризику доповнюють твій
+              аналіз матчу. Рекомендації можуть помилятися та не гарантують
+              результату.
             </p>
           </div>
           <div>
@@ -764,7 +782,9 @@ function CapabilityRows() {
       className="mq-section mq-capabilities"
       aria-labelledby="mq-capabilities-title"
     >
-      <h2 id="mq-capabilities-title">Що дає тобі MatchIQ</h2>
+      <div className="mq-capabilities-heading">
+        <h2 id="mq-capabilities-title">Що дає тобі MatchIQ</h2>
+      </div>
       <div className="mq-capability-list">
         {rows.map(([title, text, href], i) => (
           <a className="mq-capability-row" href={href} key={href}>
@@ -780,27 +800,51 @@ function CapabilityRows() {
     </section>
   );
 }
-function ProductNumbers() {
+function ProductOverview() {
+  const features = [
+    [
+      "Ризиковані команди",
+      "Позначай команди, яких уникаєш або перевіряєш уважніше. При додаванні ставки застосунок попередить про команду з твого списку.",
+      "Власний список → попередження у формі",
+    ],
+    [
+      "Цілі та стратегії",
+      "Задавай цілі й відстежуй прогрес. Визначай правила для коефіцієнтів, типів ставок і форматів матчів — MatchIQ перевіряє запис на відповідність основній стратегії.",
+      "Твої правила → перевірка перед записом",
+    ],
+    [
+      "Аналітика записів",
+      "Переглядай прибуток і збитки, частку виграшів та зміну банкролу. Порівнюй ігри, періоди й стратегії на основі власних записів.",
+      "Історія ставок → зрозумілі результати",
+    ],
+    [
+      "Матчі",
+      "Знаходь зустрічі CS2 та Dota 2, переглядай розклад, команди, формат і результати. Використовуй AI-рекомендації як додатковий матеріал для аналізу.",
+      "Розклад і контекст → власне рішення",
+    ],
+  ];
   return (
     <section className="mq-numbers" aria-labelledby="mq-numbers-title">
-      <p className="mq-kicker">• MATCHIQ У ЦИФРАХ</p>
-      <h2 id="mq-numbers-title">
-        Усе потрібне.
-        <br />В одному просторі.
-      </h2>
-      <dl>
-        {[
-          ["2", "Гри: CS2 та Dota 2"],
-          ["2", "Типи записів: ординар та експрес"],
-          ["2", "Валюти обліку: UAH та USD"],
-          ["2", "Формати експорту: CSV та JSON"],
-        ].map(([value, label]) => (
-          <div key={label}>
-            <dt>{label}</dt>
-            <dd>{value}</dd>
-          </div>
+      <div className="mq-overview-heading">
+        <div>
+          <p className="mq-kicker">• МОЖЛИВОСТІ MATCHIQ</p>
+          <h2 id="mq-numbers-title">
+            Від пошуку матчу
+            <br />
+            до аналізу своїх рішень.
+          </h2>
+        </div>
+      </div>
+      <div className="mq-product-overview">
+        {features.map(([title, description, outcome], i) => (
+          <article key={title}>
+            <span className="mq-overview-index">0{i + 1}</span>
+            <h3>{title}</h3>
+            <p>{description}</p>
+            <small>{outcome}</small>
+          </article>
         ))}
-      </dl>
+      </div>
     </section>
   );
 }
@@ -837,18 +881,17 @@ export default function Landing() {
                   <span>Твоя історія — ні.</span>
                 </h2>
                 <div className="mq-about-bottom">
-                  <HairlineFigure kind="terrain" />
+                  <HairlineFigure kind="settle" />
                   <p>
-                    Ми не підказуємо, на кого ставити. Ми допомагаємо бачити,{" "}
-                    <strong>як ти приймаєш рішення.</strong> Зберігай контекст,
-                    помічай закономірності й повертайся до гри зі своїми
-                    висновками.
+                    MatchIQ — це{" "}
+                    <strong>трекер ставок на CS2 та Dota 2.</strong> Записуй
+                    свої ставки, стеж за банкролом і порівнюй стратегії. Розклад
+                    матчів, розрахунки та AI-рекомендації доповнюють аналіз —
+                    остаточне рішення залишається за тобою.
                   </p>
                 </div>
               </Reveal>
             </section>
-            <CapabilityRows />
-            <ProductNumbers />
             <section className="mq-section mq-work" id="possibilities">
               <SectionHeading
                 label="01 / ТВОЯ ГРА, ЗІБРАНА ДОКУПИ"
@@ -860,14 +903,15 @@ export default function Landing() {
                   </>
                 }
               >
-                Натискай перемикачі й досліджуй приклади. Це ілюстрації
-                можливостей, не фінальні скріншоти застосунку.
+                Обирай матч, зберігай запис і причину рішення, а після
+                результату — перевіряй свою статистику. Нижче — інтерактивні
+                приклади на демо-даних.
               </SectionHeading>
               <div className="mq-work-grid">
                 <WorkCard
                   id="matches"
                   number="01"
-                  title="Матч починається з контексту."
+                  title="Знаходь матчі CS2 та Dota 2."
                   text="Розклад CS2 та Dota 2, формати й результати зустрічей. Знайди потрібний матч і почни з нього власний запис."
                   tags={["CS2 / Dota 2", "Пошук", "Розклад"]}
                 >
@@ -876,7 +920,7 @@ export default function Landing() {
                 <WorkCard
                   id="journal"
                   number="02"
-                  title="За кожним записом — рішення."
+                  title="Записуй ставки та причини."
                   text="Ординари й експреси, суми у UAH або USD з конвертацією, коефіцієнти та нотатки. Збережи не тільки підсумок, а й свої аргументи."
                   tags={["Журнал", "Стратегії", "Нотатки"]}
                 >
@@ -885,8 +929,8 @@ export default function Landing() {
                 <WorkCard
                   id="analytics"
                   number="03"
-                  title="Цифри, які складаються в історію."
-                  text="Стеж за банкролом і результатами. Порівнюй ігри та стратегії, щоб помічати те, що губиться між окремими ставками."
+                  title="Банкрол і результати — перед очима."
+                  text="Стеж за банкролом, прибутком, часткою виграшів і ROI — результатом відносно суми ставок. Порівнюй ігри та стратегії, щоб бачити власні закономірності."
                   tags={["Банкрол", "ROI", "Порівняння"]}
                 >
                   <AnalyticsDemo />
@@ -894,7 +938,7 @@ export default function Landing() {
                 <WorkCard
                   id="discipline"
                   number="04"
-                  title="Власні правила — перед очима."
+                  title="Перевіряй рішення за своєю стратегією."
                   text="Перевіряй відповідність стратегії, позначай ризикові команди та пов’язуй записи з цілями. Контроль починається з твоїх правил."
                   tags={["Правила", "Ризикові команди", "Цілі"]}
                 >
@@ -906,7 +950,7 @@ export default function Landing() {
               className="mq-section mq-journal-story"
               aria-labelledby="mq-journal-story-title"
             >
-              <HairlineFigure kind="drawer" />
+              <HairlineFigure kind="riffle" />
               <Reveal>
                 <p className="mq-kicker">ТВІЙ ЖУРНАЛ РІШЕНЬ</p>
                 <h2 id="mq-journal-story-title">
@@ -926,6 +970,8 @@ export default function Landing() {
             </section>
             <Journey />
             <Tools />
+            <CapabilityRows />
+            <ProductOverview />
             <FAQ />
           </main>
           <footer className="mq-footer">
