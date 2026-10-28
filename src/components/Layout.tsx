@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { logRender } from "@/lib/devLogger";
+import ScreenBanners from "@/components/ScreenBanners";
 import ProfileShell from "@/components/profile/ProfileShell";
 
 export default function Layout() {
@@ -44,7 +45,17 @@ export default function Layout() {
           Ви в офлайн-режимі.
         </div>
       )}
+      <ScreenBanners
+        key={location.pathname + "top"}
+        path={location.pathname}
+        slot="top"
+      />
       <Outlet />
+      <ScreenBanners
+        key={location.pathname + "bottom"}
+        path={location.pathname}
+        slot="bottom"
+      />
     </ProfileShell>
   );
 }

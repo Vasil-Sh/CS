@@ -32,12 +32,14 @@ function toCampaign(b?: BannerRow): ScheduleAdCampaign | null {
  * Slot 1 = top banner (between live and upcoming sections).
  * Slot 2 = bottom banner (before finished section).
  */
-export async function fetchActiveBanners(): Promise<{
+export async function fetchActiveBanners(screen = "matches"): Promise<{
   top: ScheduleAdCampaign | null;
   bottom: ScheduleAdCampaign | null;
 }> {
   try {
-    const data = await api.get<{ banners: BannerRow[] }>("/banners/active");
+    const data = await api.get<{ banners: BannerRow[] }>(
+      `/banners/active?screen=${encodeURIComponent(screen)}`,
+    );
     const active = (data?.banners || []).filter(
       (b) => b.active && b.title.trim(),
     );

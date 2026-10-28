@@ -34,17 +34,22 @@ export default function Matches() {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([fetchActiveBanners(), fetchBannerSlots()]).then(
-      ([campaigns, slots]) => {
-        if (cancelled) return;
-        setBanners(campaigns);
-        setPlaceholders({
-          top: slots.find((s) => s.slot === 1)?.placeholderEnabled ?? false,
-          bottom: slots.find((s) => s.slot === 2)?.placeholderEnabled ?? false,
-        });
-      },
-    );
+    const refresh = () =>
+      Promise.all([fetchActiveBanners(), fetchBannerSlots()]).then(
+        ([campaigns, slots]) => {
+          if (cancelled) return;
+          setBanners(campaigns);
+          setPlaceholders({
+            top: slots.find((s) => s.slot === 1)?.placeholderEnabled ?? false,
+            bottom:
+              slots.find((s) => s.slot === 2)?.placeholderEnabled ?? false,
+          });
+        },
+      );
+    void refresh();
+    const timer = setInterval(refresh, 60000);
     return () => {
+      clearInterval(timer);
       cancelled = true;
     };
   }, []);
