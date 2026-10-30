@@ -5,7 +5,7 @@
   --paper: #ffffff;
   --ink: #171819;
   --muted: #666666;
-  --orange: #f5a064;
+  --orange: #ff693b;
   --line: #17181926;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   font-family: Manrope, Arial, sans-serif;
@@ -136,7 +136,7 @@
 }
 .mq-hairline-hub {
   --hairline-plate: #121415;
-  --hairline-hi: #f7a17d;
+  --hairline-hi: #ff693b;
   --hairline-edge: #d8d8d8;
   --hairline-mid: #808080;
   --hairline-lo: #393939;
@@ -431,7 +431,7 @@
   vertical-align: top;
   display: inline-block;
   padding: 8px 0 0 0.7em;
-  color: #ffa68070;
+  color: #ff693b70;
 }
 .mq-hero-meta {
   border-top: 1px solid #ffffff25;
@@ -1216,7 +1216,7 @@
 }
 .mq-overview-index {
   font-size: 11px;
-  color: #f7a17d;
+  color: #ff693b;
   margin-bottom: 22px;
 }
 .mq-product-overview h3 {
@@ -1380,7 +1380,7 @@
     color: #fff;
   }
   .mq-footer-access > a:hover {
-    color: #f7a17d;
+    color: #ff693b;
   }
   .mq-mobile-menu a:hover {
     background: #17181908;
@@ -1393,12 +1393,12 @@
     transform: translate(2px, -2px);
   }
   .mq-button:hover {
-    background: #ffa57e;
+    background: #f45c2e;
     transform: translateY(-2px);
   }
   .mq-header nav a:hover,
   .mq-footer nav a:hover {
-    color: #f7a17d;
+    color: #ff693b;
   }
   .mq-motion-button:hover {
     background: #ffffff12;
@@ -1772,4 +1772,53 @@
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Match the warm orange of the MatchIQ logo. */
+.mq-header .mq-login {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #171819;
+  font-weight: 700;
+}
+@media (hover: hover) {
+  .mq-header .mq-login:hover {
+    background: #f45c2e;
+    border-color: #f45c2e;
+    color: #171819;
+  }
+}
+
+.mq-button,
+.mq-header .mq-login,
+.mq-header .mq-login:hover {
+  color: #fff !important;
+}
+
+.mq-header .mq-login {
+  gap: 24px;
+  min-height: 48px;
+  padding: 7px 8px 7px 21px;
+  border-radius: 50px;
+  font-size: 12px;
+}
+.mq-header .mq-login > svg {
+  width: 34px;
+  height: 34px;
+  padding: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #171819;
+  color: #fff;
+}
+
+.mq-header .mq-login {
+  gap: 12px;
+  min-height: 36px;
+  padding: 7px 8px 7px 16px;
+}
+.mq-header .mq-login > svg {
+  width: 20.4px;
+  height: 20.4px;
+  padding: 4.8px;
 }

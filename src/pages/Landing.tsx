@@ -468,7 +468,7 @@ function AnalyticsDemo() {
               : "M0 100L30 92L60 104L90 83L120 90L150 65L180 79L210 61L240 70L270 42L300 55L330 36L360 51L390 28L420 41L460 19L500 25"
           }
           fill="none"
-          stroke={cs2 ? "#ff906d" : "#c4d7b4"}
+          stroke={cs2 ? "#ff693b" : "#c4d7b4"}
           strokeWidth="2.5"
           initial={reduced ? false : { pathLength: 0 }}
           whileInView={{ pathLength: 1 }}

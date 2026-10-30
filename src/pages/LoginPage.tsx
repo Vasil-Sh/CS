@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Padlock } from "@lucasmarkes/hairline/react";
-import { useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -19,7 +17,6 @@ interface LoginPageProps {
 }
 
 export default function LoginPage({ demo = false }: LoginPageProps) {
-  const reducedMotion = useReducedMotion();
   const {
     username,
     setUsername,
@@ -178,9 +175,6 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
                 <br />
                 Більше <span>розуміння.</span>
               </h2>
-            </div>
-            <div className="mq-auth-padlock" aria-hidden="true">
-              <Padlock theme="dark" intensity={0.55} play={!reducedMotion} />
             </div>
           </div>
           <p>
