@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
-
 .mq-auth {
   font-family: Manrope, Arial, sans-serif;
   background: #fff;
@@ -470,4 +468,54 @@
 
 .mq-auth .mq-auth-back:focus-visible {
   outline: 2px solid #777;
+}
+
+/* ── Story panel: liquid backdrop + glass content ───────────────── */
+.mq-auth-story {
+  background: #1a0d08;
+}
+.mq-auth-liquid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.mq-auth-story-top,
+.mq-auth-story-bottom {
+  color: #ffffffb3;
+  text-shadow: 0 1px 8px #0008;
+}
+.mq-auth-story-content {
+  margin: auto 0;
+  padding: clamp(28px, 3vw, 44px);
+  max-width: 560px;
+  background: #0f1011b8;
+  border: 1px solid #ffffff2b;
+  border-radius: 18px;
+  -webkit-backdrop-filter: blur(22px) saturate(1.3);
+  backdrop-filter: blur(22px) saturate(1.3);
+  box-shadow:
+    inset 0 1px 0 #ffffff26,
+    0 30px 80px #00000066;
+}
+.mq-auth-story-content > p:last-of-type {
+  color: #c3c5c6;
+}
+@media (min-width: 761px) {
+  .mq-auth-story {
+    justify-content: space-between;
+  }
+}
+.mq-auth-story-heading {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.mq-auth-legal a {
+  color: inherit;
+  text-decoration: none;
+}
+.mq-auth-legal a:hover {
+  text-decoration: underline;
 }

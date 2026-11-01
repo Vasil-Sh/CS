@@ -11,6 +11,8 @@ const BASE_URL = "https://matchiq.pro";
 const routes = [
   { path: "/", changefreq: "weekly", priority: 1.0, hreflang: true },
   { path: "/login", changefreq: "monthly", priority: 0.8 },
+  { path: "/privacy", changefreq: "yearly", priority: 0.3 },
+  { path: "/terms", changefreq: "yearly", priority: 0.3 },
   { path: "/login-digesto-demo", changefreq: "monthly", priority: 0.7 },
   { path: "/app/analytics", changefreq: "monthly", priority: 0.5 },
   { path: "/app/matches", changefreq: "daily", priority: 0.6 },

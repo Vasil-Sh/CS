@@ -61,6 +61,7 @@ const Strategy = safeLazy(
 const RiskyTeams = safeLazy("RiskyTeams", () => import("@/pages/RiskyTeams"));
 const TelegramPage = safeLazy("TelegramPage", () => import("@/pages/Telegram"));
 const NotFound = safeLazy("NotFound", () => import("@/pages/NotFound"));
+const LegalPage = lazy(() => import("@/pages/LegalPage"));
 const PublicProfile = safeLazy(
   "PublicProfile",
   () => import("@/pages/PublicProfile"),
@@ -224,6 +225,28 @@ export default function App() {
               }
             />
           </Route>
+
+          {/* Legal */}
+          <Route
+            path="/privacy"
+            element={
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <LegalPage doc="privacy" />
+                </Suspense>
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/terms"
+            element={
+              <ErrorBoundary>
+                <Suspense fallback={<PageLoader />}>
+                  <LegalPage doc="terms" />
+                </Suspense>
+              </ErrorBoundary>
+            }
+          />
 
           {/* 404 catch-all */}
           <Route

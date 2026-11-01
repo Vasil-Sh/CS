@@ -12,59 +12,53 @@
   <!-- Theme -->
   <meta name="theme-color" content="#111827" />
 
-  <!-- Font: Inter + Inter Tight (Google Fonts) -->
+  <!-- Fonts: Inter + Inter Tight (app), Manrope (landing, login) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- ═══════ SEO Meta ═══════ -->
-  <title>MatchIQ — Аналітика ставок на CS2 | EV-детектор, Келлі, AI</title>
-  <meta name="description" content="MatchIQ — професійна аналітика ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу та AI-рекомендації. Контролюйте ризики та збільшуйте ROI." />
-  <meta name="keywords" content="CS2, ставки, аналітика, кіберспорт, betting, аналіз матчів, EV, Kelly criterion, bankroll management, ROI, трекінг ставок" />
-  <meta name="author" content="MatchIQ" />
-  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
-  <link rel="canonical" href="https://matchiq.pro/" />
-
-  <!-- ═══════ hreflang ═══════ -->
-  <link rel="alternate" hrefLang="uk" href="https://matchiq.pro/" />
-  <link rel="alternate" hrefLang="en" href="https://matchiq.pro/" />
-  <link rel="alternate" hrefLang="x-default" href="https://matchiq.pro/" />
+  <!-- Static copies for crawlers that do not run JavaScript (Telegram, Facebook, etc.).
+       Tags marked data-static-seo are removed by <SEO /> once React renders its own. -->
+  <title>Твій журнал ставок на CS2 та Dota 2 | MatchIQ</title>
+  <meta data-static-seo name="description" content="MatchIQ — журнал ставок на CS2 та Dota 2. Записуй ставки й причини рішень, стеж за банкролом і ROI, перевіряй власну стратегію. Не букмекер: ставки не приймаємо." />
+  <meta data-static-seo name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link data-static-seo rel="canonical" href="https://matchiq.pro/" />
 
   <!-- ═══════ Open Graph ═══════ -->
-  <meta property="og:site_name" content="MatchIQ" />
-  <meta property="og:title" content="MatchIQ — Аналітика ставок на CS2 | EV-детектор, Келлі, AI" />
-  <meta property="og:description" content="Професійна аналітика ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу та AI-рекомендації. Контролюйте ризики та збільшуйте ROI." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://matchiq.pro/" />
-  <meta property="og:image" content="https://matchiq.pro/assets/og-image.svg" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta property="og:image:alt" content="MatchIQ — Аналітика ставок на CS2" />
-  <meta property="og:locale" content="uk_UA" />
-  <meta property="og:locale:alternate" content="en_US" />
+  <meta data-static-seo property="og:site_name" content="MatchIQ" />
+  <meta data-static-seo property="og:title" content="Твій журнал ставок на CS2 та Dota 2 | MatchIQ" />
+  <meta data-static-seo property="og:description" content="MatchIQ — журнал ставок на CS2 та Dota 2. Записуй ставки й причини рішень, стеж за банкролом і ROI, перевіряй власну стратегію. Не букмекер: ставки не приймаємо." />
+  <meta data-static-seo property="og:type" content="website" />
+  <meta data-static-seo property="og:url" content="https://matchiq.pro/" />
+  <meta data-static-seo property="og:image" content="https://matchiq.pro/assets/og-image.jpg" />
+  <meta data-static-seo property="og:image:width" content="1200" />
+  <meta data-static-seo property="og:image:height" content="630" />
+  <meta data-static-seo property="og:image:alt" content="Твій журнал ставок на CS2 та Dota 2 | MatchIQ" />
+  <meta data-static-seo property="og:locale" content="uk_UA" />
 
   <!-- ═══════ Twitter Card ═══════ -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="MatchIQ — Аналітика ставок на CS2 | EV-детектор, Келлі, AI" />
-  <meta name="twitter:description" content="Професійна аналітика ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу та AI-рекомендації." />
-  <meta name="twitter:image" content="https://matchiq.pro/assets/og-image.svg" />
-  <meta name="twitter:image:alt" content="MatchIQ — Аналітика ставок на CS2" />
+  <meta data-static-seo name="twitter:card" content="summary_large_image" />
+  <meta data-static-seo name="twitter:title" content="Твій журнал ставок на CS2 та Dota 2 | MatchIQ" />
+  <meta data-static-seo name="twitter:description" content="MatchIQ — журнал ставок на CS2 та Dota 2. Записуй ставки й причини рішень, стеж за банкролом і ROI, перевіряй власну стратегію. Не букмекер: ставки не приймаємо." />
+  <meta data-static-seo name="twitter:image" content="https://matchiq.pro/assets/og-image.jpg" />
+  <meta data-static-seo name="twitter:image:alt" content="Твій журнал ставок на CS2 та Dota 2 | MatchIQ" />
 
   <!-- ═══════ PWA / Mobile ═══════ -->
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="MatchIQ" />
+  <meta data-static-seo name="mobile-web-app-capable" content="yes" />
+  <meta data-static-seo name="apple-mobile-web-app-capable" content="yes" />
+  <meta data-static-seo name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta data-static-seo name="apple-mobile-web-app-title" content="MatchIQ" />
 
   <!-- ═══════ Structured Data (JSON-LD fallback for bot-only visits) ═══════ -->
-  <script type="application/ld+json">
+  <script data-static-seo type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "MatchIQ",
-    "description": "Професійна аналітика ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу та AI-рекомендації.",
+    "description": "MatchIQ — журнал ставок на CS2 та Dota 2. Записуй ставки й причини рішень, стеж за банкролом і ROI, перевіряй власну стратегію. Не букмекер: ставки не приймаємо.",
     "url": "https://matchiq.pro",
-    "image": "https://matchiq.pro/assets/og-image.svg",
+    "image": "https://matchiq.pro/assets/og-image.jpg",
     "applicationCategory": "FinanceApplication",
     "operatingSystem": "Web",
     "browserRequirements": "Requires JavaScript"

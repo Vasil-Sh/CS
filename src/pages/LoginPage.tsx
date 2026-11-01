@@ -8,6 +8,8 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
+import { useReducedMotion } from "framer-motion";
+import { LiquidBackdrop } from "@/components/LiquidBackdrop";
 import { useLogin } from "@/hooks/useLogin";
 import { SEO } from "@/components/SEO";
 import "./LoginPage.css";
@@ -27,6 +29,7 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
     handleSubmit,
   } = useLogin();
   const [showPassword, setShowPassword] = useState(false);
+  const reducedMotion = Boolean(useReducedMotion());
   return (
     <main className="mq-auth">
       <SEO
@@ -158,10 +161,14 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
         </div>
         <footer className="mq-auth-footer">
           <span>© {new Date().getFullYear()} MatchIQ</span>
-          <span>CS2 / DOTA 2</span>
+          <span className="mq-auth-legal">
+            <Link to="/privacy">Конфіденційність</Link> ·{" "}
+            <Link to="/terms">Умови</Link> · 18+
+          </span>
         </footer>
       </section>
       <aside className="mq-auth-story" aria-labelledby="mq-auth-story-title">
+        <LiquidBackdrop paused={reducedMotion} className="mq-auth-liquid" />
         <div className="mq-auth-story-top">
           <span>ОБЛІК. АНАЛІЗ. ДИСЦИПЛІНА.</span>
           <span>01 — 03</span>
@@ -208,9 +215,6 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
         <div className="mq-auth-story-bottom">
           MatchIQ не приймає ставки та не зберігає кошти.
         </div>
-        <span className="mq-auth-watermark" aria-hidden="true">
-          MatchIQ
-        </span>
       </aside>
     </main>
   );

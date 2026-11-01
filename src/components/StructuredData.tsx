@@ -20,9 +20,9 @@ interface WebAppStructuredDataProps {
 
 export function WebAppStructuredData({
   name = "MatchIQ",
-  description = "Професійна аналітика ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу та AI-рекомендації.",
+  description = "MatchIQ — журнал ставок на CS2 та Dota 2. Записуй ставки й причини рішень, стеж за банкролом і ROI, перевіряй власну стратегію. Не букмекер: ставки не приймаємо.",
   url = "https://matchiq.pro",
-  image = "https://matchiq.pro/assets/og-image.png",
+  image = "https://matchiq.pro/assets/og-image.jpg",
   applicationCategory = "FinanceApplication",
   operatingSystem = "Web",
   offers,

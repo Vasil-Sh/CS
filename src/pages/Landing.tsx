@@ -18,6 +18,9 @@ import { MotionConfig, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowDown,
   ArrowUpRight,
+  BarChart3,
+  BookOpen,
+  CalendarDays,
   Check,
   ChevronDown,
   Download,
@@ -25,10 +28,15 @@ import {
   Menu,
   Pause,
   Play,
+  ShieldAlert,
   ShieldCheck,
+  Target,
+  Wallet,
   X,
 } from "lucide-react";
 import { SEO } from "@/components/SEO";
+import { telegramLink, track } from "@/lib/track";
+import { LiquidBackdrop as SharedLiquidBackdrop } from "@/components/LiquidBackdrop";
 import {
   FAQStructuredData,
   OrganizationStructuredData,
@@ -80,6 +88,36 @@ const faq = [
     question: "Чи можна тут зробити ставку?",
     answer:
       "Ні. MatchIQ не приймає ставки, не зберігає кошти та не проводить платежі. У застосунку ти ведеш облік, аналізуєш матчі та результати власних ставок.",
+  },
+  {
+    question: "Скільки коштує MatchIQ?",
+    answer:
+      "Місячна підписка — 500 ₴ на місяць. Річна — 5 500 ₴ на рік, тобто 12 місяців за ціною 11 (економія 500 ₴). Можливості в обох підписках однакові.",
+  },
+  {
+    question: "Як оформити й оплатити підписку?",
+    answer:
+      "Напиши @cs2beet у Telegram і вкажи, яку підписку обираєш. Там підкажуть доступні способи оплати й відкриють доступ до акаунта.",
+  },
+  {
+    question: "Чи є пробний період?",
+    answer:
+      "Окремого пробного періоду немає. Щоб оцінити MatchIQ до оплати, скористайся інтерактивними прикладами на цій сторінці або напиши @cs2beet у Telegram: покажемо застосунок і відповімо на запитання.",
+  },
+  {
+    question: "Чи продовжується підписка автоматично?",
+    answer:
+      "Ні. Оплата відбувається вручну через Telegram, тому без твого рішення нічого не спишеться. Перед завершенням періоду ми нагадаємо про продовження.",
+  },
+  {
+    question: "Що буде, коли підписка закінчиться?",
+    answer:
+      "Доступ до застосунку призупиниться, але твої записи, стратегії й нотатки збережуться. Після продовження продовжиш з того самого місця. Перед завершенням можеш експортувати дані у CSV або JSON.",
+  },
+  {
+    question: "Чи можна перейти з місячної підписки на річну?",
+    answer:
+      "Так. Напиши @cs2beet: річна підписка почнеться одразу після завершення вже оплаченого місяця, тож оплачені дні не згорять.",
   },
   {
     question: "Чи можна спробувати без акаунта?",
@@ -231,7 +269,152 @@ function Switch({
     </div>
   );
 }
-function Hero() {
+function LiquidBackdrop() {
+  const reduced = useContext(ReducedMotion);
+  return <SharedLiquidBackdrop paused={reduced} className="mq-preview-liquid" />;
+}
+const previewMenu = [
+  { icon: BarChart3, label: "Огляд", active: true },
+  { icon: CalendarDays, label: "Матчі" },
+  { icon: BookOpen, label: "Журнал" },
+  { icon: Wallet, label: "Банкрол" },
+  { icon: Target, label: "Стратегії" },
+  { icon: ShieldAlert, label: "Ризикові команди" },
+];
+const previewBars = [
+  { month: "Лип", stake: 70, profit: 38 },
+  { month: "Сер", stake: 82, profit: 52 },
+  { month: "Вер", stake: 64, profit: 30 },
+  { month: "Жов", stake: 90, profit: 66 },
+  { month: "Лис", stake: 76, profit: 48 },
+];
+const previewBets = [
+  {
+    match: "NAVI — Team Spirit",
+    meta: "CS2 · Ординар · 1.80",
+    result: "+400 ₴",
+    win: true,
+  },
+  {
+    match: "Team Liquid — Tundra",
+    meta: "Dota 2 · Ординар · 2.10",
+    result: "−300 ₴",
+    win: false,
+  },
+  {
+    match: "Vitality — G2",
+    meta: "CS2 · Експрес · 2.70",
+    result: "+510 ₴",
+    win: true,
+  },
+  {
+    match: "FaZe — MOUZ",
+    meta: "CS2 · Ординар · 1.65",
+    result: "+195 ₴",
+    win: true,
+  },
+];
+function HeroPreview() {
+  return (
+    <div
+      className="mq-preview"
+      role="img"
+      aria-label="Приклад інтерфейсу MatchIQ на демо-даних: банкрол, ROI, результат за місяцями та останні записи"
+    >
+      <LiquidBackdrop />
+      <div className="mq-preview-window" aria-hidden="true">
+        <aside className="mq-preview-side">
+          <span className="mq-preview-brand">
+            <img src="/favicon.svg" width="18" height="18" alt="" /> MatchIQ
+          </span>
+          <small>Меню</small>
+          <ul>
+            {previewMenu.map(({ icon: Icon, label, active }) => (
+              <li key={label} className={active ? "is-active" : undefined}>
+                <Icon size={13} /> {label}
+              </li>
+            ))}
+          </ul>
+          <div className="mq-preview-goal">
+            <b>Основна стратегія</b>
+            <span>7 з 10 записів за правилами</span>
+            <i>
+              <i />
+            </i>
+          </div>
+        </aside>
+        <div className="mq-preview-main">
+          <div className="mq-preview-top">
+            <span>Огляд</span>
+            <DemoBadge />
+          </div>
+          <div className="mq-preview-body">
+            <p className="mq-preview-hello">Привіт!</p>
+            <p className="mq-preview-sub">
+              Ось як змінився твій банкрол цього місяця.
+            </p>
+            <div className="mq-preview-stats">
+              <div>
+                <span>
+                  Банкрол <em>+6.2%</em>
+                </span>
+                <strong>
+                  12 480<small> ₴</small>
+                </strong>
+                <svg viewBox="0 0 80 24" className="mq-preview-spark">
+                  <path d="M1 20 C 12 18, 16 9, 26 13 S 42 20, 52 10 S 68 4, 79 3" />
+                </svg>
+              </div>
+              <div>
+                <span>
+                  ROI за місяць <em>+1.1</em>
+                </span>
+                <strong>
+                  4.8<small>%</small>
+                </strong>
+              </div>
+            </div>
+            <div className="mq-preview-chart">
+              <div className="mq-preview-chart-head">
+                <b>Результат за місяцями</b>
+                <span>
+                  <i className="is-profit" /> Прибуток
+                </span>
+                <span>
+                  <i /> Сума ставок
+                </span>
+              </div>
+              <div className="mq-preview-bars">
+                {previewBars.map(({ month, stake, profit }) => (
+                  <div key={month}>
+                    <span style={{ height: `${stake}%` }}>
+                      <i style={{ height: `${(profit / stake) * 100}%` }} />
+                    </span>
+                    <small>{month}</small>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="mq-preview-bets">
+              <b>Останні записи</b>
+              {previewBets.map(({ match, meta, result, win }) => (
+                <div key={match}>
+                  <span className="mq-preview-avatar">{match[0]}</span>
+                  <span>
+                    {match}
+                    <small>{meta}</small>
+                  </span>
+                  <em className={win ? "is-win" : "is-loss"}>{result}</em>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+function SiteHeader() {
   const [menu, setMenu] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -246,7 +429,7 @@ function Hero() {
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, [menu]);
   return (
-    <section className="mq-hero" aria-labelledby="mq-title">
+    <div className="mq-topbar">
       <header className="mq-header">
         <Link to="/" aria-label="MatchIQ — головна">
           <Mark />
@@ -255,9 +438,15 @@ function Hero() {
           <a href="#possibilities">Можливості</a>
           <a href="#how-it-works">Як це працює</a>
           <a href="#tools">Інструменти</a>
+          <a href="#pricing">Ціни</a>
           <a href="#faq">FAQ</a>
         </nav>
-        <Link to="/login" className="mq-login">
+        <Link
+          to="/login"
+          className="mq-login"
+          data-track="cta_login"
+          data-track-place="header"
+        >
           Увійти <ArrowUpRight size={16} />
         </Link>
         <button
@@ -287,12 +476,21 @@ function Hero() {
           <a href="#tools" onClick={() => setMenu(false)}>
             Інструменти
           </a>
+          <a href="#pricing" onClick={() => setMenu(false)}>
+            Ціни
+          </a>
           <a href="#faq" onClick={() => setMenu(false)}>
             FAQ
           </a>
           <Link to="/login">Увійти ↗</Link>
         </nav>
       )}
+    </div>
+  );
+}
+function Hero() {
+  return (
+    <section className="mq-hero" aria-labelledby="mq-title">
       <div className="mq-hero-layout">
         <div className="mq-hero-copy">
           <p className="mq-kicker">
@@ -313,25 +511,30 @@ function Hero() {
           <div className="mq-hero-actions">
             <a
               className="mq-button"
-              href="https://t.me/cs2beet"
+              href={telegramLink(TG_ACCESS)}
+              data-track="cta_access"
+              data-track-place="hero"
               target="_blank"
               rel="noopener noreferrer"
             >
               Отримати доступ <ArrowUpRight size={18} />
             </a>
-            <a className="mq-outline-button" href="#possibilities">
+            <a
+              className="mq-outline-button"
+              href="#possibilities"
+              data-track="cta_demo"
+              data-track-place="hero"
+            >
               Спробувати на прикладі <ArrowUpRight size={18} />
             </a>
           </div>
           <p className="mq-legal-note">
             Доступ — через Telegram @cs2beet. Приклади — без реєстрації.
             <br />
-            MatchIQ не приймає ставки та не зберігає кошти.
+            18+. MatchIQ не приймає ставки та не зберігає кошти.
           </p>
         </div>
-      </div>
-      <div className="mq-hero-signature" aria-hidden="true">
-        MatchIQ
+        <HeroPreview />
       </div>
       <div className="mq-hero-meta">
         <div>
@@ -544,7 +747,7 @@ function WorkCard({
     <Reveal className="mq-work-wrap">
       <article className="mq-work-card" id={id}>
         <div className="mq-card-top">
-          <span>{number} / МОЖЛИВОСТІ</span>
+          <span>{number} / 04</span>
           <a href="#how-it-works" aria-label={`Як працює: ${title}`}>
             <ArrowUpRight size={18} />
           </a>
@@ -561,6 +764,76 @@ function WorkCard({
         </div>
       </article>
     </Reveal>
+  );
+}
+// The reviews block uses TEST data for layout work, so it renders only in
+// development and never ships as if it were real. Replace testStats and
+// testReviews with real numbers and testimonials (published with the
+// authors' permission), then remove the SHOW_PLACEHOLDERS guard.
+const SHOW_PLACEHOLDERS = import.meta.env.DEV;
+const testStats = [
+  ["12 480", "записів у журналах"],
+  ["640+", "користувачів веде журнал"],
+  ["1 900+", "матчів CS2 і Dota 2 щомісяця"],
+];
+const testReviews = [
+  {
+    name: "Андрій К.",
+    meta: "CS2 · веде журнал 8 місяців",
+    text: "Раніше рахував усе в Google-таблиці й постійно щось губив. Тепер бачу, що на BO1 я стабільно в мінусі, і просто перестав їх брати.",
+  },
+  {
+    name: "Олена М.",
+    meta: "Dota 2 · веде журнал 5 місяців",
+    text: "Найкорисніше — нотатки до кожної ставки. Перечитую після матчу й розумію, де рішення було на емоціях, а де за планом.",
+  },
+  {
+    name: "Максим Т.",
+    meta: "CS2 і Dota 2 · веде журнал рік",
+    text: "Правило на коефіцієнти рятує від імпульсивних ставок: якщо запис не проходить перевірку стратегії, я його просто не роблю.",
+  },
+];
+function SocialProofPlaceholder() {
+  return (
+    <section
+      className="mq-section mq-proof"
+      aria-labelledby="mq-proof-title"
+    >
+      <div className="mq-proof-heading">
+        <p className="mq-kicker">
+          ВІДГУКИ <span className="mq-ph-badge">Тестові дані</span>
+        </p>
+        <h2 id="mq-proof-title">
+          Що кажуть ті,
+          <br />
+          <span>хто вже веде журнал.</span>
+        </h2>
+      </div>
+      <div className="mq-proof-stats">
+        {testStats.map(([value, label]) => (
+          <div key={label}>
+            <strong>{value}</strong>
+            <span>{label}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mq-proof-grid">
+        {testReviews.map((review) => (
+          <figure key={review.name} className="mq-quote">
+            <blockquote>«{review.text}»</blockquote>
+            <figcaption>
+              <span className="mq-quote-avatar" aria-hidden="true">
+                {review.name[0]}
+              </span>
+              <span>
+                <b>{review.name}</b>
+                <small>{review.meta}</small>
+              </span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
   );
 }
 function Journey() {
@@ -603,20 +876,23 @@ function Journey() {
             </div>
           ))}
         </div>
-        <div className="mq-journey-stage" aria-live="polite">
-          <div>
-            <span>{item.label}</span>
-            <DemoBadge />
+        <div className="mq-journey-stage">
+          <LiquidBackdrop />
+          <div className="mq-journey-glass" aria-live="polite">
+            <div>
+              <span>{item.label}</span>
+              <DemoBadge />
+            </div>
+            <h3>{item.main}</h3>
+            <strong>{item.value}</strong>
+            <p>{item.detail}</p>
+            <div className="mq-stage-progress" aria-hidden="true">
+              {journey.map((_, i) => (
+                <i key={i} className={i <= active ? "is-active" : ""} />
+              ))}
+            </div>
+            <small>Ілюстрація сценарію, не реальні результати.</small>
           </div>
-          <h3>{item.main}</h3>
-          <strong>{item.value}</strong>
-          <p>{item.detail}</p>
-          <div className="mq-stage-progress" aria-hidden="true">
-            {journey.map((_, i) => (
-              <i key={i} className={i <= active ? "is-active" : ""} />
-            ))}
-          </div>
-          <small>Ілюстрація сценарію, не реальні результати.</small>
         </div>
       </div>
     </section>
@@ -629,7 +905,7 @@ function Tools() {
     <section className="mq-section mq-tools" id="tools">
       <SectionHeading
         figure="hub"
-        label="04 / БІЛЬШЕ КОНТЕКСТУ"
+        label="03 / БІЛЬШЕ КОНТЕКСТУ"
         title={
           <>
             Менше припущень.
@@ -719,8 +995,106 @@ function Tools() {
     </section>
   );
 }
+const TG_ACCESS = "Привіт! Хочу отримати доступ до MatchIQ.";
+const MONTHLY_PRICE = 500;
+const YEARLY_PRICE = MONTHLY_PRICE * 11;
+const formatUah = (value: number) =>
+  `${value.toLocaleString("uk-UA").replace(/\u00a0/g, " ")} ₴`;
+const pricingFeatures = [
+  "Журнал ставок, причини та нотатки",
+  "Банкрол, ROI і порівняння стратегій",
+  "Правила, цілі та ризикові команди",
+  "Розклад матчів CS2 і Dota 2",
+  "EV, критерій Келлі та AI-рекомендації",
+  "Експорт у CSV і JSON-бекап",
+];
+function Pricing() {
+  const plans = [
+    {
+      id: "monthly",
+      name: "Місячна",
+      price: formatUah(MONTHLY_PRICE),
+      period: "/ місяць",
+      note: "Оплата щомісяця.",
+      featured: false,
+      message: `Привіт! Хочу оформити місячну підписку MatchIQ (${formatUah(MONTHLY_PRICE)} / місяць).`,
+    },
+    {
+      id: "yearly",
+      name: "Річна",
+      price: formatUah(YEARLY_PRICE),
+      period: "/ рік",
+      note: `≈ ${formatUah(Math.round(YEARLY_PRICE / 12))} на місяць · економія ${formatUah(MONTHLY_PRICE * 12 - YEARLY_PRICE)}`,
+      badge: "12 місяців за ціною 11",
+      featured: true,
+      message: `Привіт! Хочу оформити річну підписку MatchIQ (${formatUah(YEARLY_PRICE)} / рік).`,
+    },
+  ];
+  return (
+    <section
+      className="mq-section mq-pricing"
+      id="pricing"
+      aria-labelledby="mq-pricing-title"
+    >
+      <Reveal className="mq-pricing-heading">
+        <p className="mq-kicker">04 / ЦІНИ</p>
+        <h2 id="mq-pricing-title">
+          Один доступ.
+          <br />
+          <span>Обери, як платити.</span>
+        </h2>
+        <p>
+          Усі можливості MatchIQ в обох підписках. Різниця лише в періоді
+          оплати: за рік платиш як за 11 місяців.
+        </p>
+      </Reveal>
+      <div className="mq-pricing-grid">
+        {plans.map((plan) => (
+          <Reveal key={plan.id}>
+            <article
+              className={`mq-plan${plan.featured ? " is-featured" : ""}`}
+              aria-labelledby={`mq-plan-${plan.id}`}
+            >
+              <div className="mq-plan-top">
+                <h3 id={`mq-plan-${plan.id}`}>{plan.name}</h3>
+                {plan.badge && <span className="mq-plan-badge">{plan.badge}</span>}
+              </div>
+              <p className="mq-plan-price">
+                <strong>{plan.price}</strong> <span>{plan.period}</span>
+              </p>
+              <p className="mq-plan-note">{plan.note}</p>
+              <ul>
+                {pricingFeatures.map((feature) => (
+                  <li key={feature}>
+                    <Check size={14} aria-hidden="true" /> {feature}
+                  </li>
+                ))}
+              </ul>
+              <a
+                className="mq-button"
+                href={telegramLink(plan.message)}
+                data-track="plan_select"
+                data-track-place={plan.id}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Оформити підписку «${plan.name}» через Telegram`}
+              >
+                Оформити підписку <ArrowUpRight size={18} />
+              </a>
+            </article>
+          </Reveal>
+        ))}
+      </div>
+      <p className="mq-pricing-footnote">
+        Щоб оформити підписку, напиши @cs2beet у Telegram. Ціни в гривнях.
+      </p>
+    </section>
+  );
+}
 function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
+  const [showAll, setShowAll] = useState(false);
+  const visible = showAll ? faq : faq.slice(0, 5);
   return (
     <section
       className="mq-section mq-faq"
@@ -736,7 +1110,7 @@ function FAQ() {
         <HairlineFigure kind="query" />
       </div>
       <div className="mq-faq-list">
-        {faq.map((item, i) => (
+        {visible.map((item, i) => (
           <div key={item.question} className="mq-faq-item">
             <h3>
               <button
@@ -754,102 +1128,17 @@ function FAQ() {
             </div>
           </div>
         ))}
-      </div>
-    </section>
-  );
-}
-
-function CapabilityRows() {
-  const rows = [
-    [
-      "Матчі та контекст",
-      "Розклад CS2 і Dota 2, команди та формати зустрічей.",
-      "#matches",
-    ],
-    [
-      "Журнал рішень",
-      "Суми, коефіцієнти й причини — в одному записі.",
-      "#journal",
-    ],
-    [
-      "Особиста аналітика",
-      "Банкрол, ROI та порівняння власних стратегій.",
-      "#analytics",
-    ],
-    [
-      "Правила та дисципліна",
-      "Перевірка коефіцієнтів і контроль ризикових рішень.",
-      "#discipline",
-    ],
-  ];
-  return (
-    <section
-      className="mq-section mq-capabilities"
-      aria-labelledby="mq-capabilities-title"
-    >
-      <div className="mq-capabilities-heading">
-        <p className="mq-kicker">03 / МОЖЛИВОСТІ MATCHIQ</p>
-        <h2 id="mq-capabilities-title">Що дає тобі MatchIQ</h2>
-      </div>
-      <div className="mq-capability-list">
-        {rows.map(([title, text, href], i) => (
-          <a className="mq-capability-row" href={href} key={href}>
-            <span className="mq-capability-number">0{i + 1}</span>
-            <h3>{title}</h3>
-            <p>{text}</p>
-            <span className="mq-row-arrow" aria-hidden="true">
-              <ArrowUpRight size={18} />
-            </span>
-          </a>
-        ))}
-      </div>
-    </section>
-  );
-}
-function ProductOverview() {
-  const features = [
-    [
-      "Ризиковані команди",
-      "Позначай команди, яких уникаєш або перевіряєш уважніше. При додаванні ставки застосунок попередить про команду з твого списку.",
-      "Власний список → попередження у формі",
-    ],
-    [
-      "Цілі та стратегії",
-      "Задавай цілі й відстежуй прогрес. Визначай правила для коефіцієнтів, типів ставок і форматів матчів — MatchIQ перевіряє запис на відповідність основній стратегії.",
-      "Твої правила → перевірка перед записом",
-    ],
-    [
-      "Аналітика записів",
-      "Переглядай прибуток і збитки, частку виграшів та зміну банкролу. Порівнюй ігри, періоди й стратегії на основі власних записів.",
-      "Історія ставок → зрозумілі результати",
-    ],
-    [
-      "Матчі",
-      "Знаходь зустрічі CS2 та Dota 2, переглядай розклад, команди, формат і результати. Використовуй AI-рекомендації як додатковий матеріал для аналізу.",
-      "Розклад і контекст → власне рішення",
-    ],
-  ];
-  return (
-    <section className="mq-numbers" aria-labelledby="mq-numbers-title">
-      <div className="mq-overview-heading">
-        <div>
-          <p className="mq-kicker">• МОЖЛИВОСТІ MATCHIQ</p>
-          <h2 id="mq-numbers-title">
-            Від пошуку матчу
-            <br />
-            до аналізу своїх рішень.
-          </h2>
-        </div>
-      </div>
-      <div className="mq-product-overview">
-        {features.map(([title, description, outcome], i) => (
-          <article key={title}>
-            <span className="mq-overview-index">0{i + 1}</span>
-            <h3>{title}</h3>
-            <p>{description}</p>
-            <small>{outcome}</small>
-          </article>
-        ))}
+        {faq.length > 5 && (
+          <button
+            type="button"
+            className="mq-faq-more"
+            onClick={() => setShowAll((v) => !v)}
+            aria-expanded={showAll}
+          >
+            {showAll ? "Показати менше" : `Показати більше (${faq.length - 5})`}
+            <ChevronDown size={16} aria-hidden="true" />
+          </button>
+        )}
       </div>
     </section>
   );
@@ -859,6 +1148,19 @@ export default function Landing() {
   const systemReduced = useReducedMotion();
   const [paused, setPaused] = useState(false);
   const reduced = Boolean(systemReduced || paused);
+  useEffect(() => {
+    const onClick = (event: MouseEvent) => {
+      const target = (event.target as Element | null)?.closest<HTMLElement>(
+        "[data-track]",
+      );
+      if (!target?.dataset.track) return;
+      track(target.dataset.track, {
+        place: target.dataset.trackPlace ?? "unknown",
+      });
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
   return (
     <ReducedMotion.Provider value={reduced}>
       <MotionConfig reducedMotion={reduced ? "always" : "never"}>
@@ -869,13 +1171,17 @@ export default function Landing() {
             canonical="https://matchiq.pro/"
           />
           <OrganizationStructuredData description={description} />
-          <WebAppStructuredData description={description} />
+          <WebAppStructuredData
+            description={description}
+            offers={{ price: String(MONTHLY_PRICE), priceCurrency: "UAH" }}
+          />
           <FAQStructuredData questions={faq} />
           <a href="#mq-main" className="mq-skip">
             Перейти до вмісту
           </a>
-          <Hero />
+          <SiteHeader />
           <main id="mq-main">
+            <Hero />
             <section className="mq-section mq-about" id="about">
               <Reveal>
                 <p className="mq-kicker">
@@ -939,7 +1245,7 @@ export default function Landing() {
                   id="analytics"
                   number="03"
                   title="Банкрол і результати — перед очима."
-                  text="Скільки ти виграв або втратив? Яка стратегія дає збитки? Порівнюй ігри й стратегії, стеж за банкролом та ROI — результатом відносно суми ставок."
+                  text="Скільки ти виграв або втратив? Яка стратегія дає збитки? Порівнюй ігри, періоди й стратегії, стеж за банкролом, часткою виграшів та ROI — результатом відносно суми ставок."
                   tags={["Банкрол", "ROI", "Порівняння"]}
                 >
                   <AnalyticsDemo />
@@ -948,7 +1254,7 @@ export default function Landing() {
                   id="discipline"
                   number="04"
                   title="Перевіряй рішення за своєю стратегією."
-                  text="Перевіряй відповідність стратегії, позначай ризикові команди та пов’язуй записи з цілями. Контроль починається з твоїх правил."
+                  text="Задай правила для коефіцієнтів, типів ставок і форматів матчів — MatchIQ перевірить запис на відповідність стратегії й попередить про команду з твого ризикового списку. Пов’язуй записи з цілями та стеж за прогресом."
                   tags={["Правила", "Ризикові команди", "Цілі"]}
                 >
                   <RulesDemo />
@@ -984,41 +1290,45 @@ export default function Landing() {
               </Reveal>
             </section>
             <Journey />
-            <ProductOverview />
-            <CapabilityRows />
             <Tools />
+            {SHOW_PLACEHOLDERS && <SocialProofPlaceholder />}
+            <Pricing />
             <FAQ />
           </main>
           <footer className="mq-footer">
-            <div className="mq-footer-cta">
-              <h2>
+            <section className="mq-fcta" aria-labelledby="mq-fcta-title">
+              <LiquidBackdrop />
+              <span className="mq-fcta-pill">
+                <ArrowUpRight size={12} aria-hidden="true" /> Доступ через
+                Telegram
+              </span>
+              <h2 id="mq-fcta-title">
                 Твій журнал ставок
                 <br />
                 починається тут.
               </h2>
-              <div className="mq-footer-actions">
+              <p>
+                Напиши @cs2beet у Telegram, щоб дізнатися умови й отримати
+                акаунт. Приклади на сторінці доступні без реєстрації.
+              </p>
+              <div className="mq-fcta-actions">
                 <a
-                  className="mq-button"
-                  href="https://t.me/cs2beet"
+                  className="mq-fcta-primary"
+                  href={telegramLink(TG_ACCESS)}
+                  data-track="cta_access"
+                  data-track-place="footer_cta"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Отримати доступ <ArrowUpRight size={18} />
+                  Отримати доступ
                 </a>
-                <p>
-                  Напиши @cs2beet у Telegram, щоб дізнатися умови й отримати
-                  акаунт.
-                </p>
-                <a className="mq-outline-button" href="#possibilities">
-                  Спробувати на прикладі <ArrowUpRight size={18} />
+                <a className="mq-fcta-glass" href="#possibilities">
+                  Спробувати на прикладі
                 </a>
-                <Link className="mq-outline-button" to="/login">
-                  У мене вже є акаунт <ArrowUpRight size={16} />
-                </Link>
               </div>
-            </div>
-            <div className="mq-footer-columns">
-              <div className="mq-footer-brand">
+            </section>
+            <div className="mq-fgrid">
+              <div className="mq-fbrand">
                 <Link to="/" aria-label="MatchIQ — головна">
                   <Mark />
                 </Link>
@@ -1026,60 +1336,96 @@ export default function Landing() {
                   Особистий журнал ставок на кіберспорт. Зберігай контекст,
                   аналізуй рішення, помічай закономірності.
                 </p>
+                <div className="mq-fbrand-actions">
+                  <Link className="mq-fbrand-login" to="/login">
+                    У мене вже є акаунт <ArrowUpRight size={14} />
+                  </Link>
+                  <button
+                    type="button"
+                    className="mq-motion-button"
+                    disabled={Boolean(systemReduced)}
+                    aria-pressed={reduced}
+                    aria-label={
+                      reduced ? "Увімкнути анімації" : "Зупинити анімації"
+                    }
+                    onClick={() => setPaused(!paused)}
+                  >
+                    {reduced ? <Play size={14} /> : <Pause size={14} />}
+                    {systemReduced
+                      ? "Рух вимкнено системою"
+                      : reduced
+                        ? "Рух вимкнено"
+                        : "Зупинити рух"}
+                  </button>
+                </div>
               </div>
               <nav aria-label="Про MatchIQ">
-                <h3>ПРО ПРОДУКТ</h3>
+                <h3>Продукт</h3>
                 <a href="#about">Про MatchIQ</a>
                 <a href="#how-it-works">Як це працює</a>
                 <a href="#tools">Інструменти</a>
+                <a href="#pricing">Ціни</a>
                 <a href="#faq">Запитання</a>
               </nav>
               <nav aria-label="Можливості MatchIQ">
-                <h3>МОЖЛИВОСТІ</h3>
+                <h3>Можливості</h3>
                 <a href="#matches">Матчі</a>
                 <a href="#journal">Журнал</a>
                 <a href="#analytics">Аналітика</a>
                 <a href="#discipline">Дисципліна</a>
               </nav>
-              <div className="mq-footer-access">
-                <h3>ТВІЙ ПРОСТІР</h3>
+              <nav aria-label="Твій простір">
+                <h3>Твій простір</h3>
+                <a
+                  href={telegramLink(TG_ACCESS)}
+                  data-track="cta_access"
+                  data-track-place="footer_nav"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Запитати про доступ
+                </a>
+                <Link to="/login">Увійти в акаунт</Link>
+                <a href="#possibilities">Інтерактивні приклади</a>
+              </nav>
+            </div>
+            <div className="mq-fresponsible">
+              <span className="mq-f18" aria-label="Лише для повнолітніх">
+                18+
+              </span>
+              <p>
+                <b>Відповідальна гра.</b> Став лише ті гроші, які готовий
+                втратити. MatchIQ допомагає бачити результати та тримати
+                власні ліміти, але не робить ставки безпечними. Якщо гра
+                виходить з-під контролю, оформи самообмеження чи отримай
+                допомогу на сайті державного регулятора.
+              </p>
+              <a
+                href="https://playcity.gov.ua/borotba-z-ihrovoiu-zalezhnistiu"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Допомога при ігровій залежності ↗
+              </a>
+            </div>
+            <div className="mq-fbottom">
+              <span>© {new Date().getFullYear()} MatchIQ. Облік і аналітика, без приймання ставок.</span>
+              <span>
+                <Link to="/privacy">Конфіденційність</Link>
+                <span aria-hidden="true">·</span>
+                <Link to="/terms">Умови</Link>
+                <span aria-hidden="true">·</span>
                 <a
                   href="https://t.me/cs2beet"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Запитати про доступ ↗
+                  Telegram
                 </a>
-                <Link to="/login">Увійти в акаунт ↗</Link>
-                <a href="#possibilities">Інтерактивні приклади</a>
-                <button
-                  type="button"
-                  className="mq-motion-button"
-                  disabled={Boolean(systemReduced)}
-                  aria-pressed={reduced}
-                  aria-label={
-                    reduced ? "Увімкнути анімації" : "Зупинити анімації"
-                  }
-                  onClick={() => setPaused(!paused)}
-                >
-                  {reduced ? <Play size={14} /> : <Pause size={14} />}
-                  {systemReduced
-                    ? "Рух вимкнено системою"
-                    : reduced
-                      ? "Рух вимкнено"
-                      : "Зупинити рух"}
-                </button>
-              </div>
-            </div>
-            <div className="mq-footer-wordmark" aria-hidden="true">
-              MATCHIQ
-            </div>
-            <div className="mq-footer-bottom">
-              <span>© {new Date().getFullYear()} MatchIQ</span>
-              <span>
-                <Check size={12} /> Облік. Аналітика. Без приймання ставок.
               </span>
-              <span>CS2 / DOTA 2</span>
+            </div>
+            <div className="mq-fwordmark" aria-hidden="true">
+              MatchIQ
             </div>
           </footer>
         </div>

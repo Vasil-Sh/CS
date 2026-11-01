@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 
 interface SEOProps {
@@ -22,8 +23,8 @@ interface SEOProps {
 const SITE_NAME = "MatchIQ";
 const BASE_URL = "https://matchiq.pro";
 const DEFAULT_DESCRIPTION =
-  "MatchIQ — професійна аналітика ставок на CS2. EV-детектор, алгоритм Келлі, трекінг банкролу та AI-рекомендації. Контролюйте ризики та збільшуйте ROI.";
-const DEFAULT_OG_IMAGE = `${BASE_URL}/assets/og-image.png`;
+  "MatchIQ — журнал ставок на CS2 та Dota 2. Записуй ставки й причини рішень, стеж за банкролом і ROI, перевіряй власну стратегію. Не букмекер: ставки не приймаємо.";
+const DEFAULT_OG_IMAGE = `${BASE_URL}/assets/og-image.jpg`;
 
 export function SEO({
   title,
@@ -37,8 +38,16 @@ export function SEO({
 }: SEOProps) {
   const pageTitle = title
     ? `${title} | ${SITE_NAME}`
-    : `${SITE_NAME} — Аналітика ставок на CS2`;
+    : `${SITE_NAME} — журнал ставок на CS2 та Dota 2`;
   const canonicalUrl = canonical ?? BASE_URL;
+
+  // index.html ships static SEO tags for crawlers without JavaScript.
+  // Once this component renders its own, drop those to avoid duplicates.
+  useEffect(() => {
+    document
+      .querySelectorAll("[data-static-seo]")
+      .forEach((element) => element.remove());
+  }, []);
 
   return (
     <Helmet>
@@ -68,7 +77,6 @@ export function SEO({
       <meta property="og:image:height" content="630" />
       <meta property="og:image:alt" content={pageTitle} />
       <meta property="og:locale" content="uk_UA" />
-      <meta property="og:locale:alternate" content="en_US" />
 
       {/* ── Twitter Card ── */}
       <meta name="twitter:card" content="summary_large_image" />
