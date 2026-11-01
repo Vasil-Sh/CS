@@ -15,6 +15,7 @@ import {
   type PublicProfileData,
 } from "@/components/public-profile/publicProfileModel";
 import "./PublicProfile.css";
+import "./PublicProfileRedesign.css";
 import { ensureAppFonts } from "@/lib/appFonts";
 
 ensureAppFonts();
@@ -146,14 +147,35 @@ export default function PublicProfile() {
         <nav className="public-wrap public-nav" aria-label="Публічна навігація">
           <Link
             to="/"
-            className="public-logo"
+            className="public-logo public-brand"
             aria-label="MatchIQ — на головну"
           >
-            Match<span>IQ</span>
+            <span className="public-brand-mark" aria-hidden="true">
+              <svg
+                width="19"
+                height="19"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 16v5M16 14v7M20 10v11M4 18v3M8 14v7" />
+                <path d="m22 3-8.646 8.646a.5.5 0 0 1-.708 0L9.354 8.354a.5.5 0 0 0-.707 0L2 15" />
+              </svg>
+            </span>
+            MatchIQ
           </Link>
-          <span className="public-nav-label">Публічний профіль</span>
+          <span className="public-nav-label">
+            <i aria-hidden="true" />
+            Публічний профіль
+          </span>
           <Link to="/login" className="public-login">
-            Увійти <ArrowUpRight size={17} />
+            Увійти
+            <span className="public-pill-arrow" aria-hidden="true">
+              <ArrowUpRight size={15} />
+            </span>
           </Link>
         </nav>
       </header>
@@ -446,8 +468,11 @@ export default function PublicProfile() {
         </Link>
         <p>
           Дані з журналу користувача. Минулі результати не гарантують майбутніх.
+          MatchIQ не приймає ставки. 18+.
         </p>
-        <span>Публічний журнал</span>
+        <Link to="/" className="public-footer-cta">
+          Створити свій журнал →
+        </Link>
       </footer>
     </div>
   );

@@ -1002,3 +1002,111 @@
     animation: none !important;
   }
 }
+
+/* ===== Studio photo variant (light hero, product shots) ===== */
+.mqp-page {
+  --mqp-ground: #fbfaf8;
+  --mqp-shadow: 0 1px 2px #1718190a, 0 10px 28px #1718190f;
+}
+.mqp-hero.is-photo {
+  min-height: 340px;
+  justify-content: space-between;
+  background: #d7d8d5 url("/assets/app/profile-hero.webp") right center / cover
+    no-repeat;
+  color: var(--mqp-ink);
+}
+.mqp-hero.is-photo.is-compact {
+  min-height: 220px;
+}
+.mqp-hero.is-photo .mqp-eyebrow,
+.mqp-hero.is-photo .mqp-online,
+.mqp-hero.is-photo .mqp-identity-copy p {
+  color: #4a4b45;
+}
+.mqp-hero.is-photo .mqp-eyebrow i {
+  background: var(--mqp-orange-text);
+}
+.mqp-hero.is-photo .mqp-online i {
+  background: #1d7a46;
+}
+.mqp-hero.is-photo .mqp-identity {
+  max-width: 560px;
+}
+.mqp-hero.is-photo .mqp-avatar {
+  background: var(--mqp-ink);
+  color: #f3f2ee;
+  box-shadow: 0 0 0 6px #ffffff80;
+}
+.mqp-hero.is-photo .mqp-tabs {
+  border-color: #fff;
+  background: #ffffffb8;
+}
+.mqp-hero.is-photo .mqp-tabs button {
+  color: #4a4b45;
+}
+.mqp-hero.is-photo .mqp-tabs button:hover {
+  color: var(--mqp-ink);
+}
+.mqp-hero.is-photo .mqp-tabs button[aria-current="page"] {
+  background: var(--mqp-ink);
+  color: #fff;
+}
+
+.mqp-player.is-photo {
+  min-height: 380px;
+  border: 1px solid #17181914;
+  background: #e4e5e2 url("/assets/app/card-all.webp") center 30% / cover
+    no-repeat;
+  color: var(--mqp-ink);
+}
+.mqp-player.is-photo::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  z-index: -1;
+  height: 55%;
+  background: linear-gradient(to top, #f1f1eff2 35%, #f1f1ef00);
+}
+.mqp-player.is-photo .mqp-player-brand span {
+  color: var(--mqp-orange-text);
+}
+.mqp-player.is-photo .mqp-chip-glass {
+  border-color: #fff;
+  background: #ffffffc2;
+  color: var(--mqp-ink);
+}
+.mqp-player.is-photo .mqp-chip-glass i {
+  background: #1d7a46;
+}
+.mqp-player.is-photo .mqp-player-bottom {
+  margin-top: auto;
+}
+.mqp-player.is-photo .mqp-player-bottom span {
+  color: #4a4b45;
+}
+.mqp-player.is-photo .mqp-btn-glass {
+  border-color: #fff;
+  background: #ffffffcc;
+  color: var(--mqp-ink);
+}
+
+.mqp-photo-tile {
+  flex: 1 1 260px;
+  min-height: 220px;
+  border-radius: 24px;
+  background: #e2e3e0 url("/assets/app/backup-tokens.webp") center / cover
+    no-repeat;
+}
+
+@media (max-width: 700px) {
+  .mqp-hero.is-photo {
+    background-position: 72% center;
+  }
+  .mqp-hero.is-photo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(90deg, #d7d8d5f2 35%, #d7d8d500);
+  }
+}

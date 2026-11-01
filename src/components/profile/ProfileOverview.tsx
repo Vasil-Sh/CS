@@ -261,12 +261,7 @@ export default function ProfileOverview(p: Props) {
 
   return (
     <>
-      <section className="mqp-hero" aria-label="Ваш профіль">
-        <span className="mqp-ribbons" aria-hidden="true">
-          <i />
-          <i />
-          <i />
-        </span>
+      <section className="mqp-hero is-photo" aria-label="Ваш профіль">
         {p.header}
         <div className="mqp-identity">
           <div className="mqp-avatar">
@@ -514,11 +509,7 @@ export default function ProfileOverview(p: Props) {
             <div className="mqp-card-head">
               <h2 id="profile-public-title">Публічний профіль</h2>
             </div>
-            <div className="mqp-player">
-              <span className="mqp-ribbons" aria-hidden="true">
-                <i />
-                <i />
-              </span>
+            <div className="mqp-player is-photo">
               <div className="mqp-player-top">
                 <span className="mqp-player-brand">
                   Match<span>IQ</span>
@@ -528,9 +519,6 @@ export default function ProfileOverview(p: Props) {
                   Онлайн
                 </span>
               </div>
-              <span className="mqp-player-initial" aria-hidden="true">
-                {initial}
-              </span>
               <div className="mqp-player-bottom">
                 <strong>@{p.username}</strong>
                 <span>

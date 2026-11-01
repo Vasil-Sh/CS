@@ -1,5 +1,4 @@
 import { Check, Link2 } from "lucide-react";
-import { GameMark } from "./GameMark";
 import { gameOptions, type GameFilter } from "./publicProfileModel";
 
 export function PlayerCard({
@@ -22,10 +21,10 @@ export function PlayerCard({
         {gameOptions.map((item) => (
           <img
             key={item.value}
-            src={`/assets/public-profile/cover-${item.value}.webp`}
+            src={`/assets/app/card-${item.value}.webp`}
             alt=""
-            width="768"
-            height="1152"
+            width="896"
+            height="1200"
             className={`public-cover${game === item.value ? " is-active" : ""}`}
             decoding="async"
             fetchPriority={game === item.value ? "high" : "low"}
@@ -37,7 +36,6 @@ export function PlayerCard({
           Match<span>IQ</span>
         </span>
         <span className="public-card-game">
-          <GameMark game={game} paired />
           {gameOptions.find((o) => o.value === game)?.cardLabel}
         </span>
       </div>
@@ -53,11 +51,14 @@ export function PlayerCard({
         >
           <span className="public-share-content" aria-hidden="true">
             <span className="public-share-state public-share-idle">
-              <Link2 size={21} /> Поділитися
+              Поділитися
             </span>
             <span className="public-share-state public-share-success">
-              <Check size={21} /> Скопійовано
+              Скопійовано
             </span>
+          </span>
+          <span className="public-pill-arrow" aria-hidden="true">
+            {copied ? <Check size={16} /> : <Link2 size={16} />}
           </span>
         </button>
       </div>
