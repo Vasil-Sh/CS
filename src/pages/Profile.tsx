@@ -13,6 +13,7 @@ import { api } from "@/lib/apiClient";
 import ProfileOverview from "@/components/profile/ProfileOverview";
 import ProfileBackup from "@/components/profile/ProfileBackup";
 import "./Profile.css";
+import "@/components/profile/ProfileRedesign.css";
 import { useTheme, type ThemePreference } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { setLang, getLang, type Lang } from "@/lib/i18n";
@@ -456,12 +457,15 @@ export default function Profile() {
   };
 
   const profileHeader = (
-    <>
-      <header className="profile-heading">
-        <p className="profile-heading-eyebrow">ОСОБИСТИЙ ПРОСТІР</p>
+    <header className="mqp-heading">
+      <div>
+        <p className="mqp-eyebrow">
+          <i aria-hidden="true" />
+          Особистий простір
+        </p>
         <h1>Ваш профіль</h1>
-      </header>
-      <nav className="profile-tabs" aria-label="Розділи профілю">
+      </div>
+      <nav className="mqp-tabs" aria-label="Розділи профілю">
         <button
           type="button"
           aria-current={activeTab === "interface" ? "page" : undefined}
@@ -474,15 +478,15 @@ export default function Profile() {
           aria-current={activeTab === "backup" ? "page" : undefined}
           onClick={() => setActiveTab("backup")}
         >
-          Бекап
+          Дані та бекап
         </button>
       </nav>
-    </>
+    </header>
   );
 
   return (
-    <div className={`profile-page profile-view-${activeTab}`}>
-      <div className="profile-content" key={activeTab}>
+    <div className={`mqp-page profile-view-${activeTab}`}>
+      <div className="mqp-content" key={activeTab}>
         {activeTab === "interface" && (
           <ProfileOverview
             header={profileHeader}

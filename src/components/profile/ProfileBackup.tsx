@@ -6,6 +6,7 @@ import {
   Trash2,
   X,
   Loader2,
+  Check,
 } from "lucide-react";
 import {
   Dialog,
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import "./ProfileBackup.css";
+import "./ProfileRedesign.css";
 
 interface Props {
   header?: ReactNode;
@@ -79,34 +81,30 @@ export default function ProfileBackup({
 
   return (
     <>
-      <div className="profile-masthead backup-masthead">
+      <section className="mqp-hero is-compact" aria-label="Дані та бекап">
+        <span className="mqp-ribbons" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </span>
         {header}
-        <section className="backup-hero" aria-labelledby="backup-page-title">
-          <h2 id="backup-page-title">Бекап даних</h2>
-          <p>Збережіть копію або перенесіть дані на інший пристрій.</p>
-        </section>
-      </div>
-      <div className="backup-page backup-studio" aria-busy={busy}>
-        <section
-          className="backup-data-overview"
-          aria-label="Огляд локальних даних"
-        >
-          <dl className="backup-data-summary">
+      </section>
+      <div className="mqp-backup" aria-busy={busy}>
+        <section className="mqp-card" aria-label="Огляд локальних даних">
+          <dl className="mqp-stats">
             <div>
               <dt>Локальні дані</dt>
-              <dd>
-                {localizedSize} <span>КБ</span>
-              </dd>
+              <dd>{localizedSize} КБ</dd>
             </div>
             <div>
               <dt>Останній експорт</dt>
-              <dd className={!lastExport ? "backup-no-export" : undefined}>
+              <dd>
                 {lastExport ? (
                   <time dateTime={lastBackupDate!.toISOString()}>
                     {lastExport}
                   </time>
                 ) : (
-                  "Ще не створювали"
+                  "Ще не було"
                 )}
               </dd>
             </div>
@@ -115,71 +113,68 @@ export default function ProfileBackup({
               <dd>JSON</dd>
             </div>
           </dl>
-          <p className="backup-scope-note">
-            Експортуються дані localStorage цього браузера. Це не копія
-            серверної бази.
-          </p>
         </section>
+        <p className="mqp-scope">
+          Експортуються дані цього браузера. Це не копія серверної бази.
+        </p>
 
-        <div className="backup-top-grid">
-          <section
-            className="profile-panel backup-export"
-            aria-labelledby="backup-export-title"
-          >
-            <h2 id="backup-export-title">Завантажити бекап</h2>
-            <p>
-              Усі локальні дані — в одному JSON-файлі.
-              <br />
-              Збережіть копію перед змінами або перенесенням.
+        <div className="mqp-row">
+          <section className="mqp-card" aria-labelledby="backup-export-title">
+            <div className="mqp-card-head">
+              <h2 id="backup-export-title">Завантажити бекап</h2>
+            </div>
+            <p className="mqp-text">
+              Усі локальні дані в одному JSON-файлі. Збережіть копію перед
+              змінами або перенесенням на інший пристрій.
             </p>
             <button
               type="button"
-              className="profile-button profile-primary backup-download"
+              className="mqp-pill"
               onClick={onExport}
               disabled={busy}
             >
-              {isExporting ? (
-                <Loader2
-                  size={24}
-                  className="backup-spinner"
-                  aria-hidden="true"
-                />
-              ) : (
-                <Download size={24} aria-hidden="true" />
-              )}
               {isExporting ? "Створення копії…" : "Завантажити повний бекап"}
+              <span className="mqp-pill-arrow" aria-hidden="true">
+                {isExporting ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Download size={16} />
+                )}
+              </span>
             </button>
-            <p className="backup-helper">
-              Файл буде збережено на вашому пристрої.
-            </p>
           </section>
-          <section
-            className="profile-panel backup-contents"
-            aria-labelledby="backup-contents-title"
-          >
-            <h2 id="backup-contents-title">Що входить у копію</h2>
-            <ul>
-              <li>Ставки</li>
-              <li>Ризикові команди</li>
-              <li>Стратегії</li>
-              <li>Цілі</li>
-              <li>Telegram-групи</li>
-              <li>Налаштування</li>
+          <section className="mqp-card" aria-labelledby="backup-contents-title">
+            <div className="mqp-card-head">
+              <h2 id="backup-contents-title">Що входить у копію</h2>
+            </div>
+            <ul className="mqp-checklist">
+              {[
+                "Ставки",
+                "Цілі",
+                "Ризикові команди",
+                "Telegram-групи",
+                "Стратегії",
+                "Налаштування",
+              ].map((item) => (
+                <li key={item}>
+                  <span aria-hidden="true">
+                    <Check size={13} strokeWidth={3} />
+                  </span>
+                  {item}
+                </li>
+              ))}
             </ul>
-            <p className="backup-helper">
-              Лише дані, доступні в цьому браузері.
-            </p>
+            <p className="mqp-note">Лише дані, доступні в цьому браузері.</p>
           </section>
         </div>
 
-        <section
-          className="profile-panel backup-restore"
-          aria-labelledby="backup-restore-title"
-        >
-          <h2 id="backup-restore-title">Відновити з бекапу</h2>
-          <p>Оберіть раніше збережений JSON-файл MatchIQ.</p>
-          <div className="backup-warning">
-            <AlertTriangle size={21} aria-hidden="true" />
+        <section className="mqp-card" aria-labelledby="backup-restore-title">
+          <div className="mqp-card-head">
+            <h2 id="backup-restore-title">Відновити з бекапу</h2>
+          </div>
+          <p className="mqp-text">Оберіть раніше збережений JSON-файл MatchIQ.</p>
+          <div className="mqp-warning">
+            <AlertTriangle size={18} aria-hidden="true" />
             <span>
               Відновлення замінить відповідні локальні дані. Спочатку збережіть
               поточну копію.
@@ -189,7 +184,7 @@ export default function ProfileBackup({
             role="group"
             aria-label="Вибір файлу для відновлення"
             aria-describedby="backup-restore-hint"
-            className={`backup-dropzone${dragging ? " is-dragging" : ""}${file ? " has-file" : ""}`}
+            className={`mqp-dropzone${dragging ? " is-dragging" : ""}${file ? " has-file" : ""}`}
             onDragEnter={(event) => {
               event.preventDefault();
               if (!busy) {
@@ -213,8 +208,10 @@ export default function ProfileBackup({
               selectFile(event.dataTransfer.files[0]);
             }}
           >
-            <Upload size={30} aria-hidden="true" />
-            <div className="backup-file-copy" aria-live="polite">
+            <span className="mqp-icon is-white">
+              <Upload size={19} strokeWidth={1.8} aria-hidden="true" />
+            </span>
+            <div className="mqp-dropzone-copy" aria-live="polite">
               <strong>{file ? file.name : "Перетягніть JSON-файл сюди"}</strong>
               <span>
                 {file
@@ -222,25 +219,24 @@ export default function ProfileBackup({
                   : "або оберіть його на пристрої"}
               </span>
             </div>
-            <div className="backup-file-actions">
+            <div className="mqp-dropzone-actions">
               {file && (
                 <button
                   type="button"
-                  className="profile-button backup-remove-file"
+                  className="mqp-round"
                   aria-label="Прибрати обраний файл"
                   disabled={busy}
                   onClick={() => setFile(null)}
                 >
-                  <X size={18} aria-hidden="true" />
+                  <X size={17} aria-hidden="true" />
                 </button>
               )}
               <button
                 type="button"
-                className="profile-button"
+                className="mqp-btn-outline"
                 disabled={busy}
                 onClick={() => input.current?.click()}
               >
-                <Upload size={20} aria-hidden="true" />
                 {file ? "Змінити файл" : "Обрати файл"}
               </button>
             </div>
@@ -257,57 +253,52 @@ export default function ProfileBackup({
               }}
             />
           </div>
-          <p className="backup-helper" id="backup-restore-hint">
+          <p className="mqp-note" id="backup-restore-hint">
             Дані зміняться лише після перевірки файлу та вашого підтвердження.
           </p>
           {file && (
-            <div className="backup-restore-footer">
+            <div>
               <button
                 type="button"
-                className="profile-button profile-primary"
+                className="mqp-pill"
                 disabled={busy}
                 onClick={() => setConfirmOpen(true)}
               >
-                {isImporting && (
-                  <Loader2
-                    size={18}
-                    className="backup-spinner"
-                    aria-hidden="true"
-                  />
-                )}
                 {isImporting ? "Відновлення…" : "Відновити дані"}
+                <span className="mqp-pill-arrow" aria-hidden="true">
+                  {isImporting ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Upload size={16} />
+                  )}
+                </span>
               </button>
             </div>
           )}
         </section>
 
         <section
-          className="profile-panel backup-danger"
+          className="mqp-card mqp-danger"
           aria-labelledby="backup-clear-title"
         >
           <div>
             <h2 id="backup-clear-title">Очистити дані</h2>
-            <p>
+            <p className="mqp-text">
               Буде видалено ставки, команди, стратегії, цілі та Telegram-групи.
-              <br />
-              Обліковий запис, тема та мова залишаться. Дію неможливо скасувати.
+              Обліковий запис, тема й мова залишаться. Дію неможливо скасувати.
             </p>
           </div>
-          <div className="backup-danger-actions">
+          <div className="mqp-danger-actions">
             <button
               type="button"
-              className="profile-button backup-danger-button"
+              className="mqp-btn-danger"
               disabled={busy}
               onClick={onClear}
             >
               {isClearing ? (
-                <Loader2
-                  size={20}
-                  className="backup-spinner"
-                  aria-hidden="true"
-                />
+                <Loader2 size={17} className="animate-spin" aria-hidden="true" />
               ) : (
-                <Trash2 size={20} aria-hidden="true" />
+                <Trash2 size={17} aria-hidden="true" />
               )}
               {isClearing ? "Очищення…" : "Очистити всі дані"}
             </button>

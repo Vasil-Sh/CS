@@ -2,16 +2,17 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   FileText,
-  AlertTriangle,
-  BarChart3,
+  ShieldAlert,
   Target,
+  Flag,
+  Send,
+  Download,
   Copy,
   ArrowUpRight,
   ArrowRight,
   ChevronRight,
   Check,
   RefreshCw,
-  MessageCircle,
   Layers,
 } from "lucide-react";
 import { UserDataService } from "@/lib/userDataService";
@@ -20,6 +21,7 @@ import { proxyLogoUrl } from "@/lib/logoProxy";
 import { journalKey } from "@/components/mybets/journalModel";
 import type { ThemePreference } from "@/hooks/useTheme";
 import type { Lang } from "@/lib/i18n";
+import "./ProfileRedesign.css";
 import { toast } from "sonner";
 import {
   profileDate,
@@ -81,12 +83,12 @@ function TeamMark({
     <img
       src={proxyLogoUrl(url, game) || undefined}
       alt=""
-      className="profile-team-logo"
+      className="mqp-team-logo"
       loading="lazy"
       onError={() => setFailed(true)}
     />
   ) : (
-    <span className="profile-team-fallback" aria-hidden="true">
+    <span className="mqp-team" aria-hidden="true">
       {name.slice(0, 2).toUpperCase() || "?"}
     </span>
   );
@@ -204,25 +206,35 @@ export default function ProfileOverview(p: Props) {
       value: total,
       Icon: FileText,
       href: "/app/my-bets",
+      cta: "Додати",
     },
     {
       label: "Ризикові команди",
       value: p.stats.riskyTeams,
-      Icon: AlertTriangle,
+      Icon: ShieldAlert,
       href: "/app/risky-teams",
+      cta: "Додати",
     },
     {
       label: "Стратегії",
       value: p.stats.strategies,
-      Icon: BarChart3,
+      Icon: Target,
       href: "/app/strategy",
+      cta: "Створити",
     },
-    { label: "Цілі", value: p.stats.goals, Icon: Target, href: "/app/goals" },
+    {
+      label: "Цілі",
+      value: p.stats.goals,
+      Icon: Flag,
+      href: "/app/goals",
+      cta: "Поставити",
+    },
     {
       label: "Telegram-групи",
       value: p.stats.tgGroups,
-      Icon: MessageCircle,
+      Icon: Send,
       href: "/app/telegram",
+      cta: "Підключити",
     },
   ];
 
@@ -238,19 +250,21 @@ export default function ProfileOverview(p: Props) {
 
   return (
     <>
-      <div className="profile-masthead">
+      <section className="mqp-hero" aria-label="Ваш профіль">
+        <span className="mqp-ribbons" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+        </span>
         {p.header}
-        <section className="profile-identity" aria-label="Ваш профіль">
-          <div className="profile-avatar">
-            <span className="profile-avatar-letter" aria-hidden="true">
-              {initial}
-            </span>
+        <div className="mqp-identity">
+          <div className="mqp-avatar">
+            <span aria-hidden="true">{initial}</span>
             {tgValid && (
               <img
                 key={tgAvatarName}
                 src={`https://t.me/i/userpic/320/${tgAvatarName}.jpg`}
                 alt=""
-                className="profile-avatar-img"
                 onError={(e) => {
                   e.currentTarget.hidden = true;
                 }}
@@ -261,49 +275,67 @@ export default function ProfileOverview(p: Props) {
               />
             )}
           </div>
-          <div className="profile-identity-copy">
+          <div className="mqp-identity-copy">
             <h2>{identity.displayName || `@${p.username}`}</h2>
-            <span className="profile-online">
+            <span className="mqp-online">
               <i aria-hidden="true" />
               Активний{identity.displayName && <span> · @{p.username}</span>}
             </span>
             {identity.bio && <p>{identity.bio}</p>}
           </div>
-        </section>
-      </div>
+          <a
+            className="mqp-btn-glass"
+            href={publicUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Публічний профіль <ArrowUpRight size={16} aria-hidden="true" />
+            <span className="sr-only"> (нова вкладка)</span>
+          </a>
+        </div>
+      </section>
 
-      <nav className="profile-metrics" aria-label="Огляд вашого журналу">
-        {metrics.map(({ label, value, Icon, href }) => (
-          <Link className="profile-metric" to={href} key={href}>
-            <Icon size={30} strokeWidth={1.8} aria-hidden="true" />
-            <span className="profile-metric-copy">
-              <strong>{value.toLocaleString("uk-UA")}</strong>{" "}
+      <nav className="mqp-metrics" aria-label="Огляд вашого журналу">
+        {metrics.map(({ label, value, Icon, href, cta }) => (
+          <Link
+            className={`mqp-metric${value ? "" : " is-empty"}`}
+            to={href}
+            key={href}
+          >
+            <span className="mqp-metric-top">
+              <span className="mqp-icon">
+                <Icon size={19} strokeWidth={1.8} aria-hidden="true" />
+              </span>
+              {value ? (
+                <ArrowUpRight
+                  className="mqp-metric-arrow"
+                  size={16}
+                  aria-hidden="true"
+                />
+              ) : (
+                <span className="mqp-metric-cta">{cta} +</span>
+              )}
+            </span>
+            <span className="mqp-metric-copy">
+              <strong>{value.toLocaleString("uk-UA")}</strong>
               <small>{label}</small>
             </span>
-            <ChevronRight
-              className="profile-metric-arrow"
-              size={16}
-              aria-hidden="true"
-            />
           </Link>
         ))}
       </nav>
 
-      <div className="profile-grid">
-        <div className="profile-left">
-          <section
-            className="profile-panel profile-activity"
-            aria-labelledby="profile-activity-title"
-          >
-            <div className="profile-section-title">
+      <div className="mqp-grid">
+        <div className="mqp-col">
+          <section className="mqp-card" aria-labelledby="profile-activity-title">
+            <div className="mqp-card-head">
               <h2 id="profile-activity-title">Остання активність</h2>
-              <Link to="/app/my-bets?tab=records" className="profile-text-link">
-                Усі записи <ArrowRight size={16} />
+              <Link to="/app/my-bets?tab=records" className="mqp-link">
+                Усі записи <ArrowRight size={16} aria-hidden="true" />
               </Link>
             </div>
             {isLoading ? (
               <div
-                className="profile-activity-loading"
+                className="mqp-loading"
                 role="status"
                 aria-label="Завантажуємо записи"
               >
@@ -312,23 +344,23 @@ export default function ProfileOverview(p: Props) {
                 <span />
               </div>
             ) : recent.length ? (
-              <ul className="profile-records">
+              <ul className="mqp-records">
                 {recent.map((bet) => {
                   const summary = recordSummary(bet);
                   const date = recordDate(bet);
                   return (
                     <li key={journalKey(bet)}>
                       <Link
-                        className="profile-record"
+                        className="mqp-record"
                         to="/app/my-bets?tab=records"
                         aria-label={`Деталі: ${summary.title}`}
                       >
-                        <span className="profile-game-badge">
-                          {summary.game}
-                        </span>
-                        <span className="profile-team-pair" aria-hidden="true">
+                        <span className="mqp-badge">{summary.game}</span>
+                        <span className="mqp-pair" aria-hidden="true">
                           {summary.express ? (
-                            <Layers size={42} />
+                            <span className="mqp-team">
+                              <Layers size={16} />
+                            </span>
                           ) : (
                             <>
                               <TeamMark
@@ -338,7 +370,7 @@ export default function ProfileOverview(p: Props) {
                               />
                               {summary.team2 && (
                                 <>
-                                  <span className="profile-versus">vs</span>
+                                  <span className="mqp-vs">vs</span>
                                   <TeamMark
                                     url={bet.logoTeam2}
                                     name={summary.team2}
@@ -349,7 +381,7 @@ export default function ProfileOverview(p: Props) {
                             </>
                           )}
                         </span>
-                        <span className="profile-record-copy">
+                        <span className="mqp-record-copy">
                           <strong>{summary.title}</strong>
                           <small>{summary.description}</small>
                         </span>
@@ -358,7 +390,7 @@ export default function ProfileOverview(p: Props) {
                         </time>
                         <ChevronRight
                           size={16}
-                          className="profile-record-arrow"
+                          className="mqp-record-arrow"
                           aria-hidden="true"
                         />
                       </Link>
@@ -367,29 +399,23 @@ export default function ProfileOverview(p: Props) {
                 })}
               </ul>
             ) : (
-              <div className="profile-activity-empty">
+              <div className="mqp-empty">
                 <strong>Ваш журнал починається тут</strong>
                 <p>Нові записи з’являться в цьому блоці.</p>
-                <Link
-                  className="profile-text-link"
-                  to="/app/my-bets?tab=records"
-                >
-                  Перейти до журналу <ArrowRight size={16} />
+                <Link className="mqp-link" to="/app/my-bets?tab=records">
+                  Перейти до журналу <ArrowRight size={16} aria-hidden="true" />
                 </Link>
               </div>
             )}
           </section>
 
-          <section
-            className="profile-panel profile-settings"
-            aria-labelledby="profile-settings-title"
-          >
-            <div className="profile-section-title">
+          <section className="mqp-card" aria-labelledby="profile-settings-title">
+            <div className="mqp-card-head">
               <h2 id="profile-settings-title">Налаштування</h2>
             </div>
-            <fieldset className="profile-theme-picker">
+            <fieldset className="mqp-themes">
               <legend>Тема інтерфейсу</legend>
-              <div className="profile-theme-options">
+              <div className="mqp-theme-options">
                 {(
                   [
                     ["light", "Світла"],
@@ -397,7 +423,7 @@ export default function ProfileOverview(p: Props) {
                     ["system", "Системна"],
                   ] as const
                 ).map(([mode, label]) => (
-                  <label className="profile-theme-option" key={mode}>
+                  <label className="mqp-theme" key={mode}>
                     <input
                       type="radio"
                       name="profile-theme"
@@ -405,22 +431,23 @@ export default function ProfileOverview(p: Props) {
                       checked={p.theme === mode}
                       onChange={() => p.onThemeChange(mode)}
                     />
-                    <span className="profile-theme-frame">
+                    <span className="mqp-theme-frame">
                       <ThemePreview mode={mode} />
-                      <span className="profile-theme-check">
-                        <Check size={14} />
+                      <span className="mqp-theme-check">
+                        <Check size={13} strokeWidth={3} />
                       </span>
                     </span>
-                    <span className="profile-theme-label">{label}</span>
+                    <span className="mqp-theme-label">{label}</span>
                   </label>
                 ))}
               </div>
             </fieldset>
-            <div className="profile-settings-fields">
-              <div className="profile-setting">
+            <div className="mqp-fields">
+              <div className="mqp-field">
                 <label htmlFor="profile-language">Мова</label>
                 <select
                   id="profile-language"
+                  className="mqp-input"
                   value={p.language}
                   onChange={(e) => p.onLanguageChange(e.target.value as Lang)}
                 >
@@ -428,11 +455,12 @@ export default function ProfileOverview(p: Props) {
                   <option value="en">English</option>
                 </select>
               </div>
-              <div className="profile-setting">
+              <div className="mqp-field">
                 <label htmlFor="profile-rate">Курс USD → UAH</label>
-                <div className="profile-rate-controls">
+                <div className="mqp-rate">
                   <input
                     id="profile-rate"
+                    className="mqp-input"
                     type="text"
                     inputMode="decimal"
                     value={rate}
@@ -450,7 +478,7 @@ export default function ProfileOverview(p: Props) {
                     }}
                   />
                   <button
-                    className="profile-icon-button"
+                    className="mqp-round"
                     type="button"
                     disabled={p.isFetchingRate}
                     aria-label="Оновити курс"
@@ -462,10 +490,12 @@ export default function ProfileOverview(p: Props) {
                     />
                   </button>
                 </div>
-                <small id="profile-rate-help">Для конвертації сум</small>
+                <small id="profile-rate-help">
+                  Для конвертації сум у журналі та аналітиці
+                </small>
                 {rateError && (
                   <small
-                    className="profile-error"
+                    className="mqp-error"
                     id="profile-rate-error"
                     role="alert"
                   >
@@ -476,74 +506,81 @@ export default function ProfileOverview(p: Props) {
             </div>
           </section>
         </div>
-        <aside className="profile-rail">
-          <section
-            className="profile-panel profile-public"
-            aria-labelledby="profile-public-title"
-          >
-            <div className="profile-section-title">
+
+        <aside className="mqp-col mqp-rail">
+          <section className="mqp-card" aria-labelledby="profile-public-title">
+            <div className="mqp-card-head">
               <h2 id="profile-public-title">Публічний профіль</h2>
             </div>
-            <div className="profile-player-card">
-              <div className="profile-player-art" aria-hidden="true" />
-              <div className="profile-player-top">
-                <span className="profile-player-brand">
+            <div className="mqp-player">
+              <span className="mqp-ribbons" aria-hidden="true">
+                <i />
+                <i />
+              </span>
+              <div className="mqp-player-top">
+                <span className="mqp-player-brand">
                   Match<span>IQ</span>
                 </span>
-                <span className="profile-player-status">
-                  <i />
+                <span className="mqp-chip-glass">
+                  <i aria-hidden="true" />
                   Онлайн
                 </span>
               </div>
-              <span className="profile-player-initial" aria-hidden="true">
+              <span className="mqp-player-initial" aria-hidden="true">
                 {initial}
               </span>
-              <div className="profile-player-bottom">
+              <div className="mqp-player-bottom">
                 <strong>@{p.username}</strong>
-                <p>Публічний профіль</p>
-                <div className="profile-player-actions">
-                  <a
-                    className="profile-button profile-primary"
-                    href={publicUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Переглянути <ArrowUpRight size={18} />
-                    <span className="sr-only"> (нова вкладка)</span>
-                  </a>
-                  <button
-                    className="profile-player-copy"
-                    type="button"
-                    title={
-                      copied ? "Посилання скопійовано" : "Копіювати посилання"
-                    }
-                    aria-label={
-                      copied ? "Посилання скопійовано" : "Копіювати посилання"
-                    }
-                    onClick={async () => {
-                      try {
-                        await navigator.clipboard.writeText(publicUrl);
-                        setCopied(true);
-                        setCopyFailed(false);
-                        toast.success("Посилання скопійовано");
-                      } catch {
-                        setCopyFailed(true);
-                        toast.error("Скопіюйте посилання з поля під карткою");
-                      }
-                    }}
-                  >
-                    {copied ? <Check size={20} /> : <Copy size={20} />}
-                  </button>
-                  <span className="sr-only" role="status">
-                    {copied ? "Посилання скопійовано" : ""}
+                <span>
+                  {total.toLocaleString("uk-UA")} записів · CS2 та Dota 2
+                </span>
+              </div>
+              <div className="mqp-player-actions">
+                <a
+                  className="mqp-pill"
+                  href={publicUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Переглянути
+                  <span className="mqp-pill-arrow" aria-hidden="true">
+                    <ArrowUpRight size={16} />
                   </span>
-                </div>
+                  <span className="sr-only"> (нова вкладка)</span>
+                </a>
+                <button
+                  className="mqp-btn-glass is-square"
+                  type="button"
+                  title={
+                    copied ? "Посилання скопійовано" : "Копіювати посилання"
+                  }
+                  aria-label={
+                    copied ? "Посилання скопійовано" : "Копіювати посилання"
+                  }
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(publicUrl);
+                      setCopied(true);
+                      setCopyFailed(false);
+                      toast.success("Посилання скопійовано");
+                    } catch {
+                      setCopyFailed(true);
+                      toast.error("Скопіюйте посилання з поля під карткою");
+                    }
+                  }}
+                >
+                  {copied ? <Check size={18} /> : <Copy size={18} />}
+                </button>
+                <span className="sr-only" role="status">
+                  {copied ? "Посилання скопійовано" : ""}
+                </span>
               </div>
             </div>
             {copyFailed && (
-              <label className="profile-copy-fallback">
+              <label className="mqp-field">
                 Посилання на профіль
                 <input
+                  className="mqp-input"
                   readOnly
                   value={publicUrl}
                   onFocus={(e) => e.currentTarget.select()}
@@ -551,28 +588,30 @@ export default function ProfileOverview(p: Props) {
               </label>
             )}
           </section>
-          <section
-            className="profile-panel profile-backup-card"
-            aria-labelledby="profile-backup-title"
-          >
-            <h2 id="profile-backup-title">Резервна копія</h2>
-            <p>Збережіть копію журналу та налаштувань.</p>
-            <p className="profile-backup-date">
+
+          <section className="mqp-card" aria-labelledby="profile-backup-title">
+            <div className="mqp-card-head is-start">
+              <span className="mqp-icon is-accent">
+                <Download size={19} strokeWidth={1.8} aria-hidden="true" />
+              </span>
+              <h2 id="profile-backup-title">Резервна копія</h2>
+            </div>
+            <p className="mqp-text">
               {p.lastBackupDate
-                ? `Остання копія: ${profileDate(p.lastBackupDate)}`
-                : "Ви ще не створювали резервну копію."}
+                ? `Остання копія: ${profileDate(p.lastBackupDate)}.`
+                : "Ви ще не створювали резервну копію."}{" "}
+              Збережіть журнал і налаштування, перш ніж щось змінювати.
             </p>
-            {p.needsBackupReminder && (
-              <small className="profile-backup-reminder">
+            {p.needsBackupReminder && p.lastBackupDate && (
+              <small className="mqp-note">
                 Рекомендуємо створити актуальну копію.
               </small>
             )}
-            <button
-              className="profile-button profile-primary"
-              type="button"
-              onClick={p.onOpenBackup}
-            >
-              Відкрити бекап <ArrowRight size={16} />
+            <button className="mqp-pill" type="button" onClick={p.onOpenBackup}>
+              Відкрити бекап
+              <span className="mqp-pill-arrow" aria-hidden="true">
+                <ArrowRight size={16} />
+              </span>
             </button>
           </section>
         </aside>

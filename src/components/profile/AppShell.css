@@ -1,0 +1,200 @@
+/* App shell — dark sidebar in the landing's visual language (Manrope, #ff693b). */
+.mq-shell,
+.mq-mobile-menu {
+  --mq-orange: #ff693b;
+  --mq-sidebar: #0d0e0f;
+  --mq-sidebar-w: 256px;
+}
+.mq-shell {
+  min-height: 100vh;
+}
+
+.mq-sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 40;
+  width: var(--mq-sidebar-w);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 22px 14px 18px;
+  overflow-y: auto;
+  background: var(--mq-sidebar);
+  color: #f3f2ee;
+  font-family: Manrope, system-ui, sans-serif;
+}
+.mq-shell .profile-main.mq-main {
+  margin-left: var(--mq-sidebar-w);
+  min-width: 0;
+}
+
+.mq-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 10px 18px;
+  color: #fff;
+  font: 800 19px/1 Manrope, system-ui, sans-serif;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+.mq-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--mq-orange);
+  color: #fff;
+  flex: none;
+}
+
+.mq-nav {
+  display: flex;
+  flex-direction: column;
+}
+.mq-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mq-nav-title {
+  padding: 18px 14px 8px;
+  color: #8d8e91;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.mq-nav-group:first-child .mq-nav-title {
+  padding-top: 6px;
+}
+.mq-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #a9aaad;
+  font: 600 14px/1.2 Manrope, system-ui, sans-serif;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
+}
+.mq-nav-link svg {
+  flex: none;
+}
+.mq-nav-link:hover {
+  background: #ffffff0d;
+  color: #fff;
+}
+.mq-nav-link[aria-current="page"] {
+  background: #1f2123;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px #ffffff17;
+}
+.mq-nav-link[aria-current="page"] svg {
+  color: var(--mq-orange);
+}
+.mq-nav-link.is-small {
+  font-size: 13px;
+}
+.mq-nav-link:focus-visible,
+.mq-brand:focus-visible,
+.mq-menu-button:focus-visible,
+.mq-menu-close:focus-visible {
+  outline: 2px solid var(--mq-orange);
+  outline-offset: 2px;
+}
+.mq-nav-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #ffffff12;
+}
+
+.mq-mobile-header {
+  display: none;
+}
+
+@media (max-width: 1200px) {
+  .mq-shell {
+    --mq-sidebar-w: 232px;
+  }
+}
+
+@media (max-width: 800px) {
+  .mq-sidebar {
+    display: none;
+  }
+  .mq-shell .profile-main.mq-main {
+    margin-left: 0;
+  }
+  .mq-mobile-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--mq-sidebar);
+  }
+  .mq-mobile-header .mq-brand {
+    padding: 0;
+    font-size: 18px;
+  }
+  .mq-menu-button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid #ffffff1f;
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+  }
+}
+
+/* Mobile drawer (Radix sheet) */
+.mq-mobile-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: min(300px, 88vw);
+  padding: 22px 14px 18px !important;
+  overflow-y: auto;
+  border: 0 !important;
+  background: var(--mq-sidebar, #0d0e0f) !important;
+  color: #f3f2ee !important;
+  font-family: Manrope, system-ui, sans-serif;
+}
+.mq-mobile-menu > button:last-child:not(.mq-nav-link) {
+  display: none; /* default Radix close icon — we render our own */
+}
+.mq-menu-close {
+  position: absolute;
+  top: 18px;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ffffff1f;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}

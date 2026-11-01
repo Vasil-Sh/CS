@@ -1,28 +1,28 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Trophy,
+  CalendarDays,
   Plus,
-  BarChart3,
+  LineChart,
   Target,
-  AlertTriangle,
-  MessageCircle,
+  Flag,
+  ShieldAlert,
+  Send,
   User,
   LogOut,
   CircleHelp,
   Menu,
-  ChevronDown,
   X,
-  FileText,
+  type LucideIcon,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { t } from "@/lib/i18n";
 import { useTheme } from "@/hooks/useTheme";
 import "@/pages/Profile.css";
 import "@/pages/ProfileLanding.css";
-import "@/pages/PlanningNavigation.css";
+import "./AppShell.css";
 
-const BrandMarkIcon = ({ size = 23 }: { size?: number }) => (
+const BrandMarkIcon = ({ size = 21 }: { size?: number }) => (
   <svg
     width={size}
     height={size}
@@ -43,15 +43,31 @@ const BrandMarkIcon = ({ size = 23 }: { size?: number }) => (
   </svg>
 );
 
-const links = [
-  ["nav.matches", "/app/matches", Trophy],
-  ["nav.addRecord", "/app/my-bets", Plus],
-  ["nav.analytics", "/app/analytics", BarChart3],
-  ["nav.strategies", "/app/strategy", Target],
-  ["nav.riskyTeams", "/app/risky-teams", AlertTriangle],
-  ["nav.telegram", "/app/telegram", MessageCircle],
-  ["nav.profile", "/app/profile", User],
-] as const;
+type NavItem = { label: string; href: string; Icon: LucideIcon };
+
+const getSections = (): { title: string; items: NavItem[] }[] => [
+  {
+    title: "Головне",
+    items: [
+      { label: t("nav.matches"), href: "/app/matches", Icon: CalendarDays },
+      { label: t("nav.addRecord"), href: "/app/my-bets", Icon: Plus },
+      { label: t("nav.analytics"), href: "/app/analytics", Icon: LineChart },
+    ],
+  },
+  {
+    title: "Дисципліна",
+    items: [
+      { label: "Стратегії", href: "/app/strategy", Icon: Target },
+      { label: "Цілі", href: "/app/goals", Icon: Flag },
+      { label: t("nav.riskyTeams"), href: "/app/risky-teams", Icon: ShieldAlert },
+    ],
+  },
+  {
+    title: "Інтеграції",
+    items: [{ label: t("nav.telegram"), href: "/app/telegram", Icon: Send }],
+  },
+];
+
 
 export default function ProfileShell({
   onLogout,
@@ -64,121 +80,82 @@ export default function ProfileShell({
   useTheme();
   const [open, setOpen] = useState(false);
   const { pathname } = useLocation();
-  const inPlanning = pathname === "/app/strategy" || pathname === "/app/goals";
-  const [planningOpen, setPlanningOpen] = useState(inPlanning);
-  useEffect(() => {
-    setPlanningOpen(pathname === "/app/strategy" || pathname === "/app/goals");
-  }, [pathname]);
+  const close = () => setOpen(false);
+
+  const navLink = ({ label, href, Icon }: NavItem) => (
+    <Link
+      key={href}
+      to={href}
+      className="mq-nav-link"
+      aria-current={pathname === href ? "page" : undefined}
+      onClick={close}
+    >
+      <Icon size={19} strokeWidth={1.8} aria-hidden="true" />
+      {label}
+    </Link>
+  );
+
   const navigation = (
     <>
-      <Link to="/app/matches" className="profile-brand">
-        <span className="profile-brand-mark">
+      <Link to="/app/matches" className="mq-brand" onClick={close}>
+        <span className="mq-brand-mark">
           <BrandMarkIcon />
         </span>
-        <span className="profile-brand-text">
-          Match<span className="profile-brand-iq">IQ</span>
-          <small>BET TRACKER</small>
-        </span>
+        MatchIQ
       </Link>
-      <nav className="profile-nav" aria-label="Основна навігація">
-        {links.map(([label, href, Icon]) =>
-          href === "/app/strategy" ? (
-            <div key={href} className="planning-nav-group">
-              <button
-                type="button"
-                className={`planning-nav-toggle${planningOpen ? " is-open" : ""}`}
-                aria-expanded={planningOpen}
-                onClick={() => setPlanningOpen(!planningOpen)}
-              >
-                <Icon size={21} strokeWidth={1.6} />
-                <span>Стратегії та цілі</span>
-                <ChevronDown
-                  size={16}
-                  style={{
-                    transform: planningOpen ? "rotate(180deg)" : undefined,
-                  }}
-                />
-              </button>
-              {planningOpen && (
-                <div className="planning-nav-children">
-                  {(
-                    [
-                      ["/app/strategy", "Стратегії", FileText],
-                      ["/app/goals", "Цілі", Target],
-                    ] as const
-                  ).map(([url, title, ChildIcon]) => (
-                    <Link
-                      key={url}
-                      to={url}
-                      aria-current={pathname === url ? "page" : undefined}
-                      onClick={() => setOpen(false)}
-                    >
-                      <ChildIcon size={17} strokeWidth={1.6} />
-                      {title}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ) : (
-            <Link
-              key={href}
-              to={href}
-              onClick={() => setOpen(false)}
-              aria-current={pathname === href ? "page" : undefined}
-            >
-              <Icon size={21} strokeWidth={1.6} />
-              {t(label)}
-            </Link>
-          ),
-        )}
+      <nav className="mq-nav" aria-label="Основна навігація">
+        {getSections().map((section) => (
+          <div className="mq-nav-group" key={section.title}>
+            <span className="mq-nav-title">{section.title}</span>
+            {section.items.map(navLink)}
+          </div>
+        ))}
       </nav>
-      <div className="profile-nav-footer">
+      <div className="mq-nav-footer">
+        {navLink({ label: t("nav.profile"), href: "/app/profile", Icon: User })}
         <a
+          className="mq-nav-link is-small"
           href="https://t.me/cs2beet"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <CircleHelp size={20} />
+          <CircleHelp size={18} strokeWidth={1.8} aria-hidden="true" />
           Допомога та підтримка
         </a>
-        <button type="button" onClick={onLogout}>
-          <LogOut size={20} />
+        <button type="button" className="mq-nav-link is-small" onClick={onLogout}>
+          <LogOut size={18} strokeWidth={1.8} aria-hidden="true" />
           {t("app.logout")}
         </button>
       </div>
     </>
   );
-  const isProfile = pathname === "/app/profile";
+
   return (
-    <div className={`profile-shell${isProfile ? " profile-landing" : ""}`}>
-      <aside className="profile-sidebar">{navigation}</aside>
-      <div className="profile-mobile-header">
-        <span className="profile-mobile-brand">
-          <span className="profile-brand-mark">
-            <BrandMarkIcon size={20} />
+    <div className="profile-shell mq-shell">
+      <aside className="mq-sidebar">{navigation}</aside>
+      <div className="mq-mobile-header">
+        <Link to="/app/matches" className="mq-brand">
+          <span className="mq-brand-mark">
+            <BrandMarkIcon size={19} />
           </span>
-          <span>
-            Match<span className="profile-brand-iq">IQ</span>
-          </span>
-        </span>
+          MatchIQ
+        </Link>
         <button
           type="button"
+          className="mq-menu-button"
           onClick={() => setOpen(true)}
           aria-label="Відкрити меню"
         >
-          <Menu />
+          <Menu size={22} />
         </button>
       </div>
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent
-          side="left"
-          className={`profile-mobile-menu${isProfile ? " profile-landing-menu" : ""}`}
-        >
+        <SheetContent side="left" className="mq-mobile-menu">
           <SheetTitle className="sr-only">Навігація MatchIQ</SheetTitle>
           <button
-            className="profile-menu-close"
-            onClick={() => setOpen(false)}
+            type="button"
+            className="mq-menu-close"
+            onClick={close}
             aria-label="Закрити меню"
           >
             <X size={20} />
@@ -186,7 +163,7 @@ export default function ProfileShell({
           {navigation}
         </SheetContent>
       </Sheet>
-      <main className="profile-main">{children}</main>
+      <main className="profile-main mq-main">{children}</main>
     </div>
   );
 }
