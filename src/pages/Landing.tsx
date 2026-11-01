@@ -1825,8 +1825,17 @@ export default function Landing() {
                   історія ставок допомагає помічати повторювані помилки й
                   перевіряти власні правила на фактах.
                 </p>
-                <a className="mq-outline-button" href="#journal">
-                  Дослідити приклад запису <ArrowUpRight size={16} />
+                <a
+                  className="mq-button"
+                  href="#journal"
+                  data-track="cta_demo"
+                  data-track-place="journal_story"
+                >
+                  <span className="mq-swap-in" aria-hidden="true">
+                    <ArrowUpRight size={18} />
+                  </span>
+                  <span className="mq-btn-label">Дослідити приклад запису</span>{" "}
+                  <ArrowUpRight size={18} />
                 </a>
               </Reveal>
             </section>
@@ -1837,7 +1846,7 @@ export default function Landing() {
                   <>
                     Що ти зможеш
                     <br />
-                    <span>робити в MatchIQ.</span>
+                    робити в <span>MatchIQ.</span>
                   </>
                 }
               >
@@ -1998,11 +2007,18 @@ export default function Landing() {
                 допомогу на сайті державного регулятора.
               </p>
               <a
+                className="mq-button mq-button-sm"
                 href="https://playcity.gov.ua/borotba-z-ihrovoiu-zalezhnistiu"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Допомога при ігровій залежності ↗
+                <span className="mq-swap-in" aria-hidden="true">
+                  <ArrowUpRight size={14} />
+                </span>
+                <span className="mq-btn-label">
+                  Допомога при ігровій залежності
+                </span>{" "}
+                <ArrowUpRight size={14} />
               </a>
             </div>
             <div className="mq-fbottom">
