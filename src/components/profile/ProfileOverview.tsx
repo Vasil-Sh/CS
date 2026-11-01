@@ -194,7 +194,18 @@ export default function ProfileOverview(p: Props) {
     return () => clearTimeout(timeout);
   }, [copied]);
 
-  const tgAvatarName = (p.telegram || "").replace(/^@/, "").trim();
+  const tgAvatarName = (() => {
+    const raw = (p.telegram || "").trim();
+    if (/^(https?:\/\/)?(www\.)?(t\.me|telegram\.me)\//i.test(raw)) {
+      try {
+        const url = new URL(/^https?:/i.test(raw) ? raw : `https://${raw}`);
+        return url.pathname.replace(/^\//, "").replace(/\/$/, "");
+      } catch {
+        return "";
+      }
+    }
+    return raw.replace(/^@/, "");
+  })();
   const tgValid = /^[a-zA-Z0-9_]{5,32}$/.test(tgAvatarName);
   const initial = Array.from(p.username)[0]?.toUpperCase() || "M";
   const publicUrl = `${window.location.origin}/user/${encodeURIComponent(p.username)}`;
@@ -283,15 +294,6 @@ export default function ProfileOverview(p: Props) {
             </span>
             {identity.bio && <p>{identity.bio}</p>}
           </div>
-          <a
-            className="mqp-btn-glass"
-            href={publicUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Публічний профіль <ArrowUpRight size={16} aria-hidden="true" />
-            <span className="sr-only"> (нова вкладка)</span>
-          </a>
         </div>
       </section>
 
