@@ -519,3 +519,6 @@
 .mq-auth-legal a:hover {
   text-decoration: underline;
 }
+.mq-auth-back:active:not(:focus-visible) {
+  transform: scale(0.98);
+}

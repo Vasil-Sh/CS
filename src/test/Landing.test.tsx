@@ -1,4 +1,5 @@
 import {
+  act,
   cleanup,
   fireEvent,
   render,
@@ -75,20 +76,116 @@ describe("Lumora landing", () => {
       container.querySelectorAll('.mq-hairline[data-paused="false"]'),
     ).toHaveLength(5);
   });
-  it("includes reference rows, product numbers and a unified footer CTA", () => {
+  it("compares a spreadsheet with MatchIQ point by point", () => {
     const { container } = setup();
-    expect(container.querySelectorAll(".mq-capability-row")).toHaveLength(4);
+    const sheet = screen.getByRole("article", { name: "Google-таблиця" });
+    const app = screen.getByRole("article", { name: "MatchIQ" });
+    expect(sheet.querySelectorAll(".mq-vs-item")).toHaveLength(6);
+    expect(app.querySelectorAll(".mq-vs-item")).toHaveLength(6);
+    // Same row order in both cards, so every point lines up.
+    const rows = (card: HTMLElement) =>
+      Array.from(card.querySelectorAll(".mq-vs-item b")).map(
+        (b) => b.textContent,
+      );
+    expect(rows(sheet)).toEqual(rows(app));
+    expect(container.querySelector("#compare .mq-vs-badge")).not.toBeNull();
     expect(
-      container.querySelectorAll(".mq-product-overview article"),
-    ).toHaveLength(4);
+      within(app)
+        .getByRole("link", { name: /Подивитися на прикладі/ })
+        .getAttribute("href"),
+    ).toBe("#possibilities");
+  });
+  it("has a unified footer CTA, 18+ notice and legal links", () => {
+    const { container } = setup();
     const footer = screen.getByRole("contentinfo");
     expect(
       within(footer)
         .getByRole("link", { name: "Спробувати на прикладі" })
         .getAttribute("href"),
     ).toBe("#possibilities");
-    expect(footer.querySelectorAll("nav")).toHaveLength(2);
+    expect(footer.querySelectorAll("nav")).toHaveLength(3);
+    expect(within(footer).getByText("18+")).toBeDefined();
+    expect(
+      within(footer).getByRole("link", { name: "Конфіденційність" }).getAttribute("href"),
+    ).toBe("/privacy");
+    expect(
+      within(footer).getByRole("link", { name: "Умови" }).getAttribute("href"),
+    ).toBe("/terms");
     expect(container.querySelector(".mq-closing")).toBeNull();
+  });
+  it("shows both plans, the yearly discount and how to start", () => {
+    const { container } = setup();
+    const pricing = container.querySelector<HTMLElement>("#pricing")!;
+    expect(within(pricing).getByText("500 ₴")).toBeDefined();
+    expect(within(pricing).getByText("5 500 ₴")).toBeDefined();
+    expect(within(pricing).getByText("12 місяців за ціною 11")).toBeDefined();
+    const links = within(pricing).getAllByRole("link", {
+      name: /Оформити підписку/,
+    });
+    expect(links).toHaveLength(2);
+    expect(decodeURIComponent(links[0].getAttribute("href")!)).toContain(
+      "місячну підписку",
+    );
+    expect(decodeURIComponent(links[1].getAttribute("href")!)).toContain(
+      "річну підписку",
+    );
+    expect(pricing.querySelectorAll(".mq-start-steps li")).toHaveLength(3);
+  });
+  it("reports CTA clicks through the matchiq:track event", () => {
+    setup();
+    const events: unknown[] = [];
+    const listener = (e: Event) => events.push((e as CustomEvent).detail);
+    window.addEventListener("matchiq:track", listener);
+    const link = screen.getByRole("link", {
+      name: "Оформити підписку «Річна» через Telegram",
+    });
+    link.addEventListener("click", (e) => e.preventDefault());
+    fireEvent.click(link);
+    window.removeEventListener("matchiq:track", listener);
+    expect(events).toContainEqual({ event: "plan_select", place: "yearly" });
+  });
+  it("switches screens in the hero app preview", () => {
+    const { container } = setup();
+    const preview = screen.getByRole("region", {
+      name: /Інтерактивний приклад інтерфейсу MatchIQ/,
+    });
+    const title = () =>
+      container.querySelector(".mq-preview-top span")?.textContent;
+    expect(title()).toBe("Огляд");
+    for (const name of ["Матчі", "Журнал", "Банкрол", "Стратегії", "Ризикові команди"]) {
+      const button = within(preview).getByRole("button", { name });
+      fireEvent.click(button);
+      expect(button.getAttribute("aria-pressed")).toBe("true");
+      expect(title()).toBe(name);
+    }
+    expect(within(preview).getByText("Попередження у формі запису")).toBeDefined();
+  });
+  it("shows the sticky bar only when scrolling up past the hero", () => {
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => {
+      cb(0);
+      return 1;
+    });
+    vi.stubGlobal("cancelAnimationFrame", () => {});
+    const { container } = setup();
+    const bar = container.querySelector<HTMLElement>(".mq-sticky")!;
+    const scrollTo = (y: number) =>
+      act(() => {
+        Object.defineProperty(window, "scrollY", {
+          value: y,
+          configurable: true,
+        });
+        fireEvent.scroll(window);
+      });
+    expect(bar.getAttribute("aria-hidden")).toBe("true");
+    scrollTo(1500);
+    expect(bar.classList.contains("is-visible")).toBe(false);
+    scrollTo(1400);
+    expect(bar.classList.contains("is-visible")).toBe(true);
+    expect(bar.getAttribute("aria-hidden")).toBe("false");
+    scrollTo(1600);
+    expect(bar.classList.contains("is-visible")).toBe(false);
+    scrollTo(300);
+    expect(bar.classList.contains("is-visible")).toBe(false);
   });
   it("shows Settle and explains the product before capability summaries", () => {
     const { container } = setup();
@@ -99,9 +196,16 @@ describe("Lumora landing", () => {
     const sections = Array.from(container.querySelectorAll("main > section"));
     const index = (selector: string) =>
       sections.indexOf(container.querySelector(selector)!);
-    expect(index("#possibilities")).toBeLessThan(index(".mq-capabilities"));
-    expect(index(".mq-capabilities")).toBeLessThan(index("#faq"));
-    expect(index(".mq-numbers")).toBeLessThan(index("#faq"));
+    expect(index("#possibilities")).toBeLessThan(index("#how-it-works"));
+    expect(index("#how-it-works")).toBeLessThan(index("#compare"));
+    expect(index("#compare")).toBeLessThan(index("#tools"));
+    expect(index("#tools")).toBeLessThan(index("#pricing"));
+    expect(index("#pricing")).toBeLessThan(index("#faq"));
+    // The old repeated summary blocks stay removed.
+    expect(container.querySelector(".mq-capabilities")).toBeNull();
+    expect(container.querySelector(".mq-numbers")).toBeNull();
+    expect(index("#about")).toBeLessThan(index(".mq-journal-story"));
+    expect(index(".mq-journal-story")).toBeLessThan(index("#possibilities"));
     expect(screen.queryByText(/Ми не підказуємо, на кого ставити/)).toBeNull();
   });
   it("uses a standalone design and preserves product explanations", () => {
@@ -110,7 +214,6 @@ describe("Lumora landing", () => {
     expect(
       container.querySelector('.mq-hero img[src*="profile-player-hero"]'),
     ).toBeNull();
-    expect(container.querySelector(".mq-capabilities .mq-hairline")).toBeNull();
     expect(
       container.querySelector("#how-it-works .mq-hairline-exploded svg"),
     ).not.toBeNull();

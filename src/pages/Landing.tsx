@@ -274,7 +274,7 @@ function LiquidBackdrop() {
   return <SharedLiquidBackdrop paused={reduced} className="mq-preview-liquid" />;
 }
 const previewMenu = [
-  { icon: BarChart3, label: "Огляд", active: true },
+  { icon: BarChart3, label: "Огляд" },
   { icon: CalendarDays, label: "Матчі" },
   { icon: BookOpen, label: "Журнал" },
   { icon: Wallet, label: "Банкрол" },
@@ -314,24 +314,296 @@ const previewBets = [
     win: true,
   },
 ];
+type PreviewScreen =
+  | "Огляд"
+  | "Матчі"
+  | "Журнал"
+  | "Банкрол"
+  | "Стратегії"
+  | "Ризикові команди";
+function PreviewHead({ title, text }: { title: string; text: string }) {
+  return (
+    <>
+      <p className="mq-preview-hello">{title}</p>
+      <p className="mq-preview-sub">{text}</p>
+    </>
+  );
+}
+function PreviewMatches() {
+  const matches = [
+    ["16:00", "NAVI", "Team Spirit", "BO3", "1.80", "2.05", "Є запис"],
+    ["17:30", "Vitality", "G2", "BO3", "1.62", "2.35", ""],
+    ["19:00", "Team Liquid", "Tundra", "BO3", "2.10", "1.74", "Live"],
+    ["20:30", "FaZe", "MOUZ", "BO1", "1.65", "2.20", ""],
+    ["22:00", "Falcons", "Aurora", "BO3", "1.55", "2.45", ""],
+  ];
+  return (
+    <>
+      <PreviewHead title="Матчі" text="Розклад, ваші позначки та аналіз." />
+      <div className="mq-pv-kpis">
+        <div>
+          <span>Матчів на дату</span>
+          <strong>24</strong>
+        </div>
+        <div>
+          <span>Турнірів</span>
+          <strong>6</strong>
+        </div>
+        <div>
+          <span>Зараз грають</span>
+          <strong>
+            2 <i className="mq-pv-live" />
+          </strong>
+        </div>
+      </div>
+      <div className="mq-pv-chips">
+        <b>Усі</b>
+        <span>CS2</span>
+        <span>Dota 2</span>
+        <span>Закріплені</span>
+      </div>
+      <div className="mq-pv-list">
+        {matches.map(([time, t1, t2, bo, o1, o2, tag]) => (
+          <div key={time} className="mq-pv-match">
+            <span className="mq-pv-time">{time}</span>
+            <span className="mq-pv-teams">
+              <b>{t1}</b>
+              <small>vs {t2}</small>
+            </span>
+            <span className="mq-pv-bo">{bo}</span>
+            <span className="mq-pv-odds">
+              <i>{o1}</i>
+              <i>{o2}</i>
+            </span>
+            {tag ? (
+              <span className={`mq-pv-tag${tag === "Live" ? " is-live" : ""}`}>
+                {tag}
+              </span>
+            ) : (
+              <span className="mq-pv-action">Ординар</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+function PreviewJournal() {
+  const rows = [
+    ["01.11", "NAVI — Team Spirit", "П1 · CS2", "500 ₴", "1.80", "+400 ₴", "win"],
+    ["31.10", "Vitality — G2 + 1", "Експрес · CS2", "300 ₴", "2.70", "+510 ₴", "win"],
+    ["30.10", "Team Liquid — Tundra", "П1 · Dota 2", "300 ₴", "2.10", "−300 ₴", "loss"],
+    ["30.10", "FaZe — MOUZ", "П1 · CS2", "300 ₴", "1.65", "+195 ₴", "win"],
+    ["29.10", "Falcons — Aurora", "П2 · Dota 2", "250 ₴", "2.45", "Очікує", "wait"],
+  ];
+  return (
+    <>
+      <PreviewHead title="Журнал записів" text="Кожна ставка з причиною рішення." />
+      <div className="mq-pv-chips">
+        <b>Усі · 42</b>
+        <span>Очікують · 3</span>
+        <span>Виграші · 24</span>
+        <span>Програші · 15</span>
+      </div>
+      <div className="mq-pv-table">
+        <div className="mq-pv-tr is-head">
+          <span>Дата</span>
+          <span>Матч і вибір</span>
+          <span>Сума</span>
+          <span>Коеф.</span>
+          <span>Прибуток</span>
+        </div>
+        {rows.map(([date, match, pick, sum, odd, profit, st]) => (
+          <div className="mq-pv-tr" key={match}>
+            <span>{date}</span>
+            <span>
+              <b>{match}</b>
+              <small>{pick}</small>
+            </span>
+            <span>{sum}</span>
+            <span>{odd}</span>
+            <span className={`mq-pv-profit is-${st}`}>{profit}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mq-pv-note">
+        <b>Нотатка до NAVI — Team Spirit</b>
+        «Перевірив формат матчу та власні правила перед записом.»
+      </div>
+    </>
+  );
+}
+function PreviewBankroll() {
+  const points = [30, 34, 31, 40, 38, 47, 44, 52, 58, 55, 63, 70];
+  const path = points
+    .map((v, i) => `${i ? "L" : "M"}${(i / (points.length - 1)) * 300} ${80 - v}`)
+    .join(" ");
+  return (
+    <>
+      <PreviewHead title="Аналітика" text="Картина ваших рішень — без шуму." />
+      <div className="mq-pv-kpis">
+        <div>
+          <span>Чистий прибуток</span>
+          <strong className="is-up">+2 860 ₴</strong>
+        </div>
+        <div>
+          <span>ROI</span>
+          <strong>+8.4%</strong>
+        </div>
+        <div>
+          <span>Середній коеф.</span>
+          <strong>1.92</strong>
+        </div>
+      </div>
+      <div className="mq-pv-chart">
+        <div className="mq-pv-chart-head">
+          <b>Банкрол</b>
+          <span>10 000 ₴ → 12 480 ₴</span>
+        </div>
+        <svg viewBox="0 0 300 80" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="mq-pv-fill" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0" stopColor="#ff693b" stopOpacity="0.35" />
+              <stop offset="1" stopColor="#ff693b" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path d={`${path} L300 80 L0 80 Z`} fill="url(#mq-pv-fill)" />
+          <path d={path} fill="none" stroke="#ff8a5c" strokeWidth="2" />
+        </svg>
+      </div>
+      <div className="mq-pv-split">
+        <div>
+          <span>CS2</span>
+          <b className="is-up">+2 140 ₴</b>
+          <i style={{ width: "74%" }} />
+        </div>
+        <div>
+          <span>Dota 2</span>
+          <b className="is-up">+720 ₴</b>
+          <i style={{ width: "26%" }} />
+        </div>
+      </div>
+    </>
+  );
+}
+function PreviewStrategies() {
+  return (
+    <>
+      <PreviewHead title="Стратегії" text="Правила, які перевіряють кожен запис." />
+      <div className="mq-pv-strategy is-main">
+        <div className="mq-pv-strategy-top">
+          <b>Збалансована стратегія</b>
+          <span className="mq-pv-tag">Основна</span>
+        </div>
+        <p>Оптимальне співвідношення ризику та прибутку.</p>
+        <div className="mq-pv-chips">
+          <span>Коеф. 1.50–2.50</span>
+          <span>BO1 та BO3</span>
+          <span>Ординари й експреси</span>
+          <span>Ризик: середній</span>
+        </div>
+        <div className="mq-pv-progress">
+          <span>7 з 10 записів за правилами</span>
+          <i>
+            <i style={{ width: "70%" }} />
+          </i>
+        </div>
+      </div>
+      <div className="mq-pv-strategy">
+        <div className="mq-pv-strategy-top">
+          <b>Консервативна стратегія</b>
+          <span className="mq-pv-muted">ROI +5.1%</span>
+        </div>
+        <p>Безпечний підхід з низьким ризиком.</p>
+        <div className="mq-pv-chips">
+          <span>Коеф. 1.30–1.80</span>
+          <span>Тільки BO3</span>
+          <span>Тільки ординари</span>
+        </div>
+      </div>
+      <div className="mq-pv-goal">
+        <b>Ціль листопада</b>
+        <span>+1 500 ₴ · виконано 64%</span>
+        <i>
+          <i style={{ width: "64%" }} />
+        </i>
+      </div>
+    </>
+  );
+}
+function PreviewRisky() {
+  const teams = [
+    ["Team X", "CS2", "Ризиковані", "risk", "Не розглядати для ставки."],
+    ["Team Y", "Dota 2", "Нестабільні", "unstable", "Сильно залежить від форми."],
+    ["Team Z", "CS2", "Обережно", "careful", "Лише за конкретним сценарієм."],
+    ["Team Q", "Dota 2", "Стабільні", "stable", "Передбачуваний результат."],
+  ];
+  return (
+    <>
+      <PreviewHead
+        title="Ризикові команди"
+        text="Правила, які допомагають не пропустити ризик перед ставкою."
+      />
+      <div className="mq-pv-chips">
+        <b>Усі команди · 12</b>
+        <span>Потребують уваги · 5</span>
+        <span>Неоцінені · 2</span>
+      </div>
+      <div className="mq-pv-table is-risk">
+        <div className="mq-pv-tr is-head">
+          <span>Команда</span>
+          <span>Статус</span>
+          <span>Коментар</span>
+        </div>
+        {teams.map(([team, game, status, kind, note]) => (
+          <div className="mq-pv-tr" key={team}>
+            <span>
+              <b>{team}</b>
+              <small>{game}</small>
+            </span>
+            <span>
+              <i className={`mq-pv-status is-${kind}`}>{status}</i>
+            </span>
+            <span className="mq-pv-muted">{note}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mq-pv-warn">
+        <ShieldAlert size={14} aria-hidden="true" />
+        <span>
+          <b>Попередження у формі запису</b>
+          Team X у твоєму списку ризикованих. Точно ставити?
+        </span>
+      </div>
+    </>
+  );
+}
 function HeroPreview() {
+  const [screen, setScreen] = useState<PreviewScreen>("Огляд");
   return (
     <div
       className="mq-preview"
-      role="img"
-      aria-label="Приклад інтерфейсу MatchIQ на демо-даних: банкрол, ROI, результат за місяцями та останні записи"
+      role="region"
+      aria-label="Інтерактивний приклад інтерфейсу MatchIQ на демо-даних"
     >
       <LiquidBackdrop />
-      <div className="mq-preview-window" aria-hidden="true">
+      <div className="mq-preview-window">
         <aside className="mq-preview-side">
           <span className="mq-preview-brand">
             <img src="/favicon.svg" width="18" height="18" alt="" /> MatchIQ
           </span>
           <small>Меню</small>
-          <ul>
-            {previewMenu.map(({ icon: Icon, label, active }) => (
-              <li key={label} className={active ? "is-active" : undefined}>
-                <Icon size={13} /> {label}
+          <ul aria-label="Екрани застосунку">
+            {previewMenu.map(({ icon: Icon, label }) => (
+              <li key={label}>
+                <button
+                  type="button"
+                  className={screen === label ? "is-active" : undefined}
+                  aria-pressed={screen === label}
+                  onClick={() => setScreen(label)}
+                >
+                  <Icon size={13} aria-hidden="true" /> {label}
+                </button>
               </li>
             ))}
           </ul>
@@ -344,11 +616,33 @@ function HeroPreview() {
           </div>
         </aside>
         <div className="mq-preview-main">
+          <div className="mq-preview-tabs" aria-hidden="true">
+            {previewMenu.map(({ label }) => (
+              <button
+                type="button"
+                tabIndex={-1}
+                key={label}
+                className={screen === label ? "is-active" : undefined}
+                onClick={() => setScreen(label)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <div className="mq-preview-top">
-            <span>Огляд</span>
+            <span>{screen}</span>
             <DemoBadge />
           </div>
-          <div className="mq-preview-body">
+          {screen !== "Огляд" ? (
+            <div className="mq-preview-body mq-pv-screen" key={screen} aria-live="polite">
+              {screen === "Матчі" && <PreviewMatches />}
+              {screen === "Журнал" && <PreviewJournal />}
+              {screen === "Банкрол" && <PreviewBankroll />}
+              {screen === "Стратегії" && <PreviewStrategies />}
+              {screen === "Ризикові команди" && <PreviewRisky />}
+            </div>
+          ) : (
+          <div className="mq-preview-body mq-pv-screen" key="Огляд" aria-live="polite">
             <p className="mq-preview-hello">Привіт!</p>
             <p className="mq-preview-sub">
               Ось як змінився твій банкрол цього місяця.
@@ -409,7 +703,75 @@ function HeroPreview() {
               ))}
             </div>
           </div>
+          )}
         </div>
+      </div>
+    </div>
+  );
+}
+function StickyBar() {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const y = window.scrollY;
+      const delta = y - lastY;
+      if (y < 700) setVisible(false);
+      else if (delta < -6) setVisible(true);
+      else if (delta > 6) setVisible(false);
+      if (Math.abs(delta) > 6) lastY = y;
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+  return (
+    <div
+      className={`mq-sticky${visible ? " is-visible" : ""}`}
+      aria-hidden={!visible}
+      inert={!visible}
+    >
+      <Link to="/" aria-label="MatchIQ — головна" className="mq-sticky-brand">
+        <Mark />
+      </Link>
+      <nav aria-label="Швидка навігація">
+        <a href="#possibilities">Можливості</a>
+        <a href="#how-it-works">Як це працює</a>
+        <a href="#compare">Порівняння</a>
+        <a href="#tools">Інструменти</a>
+        <a href="#pricing">Ціни</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div className="mq-sticky-actions">
+        <Link
+          to="/login"
+          className="mq-sticky-login"
+          data-track="cta_login"
+          data-track-place="sticky"
+        >
+          Увійти
+        </Link>
+        <a
+          className="mq-button mq-button-sm"
+          href={telegramLink(TG_ACCESS)}
+          data-track="cta_access"
+          data-track-place="sticky"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span className="mq-swap-in" aria-hidden="true">
+            <ArrowUpRight size={14} />
+          </span>
+          <span className="mq-btn-label">Отримати доступ</span>{" "}
+          <ArrowUpRight size={14} />
+        </a>
       </div>
     </div>
   );
@@ -437,6 +799,7 @@ function SiteHeader() {
         <nav aria-label="Основна навігація">
           <a href="#possibilities">Можливості</a>
           <a href="#how-it-works">Як це працює</a>
+          <a href="#compare">Порівняння</a>
           <a href="#tools">Інструменти</a>
           <a href="#pricing">Ціни</a>
           <a href="#faq">FAQ</a>
@@ -447,7 +810,11 @@ function SiteHeader() {
           data-track="cta_login"
           data-track-place="header"
         >
-          Увійти <ArrowUpRight size={16} />
+          <span className="mq-swap-in" aria-hidden="true">
+                <ArrowUpRight size={16} />
+              </span>
+              <span className="mq-btn-label">Увійти</span>{" "}
+              <ArrowUpRight size={16} />
         </Link>
         <button
           ref={menuButton}
@@ -472,6 +839,9 @@ function SiteHeader() {
           </a>
           <a href="#how-it-works" onClick={() => setMenu(false)}>
             Як це працює
+          </a>
+          <a href="#compare" onClick={() => setMenu(false)}>
+            Порівняння
           </a>
           <a href="#tools" onClick={() => setMenu(false)}>
             Інструменти
@@ -517,7 +887,11 @@ function Hero() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Отримати доступ <ArrowUpRight size={18} />
+              <span className="mq-swap-in" aria-hidden="true">
+                <ArrowUpRight size={18} />
+              </span>
+              <span className="mq-btn-label">Отримати доступ</span>{" "}
+              <ArrowUpRight size={18} />
             </a>
             <a
               className="mq-outline-button"
@@ -793,6 +1167,55 @@ const testReviews = [
     text: "Правило на коефіцієнти рятує від імпульсивних ставок: якщо запис не проходить перевірку стратегії, я його просто не роблю.",
   },
 ];
+/** Counts a stat like "12 480" or "1 900+" up from zero when it scrolls into view. */
+function CountUp({ value }: { value: string }) {
+  const reduced = useContext(ReducedMotion);
+  const ref = useRef<HTMLSpanElement>(null);
+  const match = value.match(/^([\d\s\u00a0]+)(.*)$/);
+  const target = match ? Number(match[1].replace(/[\s\u00a0]/g, "")) : NaN;
+  const suffix = match ? match[2] : "";
+  const format = (n: number) =>
+    n.toLocaleString("uk-UA").replace(/[\s\u00a0\u202f]/g, " ") + suffix;
+  const [shown, setShown] = useState(() =>
+    Number.isFinite(target) && !reduced ? format(0) : value,
+  );
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || !Number.isFinite(target)) return;
+    if (reduced || typeof IntersectionObserver === "undefined") {
+      setShown(value);
+      return;
+    }
+    let frame = 0;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        io.disconnect();
+        const start = performance.now();
+        const duration = 1600;
+        const tick = (now: number) => {
+          const t = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - t, 3);
+          setShown(t < 1 ? format(Math.round(target * eased)) : value);
+          if (t < 1) frame = requestAnimationFrame(tick);
+        };
+        frame = requestAnimationFrame(tick);
+      },
+      { threshold: 0.6 },
+    );
+    io.observe(element);
+    return () => {
+      io.disconnect();
+      cancelAnimationFrame(frame);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value, reduced]);
+  return (
+    <span ref={ref} aria-hidden="true" className="mq-countup">
+      {shown}
+    </span>
+  );
+}
 function SocialProofPlaceholder() {
   return (
     <section
@@ -812,14 +1235,22 @@ function SocialProofPlaceholder() {
       <div className="mq-proof-stats">
         {testStats.map(([value, label]) => (
           <div key={label}>
-            <strong>{value}</strong>
+            <strong aria-label={value}>
+              <CountUp value={value} />
+            </strong>
             <span>{label}</span>
           </div>
         ))}
       </div>
-      <div className="mq-proof-grid">
-        {testReviews.map((review) => (
-          <figure key={review.name} className="mq-quote">
+      <div className="mq-marquee">
+        <div className="mq-marquee-track">
+        {[0, 1, 2, 3].flatMap((copy) =>
+          testReviews.map((review) => (
+          <figure
+            key={`${copy}-${review.name}`}
+            className="mq-quote"
+            aria-hidden={copy > 0 ? true : undefined}
+          >
             <blockquote>«{review.text}»</blockquote>
             <figcaption>
               <span className="mq-quote-avatar" aria-hidden="true">
@@ -831,7 +1262,139 @@ function SocialProofPlaceholder() {
               </span>
             </figcaption>
           </figure>
-        ))}
+          )),
+        )}
+        </div>
+      </div>
+    </section>
+  );
+}
+const startSteps = [
+  [
+    "Напиши @cs2beet",
+    "Натисни «Оформити підписку»: Telegram відкриється з уже готовим повідомленням.",
+  ],
+  [
+    "Обери підписку й оплати",
+    "Місячна або річна. Доступні способи оплати підкажуть прямо в чаті.",
+  ],
+  [
+    "Отримай логін і заходь",
+    "Після оплати надішлемо дані для входу. Увійти можна кнопкою «Увійти» вгорі сторінки.",
+  ],
+];
+const comparisonRows = [
+  [
+    "Записати ставку",
+    "Заповнюєш рядок вручну, формули легко зламати",
+    "Обираєш матч із розкладу, сума в UAH або USD з конвертацією",
+  ],
+  [
+    "Причина рішення",
+    "Окремий стовпчик, який швидко перестаєш заповнювати",
+    "Нотатка в кожному записі, поруч із результатом",
+  ],
+  [
+    "Банкрол і ROI",
+    "Власні формули та зведені таблиці",
+    "Рахуються самі, за будь-який період",
+  ],
+  [
+    "Порівняння стратегій",
+    "Фільтри й копії аркушів",
+    "Ігри, періоди й стратегії порівнюються в одному місці",
+  ],
+  [
+    "Дисципліна",
+    "Правила тримаєш у голові",
+    "Перевірка коефіцієнта й попередження про ризикову команду до запису",
+  ],
+  [
+    "Розклад матчів",
+    "Окрема вкладка в браузері",
+    "CS2 і Dota 2 в тому ж застосунку",
+  ],
+];
+function Comparison() {
+  return (
+    <section
+      className="mq-section mq-compare"
+      id="compare"
+      aria-label="Таблиця чи MatchIQ"
+    >
+      <SectionHeading
+        label="03 / ТАБЛИЦЯ ЧИ MATCHIQ"
+        title={
+          <>
+            Ти вже ведеш облік.
+            <br />
+            <span>Тепер без рутини.</span>
+          </>
+        }
+      >
+        Якщо твій журнал зараз — Google-таблиця, ось що зміниться.
+      </SectionHeading>
+      <div className="mq-vs" role="list" aria-label="Таблиця та MatchIQ по пунктах">
+        <article className="mq-vs-card mq-vs-sheet" aria-label="Google-таблиця">
+          <header className="mq-vs-head">
+            <div className="mq-vs-sheet-icon" aria-hidden="true">
+              {Array.from({ length: 12 }, (_, i) => (
+                <i key={i} />
+              ))}
+            </div>
+            <div>
+              <small>Зараз</small>
+              <h3>Google-таблиця</h3>
+            </div>
+          </header>
+          {comparisonRows.map(([task, sheet], i) => (
+            <div className="mq-vs-item" data-row={i} key={task} role="listitem">
+              <span className="mq-vs-mark is-minus" aria-hidden="true">
+                <X size={13} />
+              </span>
+              <div>
+                <b>{task}</b>
+                <p>{sheet}</p>
+              </div>
+            </div>
+          ))}
+          <footer className="mq-vs-foot">
+            Усе тримається на твоїй уважності й формулах.
+          </footer>
+        </article>
+        <span className="mq-vs-badge" aria-hidden="true">
+          vs
+        </span>
+        <article className="mq-vs-card mq-vs-app" aria-label="MatchIQ">
+          <LiquidBackdrop />
+          <header className="mq-vs-head">
+            <img src="/favicon.svg" width="40" height="40" alt="" />
+            <div>
+              <small>З MatchIQ</small>
+              <h3>Журнал, що рахує сам</h3>
+            </div>
+          </header>
+          {comparisonRows.map(([task, , app], i) => (
+            <div className="mq-vs-item" data-row={i} key={task} role="listitem">
+              <span className="mq-vs-mark is-check" aria-hidden="true">
+                <Check size={13} />
+              </span>
+              <div>
+                <b>{task}</b>
+                <p>{app}</p>
+              </div>
+            </div>
+          ))}
+          <footer className="mq-vs-foot">
+            <a
+              href="#possibilities"
+              data-track="cta_demo"
+              data-track-place="compare"
+            >
+              Подивитися на прикладі <ArrowUpRight size={14} />
+            </a>
+          </footer>
+        </article>
       </div>
     </section>
   );
@@ -905,7 +1468,7 @@ function Tools() {
     <section className="mq-section mq-tools" id="tools">
       <SectionHeading
         figure="hub"
-        label="03 / БІЛЬШЕ КОНТЕКСТУ"
+        label="04 / БІЛЬШЕ КОНТЕКСТУ"
         title={
           <>
             Менше припущень.
@@ -919,6 +1482,7 @@ function Tools() {
       </SectionHeading>
       <div className="mq-tools-grid">
         <Reveal className="mq-calculator">
+          <LiquidBackdrop />
           <div className="mq-demo-toolbar">
             <Pill>Інтерактивний приклад</Pill>
             <span>EV / 01</span>
@@ -1037,7 +1601,7 @@ function Pricing() {
       aria-labelledby="mq-pricing-title"
     >
       <Reveal className="mq-pricing-heading">
-        <p className="mq-kicker">04 / ЦІНИ</p>
+        <p className="mq-kicker">05 / ЦІНИ</p>
         <h2 id="mq-pricing-title">
           Один доступ.
           <br />
@@ -1055,6 +1619,7 @@ function Pricing() {
               className={`mq-plan${plan.featured ? " is-featured" : ""}`}
               aria-labelledby={`mq-plan-${plan.id}`}
             >
+              {plan.featured && <LiquidBackdrop />}
               <div className="mq-plan-top">
                 <h3 id={`mq-plan-${plan.id}`}>{plan.name}</h3>
                 {plan.badge && <span className="mq-plan-badge">{plan.badge}</span>}
@@ -1079,15 +1644,44 @@ function Pricing() {
                 rel="noopener noreferrer"
                 aria-label={`Оформити підписку «${plan.name}» через Telegram`}
               >
-                Оформити підписку <ArrowUpRight size={18} />
+                <span className="mq-swap-in" aria-hidden="true">
+                <ArrowUpRight size={18} />
+              </span>
+              <span className="mq-btn-label">Оформити підписку</span>{" "}
+              <ArrowUpRight size={18} />
               </a>
             </article>
           </Reveal>
         ))}
       </div>
-      <p className="mq-pricing-footnote">
-        Щоб оформити підписку, напиши @cs2beet у Telegram. Ціни в гривнях.
-      </p>
+      <div className="mq-start" aria-labelledby="mq-start-title">
+        <div className="mq-start-head">
+          <h3 id="mq-start-title">Як почати</h3>
+          <p>Оформлення займає кілька хвилин і проходить у Telegram.</p>
+        </div>
+        <ol className="mq-start-steps">
+          {startSteps.map(([title, text], i) => (
+            <li key={title}>
+              <span>0{i + 1}</span>
+              <h4>{title}</h4>
+              <p>{text}</p>
+            </li>
+          ))}
+        </ol>
+        <p className="mq-pricing-footnote">
+          Ціни в гривнях. Питання до оплати —{" "}
+          <a
+            href={telegramLink(TG_ACCESS)}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-track="cta_access"
+            data-track-place="pricing_start"
+          >
+            @cs2beet у Telegram
+          </a>
+          .
+        </p>
+      </div>
     </section>
   );
 }
@@ -1102,7 +1696,7 @@ function FAQ() {
       aria-labelledby="mq-faq-title"
     >
       <div className="mq-faq-intro">
-        <p className="mq-kicker">05 / КОРОТКО ПРО ГОЛОВНЕ</p>
+        <p className="mq-kicker">06 / КОРОТКО ПРО ГОЛОВНЕ</p>
         <h2 id="mq-faq-title">Перед початком.</h2>
         <p className="mq-faq-description">
           Без дрібного шрифту та зайвих обіцянок.
@@ -1180,6 +1774,7 @@ export default function Landing() {
             Перейти до вмісту
           </a>
           <SiteHeader />
+          <StickyBar />
           <main id="mq-main">
             <Hero />
             <section className="mq-section mq-about" id="about">
@@ -1207,6 +1802,34 @@ export default function Landing() {
                 </div>
               </Reveal>
             </section>
+            <section
+              className="mq-section mq-journal-story"
+              aria-labelledby="mq-journal-story-title"
+            >
+              <HairlineFigure kind="riffle" />
+              <Reveal>
+                <p className="mq-kicker">ТВІЙ ЖУРНАЛ РІШЕНЬ</p>
+                <h2 id="mq-journal-story-title">
+                  Збережи запис.
+                  <br />
+                  Повернись до причини.
+                </h2>
+                <p>
+                  Журнал зберігає кожну ставку разом із її контекстом: матч,
+                  суму, коефіцієнт, стратегію та твою нотатку. Запиши, чому
+                  обрав саме це рішення, поки аргументи ще свіжі.
+                </p>
+                <p>
+                  Після матчу зафіксуй результат і повернися до запису. Порівняй
+                  початкові очікування з тим, що сталося, та додай висновок. Так
+                  історія ставок допомагає помічати повторювані помилки й
+                  перевіряти власні правила на фактах.
+                </p>
+                <a className="mq-outline-button" href="#journal">
+                  Дослідити приклад запису <ArrowUpRight size={16} />
+                </a>
+              </Reveal>
+            </section>
             <section className="mq-section mq-work" id="possibilities">
               <SectionHeading
                 label="01 / ТВОЯ ГРА, ЗІБРАНА ДОКУПИ"
@@ -1214,7 +1837,7 @@ export default function Landing() {
                   <>
                     Що ти зможеш
                     <br />
-                    робити в MatchIQ.
+                    <span>робити в MatchIQ.</span>
                   </>
                 }
               >
@@ -1261,35 +1884,8 @@ export default function Landing() {
                 </WorkCard>
               </div>
             </section>
-            <section
-              className="mq-section mq-journal-story"
-              aria-labelledby="mq-journal-story-title"
-            >
-              <HairlineFigure kind="riffle" />
-              <Reveal>
-                <p className="mq-kicker">ТВІЙ ЖУРНАЛ РІШЕНЬ</p>
-                <h2 id="mq-journal-story-title">
-                  Збережи запис.
-                  <br />
-                  Повернись до причини.
-                </h2>
-                <p>
-                  Журнал зберігає кожну ставку разом із її контекстом: матч,
-                  суму, коефіцієнт, стратегію та твою нотатку. Запиши, чому
-                  обрав саме це рішення, поки аргументи ще свіжі.
-                </p>
-                <p>
-                  Після матчу зафіксуй результат і повернися до запису. Порівняй
-                  початкові очікування з тим, що сталося, та додай висновок. Так
-                  історія ставок допомагає помічати повторювані помилки й
-                  перевіряти власні правила на фактах.
-                </p>
-                <a className="mq-outline-button" href="#journal">
-                  Дослідити приклад запису <ArrowUpRight size={16} />
-                </a>
-              </Reveal>
-            </section>
             <Journey />
+            <Comparison />
             <Tools />
             {SHOW_PLACEHOLDERS && <SocialProofPlaceholder />}
             <Pricing />
@@ -1363,6 +1959,7 @@ export default function Landing() {
                 <h3>Продукт</h3>
                 <a href="#about">Про MatchIQ</a>
                 <a href="#how-it-works">Як це працює</a>
+                <a href="#compare">Порівняння</a>
                 <a href="#tools">Інструменти</a>
                 <a href="#pricing">Ціни</a>
                 <a href="#faq">Запитання</a>

@@ -452,7 +452,7 @@
   font-size: clamp(40px, 6.5vw, 98px);
 }
 .mq-about h2 > span {
-  color: #8d8d86;
+  color: var(--orange);
 }
 .mq-about-bottom {
   margin-top: 40px;
@@ -486,39 +486,16 @@
   color: #242521;
   font-weight: 500;
 }
-.mq-journal-story {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  gap: 7%;
-  border-top: 1px solid var(--line);
-}
 .mq-hairline-riffle {
   width: 100%;
   max-width: 540px;
   justify-self: center;
 }
-.mq-journal-story .mq-kicker {
-  margin-bottom: 25px;
-}
-.mq-journal-story > :not(.mq-hairline),
 .mq-journey .mq-heading-illustrated > :not(.mq-hairline) {
   align-self: start;
 }
 .mq-journey .mq-heading-illustrated .mq-kicker {
   margin-bottom: 25px;
-}
-.mq-journal-story h2 {
-  font-size: clamp(32px, 4vw, 60px);
-}
-.mq-journal-story p:not(.mq-kicker) {
-  color: var(--muted);
-  line-height: 1.9;
-  margin: 25px 0;
-  max-width: 490px;
-}
-.mq-journal-story .mq-outline-button {
-  border-color: var(--line);
 }
 .mq-work {
   padding-top: 28px;
@@ -889,7 +866,10 @@
   margin: 0 16px;
 }
 .mq-tools .mq-section-heading h2 span {
-  color: #949a96;
+  color: var(--orange);
+}
+.mq-work .mq-section-heading h2 span {
+  color: var(--orange);
 }
 .mq-tools .mq-section-heading > p {
   color: #afb4ac;
@@ -994,7 +974,7 @@
   padding-top: 40px;
 }
 .mq-faq-list {
-  padding-top: 160px;
+  padding-top: 234px;
 }
 .mq-faq-intro .mq-kicker {
   margin: 0 0 20px;
@@ -1214,11 +1194,6 @@
     max-width: 280px;
     justify-self: center;
   }
-
-  .mq-journal-story {
-    grid-template-columns: 1fr;
-    gap: 24px;
-  }
   .mq-hairline-riffle {
     max-width: 380px;
   }
@@ -1273,6 +1248,11 @@
   }
   .mq-hero,
   .mq-topbar {
+    padding-inline: 22px;
+  }
+  .mq-header,
+  .mq-hero-meta {
+    margin-inline: -22px;
     padding-inline: 22px;
   }
   .mq-hero-layout {
@@ -1882,7 +1862,7 @@
   line-height: 1.12;
 }
 .mq-pricing-heading h2 span {
-  color: #8d908a;
+  color: var(--orange);
 }
 .mq-pricing-heading > p:last-child {
   color: var(--muted);
@@ -2277,7 +2257,7 @@
   line-height: 1.12;
 }
 .mq-proof-heading h2 span {
-  color: #8d908a;
+  color: var(--orange);
 }
 .mq-proof-stats {
   display: grid;
@@ -2305,12 +2285,6 @@
 .mq-proof-stats span {
   font-size: 12px;
   color: var(--muted);
-}
-.mq-proof-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 24px;
 }
 .mq-quote {
   margin: 0;
@@ -2351,11 +2325,6 @@
   font-size: 13px;
   font-weight: 700;
   color: #fff;
-}
-@media (max-width: 900px) {
-  .mq-proof-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 @media (max-width: 760px) {
   .mq-proof-stats {
@@ -2435,7 +2404,7 @@
    One horizontal gutter for every block, one section-title scale,
    one kicker → title spacing and one title → content spacing. */
 .mq-site {
-  --gutter: max(5%, calc((100vw - 1320px) / 2));
+  --gutter: max(5vw, calc((100vw - 1320px) / 2));
   --title-gap: 56px;
 }
 @media (min-width: 761px) {
@@ -2445,15 +2414,21 @@
   .mq-footer {
     padding-inline: var(--gutter);
   }
+  /* Header + hero-meta dividers run edge to edge while their content
+     stays on the shared gutter. */
+  .mq-header,
+  .mq-hero-meta {
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+  }
   /* The dark tools card is inset by 16px, so its content still lines up. */
   .mq-tools {
     padding-inline: calc(var(--gutter) - 16px);
   }
   .mq-section-heading h2,
-  .mq-journal-story h2,
-  .mq-proof-heading h2,
-  .mq-pricing-heading h2,
-  .mq-faq-intro h2 {
+.mq-proof-heading h2,
+.mq-pricing-heading h2,
+.mq-faq-intro h2 {
     font-size: clamp(36px, 4.5vw, 64px);
     line-height: 1.06;
   }
@@ -2467,7 +2442,6 @@
   }
 }
 .mq-section-heading .mq-kicker,
-.mq-journal-story .mq-kicker,
 .mq-faq-intro .mq-kicker {
   margin-bottom: 24px;
 }
@@ -2491,5 +2465,1191 @@
   }
   .mq-journey-glass {
     padding: 22px;
+  }
+}
+/* ── Orange buttons: icon swap on hover (inspired by CoMinVi) ─────────
+   At rest the dark arrow sits on the right. On hover it slides out to the
+   right, a twin slides in from the left and the label moves over. */
+.mq-button,
+.mq-header .mq-login {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --swap-size: 34px;
+  --swap-inset: 8px;
+  --swap-shift: 30px;
+}
+.mq-header .mq-login {
+  --swap-size: 20.4px;
+  --swap-inset: 8px;
+  --swap-shift: 22px;
+}
+.mq-swap-in {
+  position: absolute;
+  left: var(--swap-inset);
+  top: 50%;
+  width: var(--swap-size);
+  height: var(--swap-size);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #171819;
+  color: #fff;
+  transform: translate(calc(-100% - var(--swap-inset) - 4px), -50%);
+  transition: transform 520ms var(--ease);
+  pointer-events: none;
+}
+.mq-swap-in > svg {
+  width: 55%;
+  height: 55%;
+}
+.mq-btn-label {
+  display: inline-block;
+  transition: transform 520ms var(--ease);
+}
+.mq-button > svg,
+.mq-header .mq-login > svg {
+  transition: transform 520ms var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .mq-button:hover .mq-swap-in,
+  .mq-button:focus-visible .mq-swap-in,
+  .mq-header .mq-login:hover .mq-swap-in,
+  .mq-header .mq-login:focus-visible .mq-swap-in {
+    transform: translate(0, -50%);
+  }
+  .mq-button:hover .mq-btn-label,
+  .mq-button:focus-visible .mq-btn-label,
+  .mq-header .mq-login:hover .mq-btn-label,
+  .mq-header .mq-login:focus-visible .mq-btn-label {
+    transform: translateX(var(--swap-shift));
+  }
+  .mq-button:hover > svg,
+  .mq-button:focus-visible > svg,
+  .mq-header .mq-login:hover > svg,
+  .mq-header .mq-login:focus-visible > svg {
+    transform: translateX(calc(100% + var(--swap-inset) + 4px));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-swap-in,
+  .mq-btn-label,
+  .mq-button > svg,
+  .mq-header .mq-login > svg {
+    transition: none;
+  }
+}
+
+/* ── Round of fixes: stats, moving reviews, fire backgrounds, hero bleed ── */
+/* 1. Stats centred in their cells */
+.mq-proof-stats > div,
+.mq-proof-stats > div + div {
+  justify-items: center;
+  text-align: center;
+  padding-inline: 16px;
+}
+/* 1. Reviews: white cards with a shadow, scrolling in an endless row */
+.mq-marquee {
+  margin: 32px calc(-1 * var(--gutter, 22px)) 0;
+  padding: 18px 0 36px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.mq-marquee-track {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  animation: mq-marquee 60s linear infinite;
+}
+.mq-marquee:hover .mq-marquee-track,
+.mq-marquee:focus-within .mq-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes mq-marquee {
+  to {
+    transform: translateX(calc(-50% - 10px));
+  }
+}
+.mq-marquee .mq-quote {
+  width: min(400px, 78vw);
+  flex-shrink: 0;
+  background: #ffffff;
+  border: 1px solid #17181912;
+  box-shadow:
+    0 1px 2px #1718190d,
+    0 14px 34px #17181914;
+}
+.mq-reduced .mq-marquee-track {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-marquee-track {
+    animation: none;
+  }
+}
+
+/* 2 + 4. Fire backgrounds on the yearly plan and the EV calculator */
+.mq-plan.is-featured::before {
+  content: none;
+}
+.mq-plan.is-featured,
+.mq-calculator {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #1a0d08;
+}
+.mq-plan.is-featured > .mq-preview-liquid,
+.mq-calculator > .mq-preview-liquid {
+  border-radius: inherit;
+}
+.mq-plan.is-featured::after,
+.mq-calculator::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    #0f1011c7 0%,
+    #0f1011a6 55%,
+    #0f101166 100%
+  );
+}
+
+/* 3. FAQ title on one line */
+@media (min-width: 761px) {
+  .mq-faq {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+  }
+  .mq-faq-intro h2 {
+    white-space: nowrap;
+  }
+}
+
+/* 5. Hero preview runs to the right edge of the screen */
+@media (min-width: 1101px) {
+  .mq-preview {
+    margin-right: calc(-1 * var(--gutter));
+    border-radius: 14px 0 0 14px;
+    border-right: 0;
+  }
+}
+@media (max-width: 760px) {
+  .mq-marquee {
+    margin-inline: -22px;
+  }
+}
+
+/* Reviews → pricing: drop the doubled section padding (was ~236px of empty space). */
+.mq-section.mq-proof {
+  padding-bottom: 24px;
+}
+.mq-section.mq-pricing {
+  padding-top: 40px;
+}
+@media (max-width: 760px) {
+  .mq-section.mq-proof {
+    padding-bottom: 12px;
+  }
+  .mq-section.mq-pricing {
+    padding-top: 24px;
+  }
+}
+
+/* ── Accessible orange for text on light backgrounds ────────────────
+   #ff693b on white is ~2.9:1. #e2501f is ~4.7:1 (passes AA even for
+   body-size text). Buttons, fills and text on dark stay #ff693b. */
+.mq-site {
+  --orange-text: #e2501f;
+}
+.mq-about h2 > span,
+.mq-work .mq-section-heading h2 span,
+.mq-pricing-heading h2 span,
+.mq-proof-heading h2 span,
+.mq-faq-more:hover,
+.mq-plan:not(.is-featured) li svg {
+  color: var(--orange-text);
+}
+.mq-faq-more:hover {
+  border-color: var(--orange-text);
+}
+
+/* ── Sticky bar: appears after the hero when scrolling up ─────────── */
+.mq-sticky {
+  position: fixed;
+  z-index: 60;
+  top: 10px;
+  left: 50%;
+  width: min(1180px, calc(100% - 24px));
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 7px 7px 7px 16px;
+  color: #f7f6f1;
+  background: #111213e0;
+  border: 1px solid #ffffff1f;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px #0000004d;
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  backdrop-filter: blur(16px) saturate(1.3);
+  transform: translate(-50%, calc(-100% - 20px));
+  opacity: 0;
+  transition:
+    transform 380ms var(--ease),
+    opacity 240ms ease;
+}
+.mq-sticky.is-visible {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+.mq-sticky-brand .mq-brand {
+  font-size: 15px;
+}
+.mq-sticky-brand img {
+  width: 26px;
+  height: 26px;
+}
+.mq-sticky nav {
+  display: flex;
+  gap: 22px;
+  font-size: 12px;
+  margin: 0 auto;
+}
+.mq-sticky nav a {
+  color: #cfd0ca;
+}
+.mq-sticky-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.mq-sticky nav + .mq-sticky-actions {
+  margin-left: 0;
+}
+.mq-sticky-login {
+  font-size: 12px;
+  padding: 0 14px;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 30px;
+  color: #dcdcd6;
+}
+.mq-button.mq-button-sm {
+  min-height: 40px;
+  padding: 5px 5px 5px 16px;
+  gap: 14px;
+  font-size: 12px;
+  --swap-size: 30px;
+  --swap-inset: 5px;
+  --swap-shift: 26px;
+}
+.mq-button.mq-button-sm > svg {
+  width: 30px;
+  height: 30px;
+  padding: 8px;
+}
+@media (hover: hover) {
+  .mq-sticky nav a:hover,
+  .mq-sticky-login:hover {
+    color: #fff;
+  }
+}
+@media (max-width: 900px) {
+  .mq-sticky nav {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .mq-sticky {
+    top: 8px;
+    width: calc(100% - 16px);
+    padding-left: 12px;
+    gap: 10px;
+  }
+  .mq-sticky-login {
+    padding: 0 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-sticky {
+    transition: opacity 150ms ease;
+  }
+}
+
+/* ── Comparison: spreadsheet vs MatchIQ ─────────────────────────── */
+.mq-visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.mq-compare {
+  border-top: 1px solid var(--line);
+}
+.mq-compare .mq-section-heading h2 span {
+  color: var(--orange-text);
+}
+/* ── How to start (inside pricing) ──────────────────────────────── */
+.mq-start {
+  margin-top: 48px;
+  padding-top: 40px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 2fr);
+  gap: 32px 48px;
+}
+.mq-start-head h3 {
+  font-size: 26px;
+  letter-spacing: -0.03em;
+}
+.mq-start-head p {
+  margin-top: 8px !important;
+  color: var(--muted);
+  font-size: 13px;
+}
+.mq-start-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.mq-start-steps li {
+  padding: 22px;
+  border-radius: 18px;
+  background: #f6f5f1;
+  border: 1px solid var(--line);
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+.mq-start-steps span {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--orange-text);
+}
+.mq-start-steps h4 {
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+.mq-start-steps p {
+  font-size: 13px;
+  color: var(--muted);
+}
+.mq-start .mq-pricing-footnote {
+  grid-column: 2;
+  margin-top: 0 !important;
+}
+.mq-start .mq-pricing-footnote a {
+  color: var(--orange-text);
+  font-weight: 600;
+}
+@media (max-width: 900px) {
+  .mq-start {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mq-start .mq-pricing-footnote {
+    grid-column: 1;
+  }
+  .mq-start-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ── Comparison v2: two cards, rows aligned across them ─────────── */
+.mq-faq-intro .mq-hairline-query {
+  margin-inline: auto;
+}
+.mq-vs {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: repeat(8, auto);
+  column-gap: 20px;
+}
+.mq-vs-card {
+  grid-row: 1 / -1;
+  display: grid;
+  grid-template-rows: subgrid;
+  border-radius: 24px;
+  padding: 10px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+.mq-vs-sheet {
+  grid-column: 1;
+  background: #f6f5f1;
+  border: 1px solid var(--line);
+}
+.mq-vs-app {
+  grid-column: 2;
+  background: #1a0d08;
+  color: #f5f4ef;
+  box-shadow: 0 30px 70px #e2501f2e;
+}
+.mq-vs-app::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, #0f1011d9, #0f1011b3 60%, #0f101180);
+}
+.mq-vs-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 18px 20px;
+}
+.mq-vs-head small {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.mq-vs-app .mq-vs-head small {
+  color: #ff8a5c;
+}
+.mq-vs-head h3 {
+  font-size: 22px;
+  letter-spacing: -0.03em;
+  margin-top: 2px;
+}
+.mq-vs-sheet-icon {
+  width: 40px;
+  height: 40px;
+  padding: 5px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #17181926;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+.mq-vs-sheet-icon i {
+  border-radius: 1px;
+  background: #1718191f;
+}
+.mq-vs-sheet-icon i:nth-child(-n + 3) {
+  background: #1718194d;
+}
+.mq-vs-item {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin: 0 4px;
+  padding: 14px 14px;
+  border-radius: 14px;
+  transition:
+    background 220ms ease,
+    transform 220ms var(--ease);
+}
+.mq-vs-item + .mq-vs-item {
+  border-top: 1px solid var(--line);
+}
+.mq-vs-app .mq-vs-item {
+  border-top-color: #ffffff14;
+}
+.mq-vs-item b {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+}
+.mq-vs-item p {
+  margin-top: 3px !important;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.mq-vs-sheet .mq-vs-item p {
+  color: var(--muted);
+}
+.mq-vs-app .mq-vs-item p {
+  color: #e9e8e2;
+}
+.mq-vs-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin-top: 1px;
+}
+.mq-vs-mark.is-minus {
+  background: #1718190f;
+  color: #8d908a;
+}
+.mq-vs-mark.is-check {
+  background: #ff693b;
+  color: #fff;
+}
+.mq-vs-foot {
+  padding: 16px 18px 12px;
+  font-size: 12px;
+  color: var(--muted);
+  align-self: end;
+}
+.mq-vs-app .mq-vs-foot a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 30px;
+  background: #ffffff1f;
+  border: 1px solid #ffffff38;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.mq-vs-badge {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 46px;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 22px #1718191f;
+}
+/* Hovering a point highlights it in both cards. */
+@media (hover: hover) {
+.mq-vs:has([data-row="0"]:hover) [data-row="0"],
+.mq-vs:has([data-row="1"]:hover) [data-row="1"],
+.mq-vs:has([data-row="2"]:hover) [data-row="2"],
+.mq-vs:has([data-row="3"]:hover) [data-row="3"],
+.mq-vs:has([data-row="4"]:hover) [data-row="4"],
+.mq-vs:has([data-row="5"]:hover) [data-row="5"] {
+    background: #17181908;
+  }
+.mq-vs:has([data-row="0"]:hover) .mq-vs-app [data-row="0"],
+.mq-vs:has([data-row="1"]:hover) .mq-vs-app [data-row="1"],
+.mq-vs:has([data-row="2"]:hover) .mq-vs-app [data-row="2"],
+.mq-vs:has([data-row="3"]:hover) .mq-vs-app [data-row="3"],
+.mq-vs:has([data-row="4"]:hover) .mq-vs-app [data-row="4"],
+.mq-vs:has([data-row="5"]:hover) .mq-vs-app [data-row="5"] {
+    background: #ffffff12;
+  }
+  .mq-vs-app .mq-vs-foot a:hover {
+    background: #ffffff33;
+  }
+}
+@media (max-width: 760px) {
+  .mq-vs {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    row-gap: 14px;
+  }
+  .mq-vs-card {
+    grid-row: auto;
+    grid-column: 1;
+    grid-template-rows: none;
+  }
+  .mq-vs-badge {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    justify-self: center;
+    margin: -28px 0;
+  }
+  .mq-vs-item p {
+    font-size: 13px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-vs-item {
+    transition: none;
+  }
+}
+
+/* "vs" sits in the vertical middle between the two comparison cards. */
+@media (min-width: 761px) {
+  .mq-vs-badge {
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+/* Monthly plan and "how to start" steps: white cards with a soft shadow. */
+.mq-plan:not(.is-featured),
+.mq-start-steps li {
+  background: #ffffff;
+  border: 1px solid #17181912;
+  box-shadow:
+    0 1px 2px #1718190d,
+    0 14px 34px #17181914;
+}
+
+/* "Показати більше" uses the same outline style and motion as
+   "Спробувати на прикладі", in its light-surface variant. */
+.mq-faq-more {
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 22px;
+  border: 1px solid #17181960;
+  border-radius: 50px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  transition:
+    transform 160ms var(--ease),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+.mq-faq-more:hover {
+  color: var(--ink);
+  border-color: #17181960;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mq-faq-more:hover {
+    background: #1718190a;
+    border-color: currentColor;
+    transform: translateY(-2px);
+  }
+}
+.mq-faq-more:active:not(:focus-visible) {
+  transform: scale(0.98);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-faq-more,
+  .mq-faq-more:hover {
+    transition: none;
+    transform: none;
+  }
+}
+.mq-site .mq-faq-more {
+  font-size: 12px;
+}
+
+.mq-countup {
+  font-variant-numeric: tabular-nums;
+}
+/* The stat label rule (.mq-proof-stats span) must not shrink the number. */
+.mq-proof-stats .mq-countup {
+  font-size: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+}
+
+/* ── "Це MatchIQ": compact two-column layout (was ~880px tall) ───────
+   Kicker, title and text on the left, the illustration on the right. */
+@media (min-width: 761px) {
+  .mq-section.mq-about {
+    padding-block: 80px;
+  }
+  .mq-about > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.42fr);
+    grid-template-areas:
+      "kicker figure"
+      "title figure"
+      "text figure";
+    grid-template-rows: auto auto 1fr;
+    column-gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+  .mq-about .mq-kicker {
+    grid-area: kicker;
+    margin-bottom: 24px;
+  }
+  .mq-about h2 {
+    grid-area: title;
+    font-size: clamp(40px, 5.2vw, 80px);
+  }
+  .mq-about-bottom {
+    display: contents;
+  }
+  .mq-about-bottom > p {
+    grid-area: text;
+    margin-top: 28px !important;
+    max-width: 640px;
+  }
+  .mq-about .mq-hairline-settle {
+    grid-area: figure;
+    width: 100%;
+    max-width: 380px;
+    justify-self: end;
+    align-self: center;
+  }
+}
+@media (max-width: 760px) {
+  .mq-about .mq-hairline-settle {
+    width: min(100%, 240px);
+  }
+  .mq-about-bottom {
+    gap: 16px;
+    margin-top: 20px;
+  }
+}
+
+/* ── Hero preview: switchable screens ───────────────────────────── */
+.mq-preview-side li {
+  padding: 0;
+}
+.mq-preview-side li button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #cfd0ca;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+.mq-preview-side li button.is-active {
+  background: #ffffff14;
+  color: #fff;
+  box-shadow: inset 2px 0 0 #ff693b;
+}
+.mq-preview-side li button:focus-visible {
+  outline: 2px solid #ff8a5c;
+  outline-offset: -2px;
+}
+@media (hover: hover) {
+  .mq-preview-side li button:not(.is-active):hover {
+    background: #ffffff0b;
+    color: #fff;
+  }
+}
+.mq-pv-screen {
+  animation: mq-pv-in 380ms var(--ease) both;
+}
+@keyframes mq-pv-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.mq-pv-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.mq-pv-kpis > div,
+.mq-pv-chart,
+.mq-pv-list,
+.mq-pv-table,
+.mq-pv-strategy,
+.mq-pv-goal,
+.mq-pv-split > div,
+.mq-pv-note,
+.mq-pv-warn {
+  background: #ffffff08;
+  border: 1px solid #ffffff14;
+  border-radius: 12px;
+}
+.mq-pv-kpis > div {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+}
+.mq-pv-kpis span,
+.mq-pv-muted,
+.mq-pv-tr small,
+.mq-pv-teams small,
+.mq-pv-split span,
+.mq-pv-goal span,
+.mq-pv-progress span {
+  font-size: 9.5px;
+  color: #8f918a;
+}
+.mq-pv-kpis strong {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.is-up {
+  color: #7ee2a8;
+}
+.mq-pv-live {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff693b;
+  box-shadow: 0 0 0 3px #ff693b33;
+  animation: mq-pv-pulse 1.6s ease-in-out infinite;
+}
+@keyframes mq-pv-pulse {
+  50% {
+    box-shadow: 0 0 0 6px #ff693b00;
+  }
+}
+.mq-pv-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.mq-pv-chips > * {
+  font-size: 9.5px;
+  font-weight: 500;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid #ffffff1f;
+  color: #cfd0ca;
+}
+.mq-pv-chips > b {
+  background: #f7f6f1;
+  color: #121314;
+  border-color: #f7f6f1;
+}
+.mq-pv-list {
+  display: grid;
+  padding: 4px 12px;
+}
+.mq-pv-match {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 30px 78px 64px;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+.mq-pv-match + .mq-pv-match {
+  border-top: 1px solid #ffffff10;
+}
+.mq-pv-time {
+  color: #b9bbb5;
+  font-variant-numeric: tabular-nums;
+}
+.mq-pv-teams {
+  display: grid;
+}
+.mq-pv-bo {
+  font-size: 9px;
+  color: #b9bbb5;
+  border: 1px solid #ffffff24;
+  border-radius: 10px;
+  text-align: center;
+  padding: 1px 0;
+}
+.mq-pv-odds {
+  display: flex;
+  gap: 4px;
+}
+.mq-pv-odds i {
+  font-style: normal;
+  flex: 1;
+  text-align: center;
+  padding: 3px 0;
+  border-radius: 6px;
+  background: #ffffff0f;
+  font-variant-numeric: tabular-nums;
+}
+.mq-pv-tag,
+.mq-pv-action {
+  justify-self: end;
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: #ff693b26;
+  color: #ffb08a;
+  white-space: nowrap;
+}
+.mq-pv-tag.is-live {
+  background: #ff693b;
+  color: #fff;
+}
+.mq-pv-action {
+  background: transparent;
+  border: 1px solid #ffffff24;
+  color: #cfd0ca;
+}
+.mq-pv-table {
+  display: grid;
+  padding: 4px 12px;
+}
+.mq-pv-tr {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) 50px 36px 60px;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+}
+.mq-pv-table.is-risk .mq-pv-tr {
+  grid-template-columns: minmax(0, 0.9fr) 86px minmax(0, 1.4fr);
+}
+.mq-pv-tr + .mq-pv-tr {
+  border-top: 1px solid #ffffff10;
+}
+.mq-pv-tr.is-head span {
+  font-size: 9px;
+  color: #8f918a;
+  letter-spacing: 0.03em;
+}
+.mq-pv-tr > span:nth-child(2) {
+  display: grid;
+}
+.mq-pv-tr > span:first-child:has(b) {
+  display: grid;
+}
+.mq-pv-profit {
+  text-align: right;
+  font-weight: 600;
+}
+.mq-pv-profit.is-win {
+  color: #7ee2a8;
+}
+.mq-pv-profit.is-loss {
+  color: #ff8a6b;
+}
+.mq-pv-profit.is-wait {
+  color: #b9bbb5;
+  font-weight: 400;
+}
+.mq-pv-note,
+.mq-pv-warn {
+  padding: 10px 12px;
+  font-size: 10px;
+  color: #cfd0ca;
+}
+.mq-pv-note b,
+.mq-pv-warn b {
+  display: block;
+  color: #fff;
+  font-size: 10.5px;
+  margin-bottom: 2px;
+}
+.mq-pv-warn {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  border-color: #ff693b55;
+  background: #ff693b14;
+}
+.mq-pv-warn svg {
+  color: #ff8a5c;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.mq-pv-chart {
+  padding: 12px 14px 10px;
+}
+.mq-pv-chart-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.mq-pv-chart-head span {
+  font-size: 9.5px;
+  color: #8f918a;
+}
+.mq-pv-chart svg {
+  width: 100%;
+  height: 120px;
+  display: block;
+}
+.mq-pv-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mq-pv-split > div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  padding: 10px 12px;
+}
+.mq-pv-split i,
+.mq-pv-progress > i,
+.mq-pv-goal > i {
+  grid-column: 1 / -1;
+  display: block;
+  height: 4px;
+  border-radius: 4px;
+  background: #ff693b;
+}
+.mq-pv-progress > i,
+.mq-pv-goal > i {
+  background: #ffffff1a;
+}
+.mq-pv-progress > i > i,
+.mq-pv-goal > i > i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #ff693b;
+}
+.mq-pv-strategy {
+  padding: 12px 14px;
+  display: grid;
+  gap: 8px;
+}
+.mq-pv-strategy.is-main {
+  border-color: #ff693b55;
+  background: #ff693b10;
+}
+.mq-pv-strategy-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.mq-pv-strategy-top b {
+  font-size: 12.5px;
+}
+.mq-pv-strategy p {
+  font-size: 10px;
+  color: #b9bbb5;
+}
+.mq-pv-progress,
+.mq-pv-goal {
+  display: grid;
+  gap: 6px;
+}
+.mq-pv-goal {
+  padding: 10px 12px;
+  grid-template-columns: 1fr auto;
+}
+.mq-pv-status {
+  font-style: normal;
+  font-size: 9px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.mq-pv-status.is-risk {
+  background: #ff5a4a2e;
+  color: #ff9a8c;
+}
+.mq-pv-status.is-unstable {
+  background: #ff9a3c2e;
+  color: #ffc08a;
+}
+.mq-pv-status.is-careful {
+  background: #f5c84a26;
+  color: #f3d57e;
+}
+.mq-pv-status.is-stable {
+  background: #7ee2a826;
+  color: #9eeac0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-pv-screen,
+  .mq-pv-live {
+    animation: none;
+  }
+}
+
+/* On phones the sidebar is hidden, so the same screens switch from a chip row. */
+.mq-preview-tabs {
+  display: none;
+}
+@media (max-width: 760px) {
+  .mq-preview-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 10px 12px 0;
+    scrollbar-width: none;
+  }
+  .mq-preview-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .mq-preview-tabs button {
+    flex-shrink: 0;
+    font: inherit;
+    font-size: 10px;
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid #ffffff24;
+    background: transparent;
+    color: #cfd0ca;
+  }
+  .mq-preview-tabs button.is-active {
+    background: #f7f6f1;
+    border-color: #f7f6f1;
+    color: #121314;
+  }
+}
+
+/* ── "Твій журнал рішень" (restored) with the riffle card-stack animation ── */
+.mq-journal-story {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 7%;
+  border-top: 1px solid var(--line);
+}
+.mq-hairline-riffle {
+  width: 100%;
+  max-width: 540px;
+  justify-self: center;
+}
+.mq-journal-story > :not(.mq-hairline) {
+  align-self: start;
+}
+.mq-journal-story .mq-kicker {
+  margin-bottom: 24px;
+}
+.mq-journal-story h2 {
+  font-size: clamp(36px, 4.5vw, 64px);
+  line-height: 1.06;
+}
+.mq-journal-story p:not(.mq-kicker) {
+  color: var(--muted);
+  line-height: 1.9;
+  margin: 25px 0;
+  max-width: 490px;
+}
+/* Same outline button as "Спробувати на прикладі" on a light surface. */
+.mq-journal-story .mq-outline-button {
+  gap: 10px;
+  border-color: #17181960;
+  color: var(--ink);
+}
+@media (hover: hover) and (pointer: fine) {
+  .mq-journal-story .mq-outline-button:hover {
+    background: #1718190a;
+    border-color: currentColor;
+    transform: translateY(-2px);
+  }
+}
+@media (max-width: 760px) {
+  .mq-journal-story {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .mq-hairline-riffle {
+    max-width: 380px;
+  }
+  .mq-journal-story h2 {
+    font-size: clamp(34px, 8.3vw, 52px);
   }
 }

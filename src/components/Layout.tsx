@@ -4,6 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { logRender } from "@/lib/devLogger";
 import ScreenBanners from "@/components/ScreenBanners";
 import ProfileShell from "@/components/profile/ProfileShell";
+import { ensureAppFonts } from "@/lib/appFonts";
+
+ensureAppFonts();
 
 export default function Layout() {
   logRender("Layout");

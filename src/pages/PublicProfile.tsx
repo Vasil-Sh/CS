@@ -15,6 +15,9 @@ import {
   type PublicProfileData,
 } from "@/components/public-profile/publicProfileModel";
 import "./PublicProfile.css";
+import { ensureAppFonts } from "@/lib/appFonts";
+
+ensureAppFonts();
 
 export default function PublicProfile() {
   const { username = "" } = useParams<{ username: string }>();
