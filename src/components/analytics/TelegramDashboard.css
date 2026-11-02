@@ -499,7 +499,7 @@
   color: #fff;
 }
 .mqt-guide-toggle svg {
-  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 700ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .mqt-guide.is-collapsed .mqt-guide-toggle svg {
   transform: rotate(180deg);
@@ -522,6 +522,28 @@
 /* Collapsed: folds to the right into a slim full-height rail */
 .mqt-guide {
   position: relative;
+  overflow: hidden;
+  transition:
+    flex-basis 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    flex-grow 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    flex-shrink 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    padding 700ms cubic-bezier(0.4, 0, 0.2, 1),
+    gap 700ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mqt-guide-reveal {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows 700ms cubic-bezier(0.4, 0, 0.2, 1), opacity 500ms ease-in-out;
+}
+.mqt-guide-reveal > .mqt-guide-body {
+  min-height: 0;
+  overflow: hidden;
+  animation: none;
+}
+.mqt-guide.is-collapsed .mqt-guide-reveal {
+  grid-template-rows: 0fr;
+  opacity: 0;
 }
 .mqt-guide.is-collapsed {
   flex: 0 0 64px;
@@ -533,7 +555,7 @@
   display: none;
 }
 .mqt-guide.is-collapsed .mqt-guide-head {
-  animation: mqt-guide-in 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: mqt-guide-in 700ms ease-in-out;
   flex-direction: column-reverse;
   align-items: center;
   justify-content: flex-end;

@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import "./TelegramDashboard.css";
+import "@/components/SwapPill.css";
 
 export interface TelegramChannel {
   id: string;
@@ -741,7 +742,8 @@ export default function TelegramDashboard({
               <ChevronRight size={18} strokeWidth={2} aria-hidden="true" />
             </button>
           </div>
-          <div className="mqt-guide-body" id="mqt-guide-body" hidden={guideCollapsed}>
+          <div className="mqt-guide-reveal" id="mqt-guide-body" aria-hidden={guideCollapsed} inert={guideCollapsed}>
+          <div className="mqt-guide-body">
             <ol>
               {STEPS.map(([title, text], i) => (
                 <li key={title}>
@@ -759,6 +761,7 @@ export default function TelegramDashboard({
               onClick={onAdd}
               icon={<Plus size={16} strokeWidth={2.2} />}
             />
+          </div>
           </div>
         </aside>
       </div>

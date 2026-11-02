@@ -2531,6 +2531,77 @@
     transform: translateX(calc(100% + var(--swap-inset) + 4px));
   }
 }
+
+.mq-site .mq-telegram-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  height: 48px;
+  padding: 0 6px 0 22px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ff693b;
+  color: #111213 !important;
+  font: 600 14px/1 Manrope, system-ui, sans-serif;
+}
+.mq-site .mq-telegram-pill .mq-telegram-pill-in,
+.mq-site .mq-telegram-pill .mq-telegram-pill-out {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #111213;
+  color: #fff;
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mq-site .mq-telegram-pill .mq-telegram-pill-in {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translate(calc(-100% - 10px), -50%);
+}
+.mq-site .mq-telegram-pill .mq-telegram-pill-label {
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .mq-site .mq-telegram-pill:hover,
+  .mq-site .mq-telegram-pill:focus-visible { background: #ff7d55; }
+  .mq-site .mq-telegram-pill:hover .mq-telegram-pill-in,
+  .mq-site .mq-telegram-pill:focus-visible .mq-telegram-pill-in { transform: translate(0, -50%); }
+  .mq-site .mq-telegram-pill:hover .mq-telegram-pill-label,
+  .mq-site .mq-telegram-pill:focus-visible .mq-telegram-pill-label { transform: translateX(34px); }
+  .mq-site .mq-telegram-pill:hover .mq-telegram-pill-out,
+  .mq-site .mq-telegram-pill:focus-visible .mq-telegram-pill-out { transform: translateX(calc(100% + 10px)); }
+}
+
+/* Telegram's SwapPill uses a circular icon pair and a 34px label travel. */
+.mq-site .mq-button {
+  font: 600 14px/1 Manrope, system-ui, sans-serif;
+  color: #111213 !important;
+}
+.mq-site .mq-button .mq-swap-in {
+  width: 36px;
+  height: 36px;
+}
+.mq-site .mq-button .mq-btn-label {
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mq-site .mq-button > svg,
+.mq-site .mq-button .mq-swap-in {
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (hover: hover) and (pointer: fine) {
+  .mq-site .mq-button:hover .mq-swap-in,
+  .mq-site .mq-button:focus-visible .mq-swap-in { transform: translate(0, -50%); }
+  .mq-site .mq-button:hover .mq-btn-label,
+  .mq-site .mq-button:focus-visible .mq-btn-label { transform: translateX(34px); }
+  .mq-site .mq-button:hover > svg,
+  .mq-site .mq-button:focus-visible > svg { transform: translateX(calc(100% + 10px)); }
+}
 @media (prefers-reduced-motion: reduce) {
   .mq-swap-in,
   .mq-btn-label,
@@ -2752,6 +2823,68 @@
   width: 30px;
   height: 30px;
   padding: 8px;
+}
+
+/* Exact Telegram SwapPill structure, isolated from legacy .mq-button rules. */
+.mq-site .mq-tg-pill {
+  position: relative;
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  height: 48px;
+  padding: 0 6px 0 22px;
+  overflow: hidden;
+  isolation: isolate;
+  border: 0;
+  border-radius: 999px;
+  background: #ff693b;
+  color: #111213;
+  font: 600 14px/1 Manrope, system-ui, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 150ms;
+}
+.mq-site .mq-tg-pill-in,
+.mq-site .mq-tg-pill-out {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #111213;
+  color: #fff;
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mq-site .mq-tg-pill-in {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translate(calc(-100% - 10px), -50%);
+}
+.mq-site .mq-tg-pill-label {
+  display: inline-block;
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mq-site .mq-tg-pill-sm { height: 40px; padding-left: 18px; }
+.mq-site .mq-tg-pill-sm .mq-tg-pill-in,
+.mq-site .mq-tg-pill-sm .mq-tg-pill-out { width: 28px; height: 28px; }
+@media (hover: hover) and (pointer: fine) {
+  .mq-site .mq-tg-pill:hover { background: #ff7d55; transform: translateY(-2px); }
+  .mq-site .mq-tg-pill:hover .mq-tg-pill-in,
+  .mq-site .mq-tg-pill:focus-visible .mq-tg-pill-in { transform: translate(0, -50%); }
+  .mq-site .mq-tg-pill:hover .mq-tg-pill-label,
+  .mq-site .mq-tg-pill:focus-visible .mq-tg-pill-label { transform: translateX(34px); }
+  .mq-site .mq-tg-pill:hover .mq-tg-pill-out,
+  .mq-site .mq-tg-pill:focus-visible .mq-tg-pill-out { transform: translateX(calc(100% + 10px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-site .mq-tg-pill,
+  .mq-site .mq-tg-pill-in,
+  .mq-site .mq-tg-pill-out,
+  .mq-site .mq-tg-pill-label { transition: none; }
 }
 @media (hover: hover) {
   .mq-sticky nav a:hover,
@@ -3815,5 +3948,47 @@
   .mq-fresponsible a.mq-button {
     white-space: normal;
     justify-self: start;
+  }
+}
+
+/* Primary CTAs use the same continuous icon hand-off as “Додати групу”.
+   Keep the landing palette, but match the interaction and its pacing. */
+.mq-button {
+  --swap-size: 36px;
+  --swap-inset: 6px;
+  --swap-shift: 34px;
+  gap: 14px;
+  min-height: 48px;
+  padding: 0 6px 0 22px;
+  transition:
+    transform 200ms var(--ease),
+    background-color 150ms ease;
+}
+.mq-button > svg {
+  width: var(--swap-size);
+  height: var(--swap-size);
+  padding: 9px;
+}
+.mq-button .mq-swap-in {
+  left: var(--swap-inset);
+  transform: translate(calc(-100% - 10px), -50%);
+  transition: transform 520ms var(--ease);
+}
+.mq-button .mq-btn-label,
+.mq-button > svg {
+  transition: transform 520ms var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .mq-button:hover .mq-swap-in,
+  .mq-button:focus-visible .mq-swap-in {
+    transform: translate(0, -50%);
+  }
+  .mq-button:hover .mq-btn-label,
+  .mq-button:focus-visible .mq-btn-label {
+    transform: translateX(var(--swap-shift));
+  }
+  .mq-button:hover > svg,
+  .mq-button:focus-visible > svg {
+    transform: translateX(calc(100% + 10px));
   }
 }

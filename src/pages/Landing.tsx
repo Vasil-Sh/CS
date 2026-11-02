@@ -43,6 +43,7 @@ import {
   WebAppStructuredData,
 } from "@/components/StructuredData";
 import "./LandingLumora.css";
+import "@/components/SwapPill.css";
 
 const ReducedMotion = createContext(false);
 const figures = {
@@ -759,18 +760,18 @@ function StickyBar() {
           Увійти
         </Link>
         <a
-          className="mq-button mq-button-sm"
+          className="mqt-pill "
           href={telegramLink(TG_ACCESS)}
           data-track="cta_access"
           data-track-place="sticky"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <span className="mq-swap-in" aria-hidden="true">
+          <span className="mqt-pill-in" aria-hidden="true">
             <ArrowUpRight size={14} />
           </span>
-          <span className="mq-btn-label">Отримати доступ</span>{" "}
-          <ArrowUpRight size={14} />
+          <span className="mqt-pill-label">Отримати доступ</span>
+          <span className="mqt-pill-out" aria-hidden="true"><ArrowUpRight size={14} /></span>
         </a>
       </div>
     </div>
@@ -804,17 +805,17 @@ function SiteHeader() {
           <a href="#pricing">Ціни</a>
           <a href="#faq">FAQ</a>
         </nav>
-        <Link
+<Link
           to="/login"
-          className="mq-login"
+          className="mqt-pill "
           data-track="cta_login"
           data-track-place="header"
         >
-          <span className="mq-swap-in" aria-hidden="true">
+          <span className="mqt-pill-in" aria-hidden="true">
                 <ArrowUpRight size={16} />
               </span>
-              <span className="mq-btn-label">Увійти</span>{" "}
-              <ArrowUpRight size={16} />
+              <span className="mqt-pill-label">Увійти</span>{" "}
+              <span className="mqt-pill-out" aria-hidden="true"><ArrowUpRight size={16} /></span>
         </Link>
         <button
           ref={menuButton}
@@ -880,18 +881,18 @@ function Hero() {
           </p>
           <div className="mq-hero-actions">
             <a
-              className="mq-button"
+              className="mqt-pill"
               href={telegramLink(TG_ACCESS)}
               data-track="cta_access"
               data-track-place="hero"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <span className="mq-swap-in" aria-hidden="true">
+              <span className="mqt-pill-in" aria-hidden="true">
                 <ArrowUpRight size={18} />
               </span>
-              <span className="mq-btn-label">Отримати доступ</span>{" "}
-              <ArrowUpRight size={18} />
+              <span className="mqt-pill-label">Отримати доступ</span>
+              <span className="mqt-pill-out" aria-hidden="true"><ArrowUpRight size={18} /></span>
             </a>
             <a
               className="mq-outline-button"
@@ -1635,8 +1636,8 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-              <a
-                className="mq-button"
+<a
+                className="mqt-pill"
                 href={telegramLink(plan.message)}
                 data-track="plan_select"
                 data-track-place={plan.id}
@@ -1644,11 +1645,11 @@ function Pricing() {
                 rel="noopener noreferrer"
                 aria-label={`Оформити підписку «${plan.name}» через Telegram`}
               >
-                <span className="mq-swap-in" aria-hidden="true">
+                <span className="mqt-pill-in" aria-hidden="true">
                 <ArrowUpRight size={18} />
               </span>
-              <span className="mq-btn-label">Оформити підписку</span>{" "}
-              <ArrowUpRight size={18} />
+              <span className="mqt-pill-label">Оформити підписку</span>{" "}
+              <span className="mqt-pill-out" aria-hidden="true"><ArrowUpRight size={18} /></span>
               </a>
             </article>
           </Reveal>
@@ -1825,17 +1826,17 @@ export default function Landing() {
                   історія ставок допомагає помічати повторювані помилки й
                   перевіряти власні правила на фактах.
                 </p>
-                <a
-                  className="mq-button"
+<a
+                  className="mqt-pill"
                   href="#journal"
                   data-track="cta_demo"
                   data-track-place="journal_story"
                 >
-                  <span className="mq-swap-in" aria-hidden="true">
+                  <span className="mqt-pill-in" aria-hidden="true">
                     <ArrowUpRight size={18} />
                   </span>
-                  <span className="mq-btn-label">Дослідити приклад запису</span>{" "}
-                  <ArrowUpRight size={18} />
+                  <span className="mqt-pill-label">Дослідити приклад запису</span>{" "}
+                  <span className="mqt-pill-out" aria-hidden="true"><ArrowUpRight size={18} /></span>
                 </a>
               </Reveal>
             </section>
@@ -2006,19 +2007,19 @@ export default function Landing() {
                 виходить з-під контролю, оформи самообмеження чи отримай
                 допомогу на сайті державного регулятора.
               </p>
-              <a
-                className="mq-button mq-button-sm"
+<a
+                className="mqt-pill "
                 href="https://playcity.gov.ua/borotba-z-ihrovoiu-zalezhnistiu"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <span className="mq-swap-in" aria-hidden="true">
+                <span className="mqt-pill-in" aria-hidden="true">
                   <ArrowUpRight size={14} />
                 </span>
-                <span className="mq-btn-label">
+                <span className="mqt-pill-label">
                   Допомога при ігровій залежності
                 </span>{" "}
-                <ArrowUpRight size={14} />
+                <span className="mqt-pill-out" aria-hidden="true"><ArrowUpRight size={14} /></span>
               </a>
             </div>
             <div className="mq-fbottom">

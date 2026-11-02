@@ -1,0 +1,73 @@
+.mqt-pill {
+  --mqt-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  height: 48px;
+  padding: 0 6px 0 22px;
+  overflow: hidden;
+  isolation: isolate;
+  border: 0;
+  border-radius: 999px;
+  background: #ff693b;
+  color: #111213;
+  font: 600 14px/1 Manrope, system-ui, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 0.2s var(--mqt-ease),
+    background-color 0.15s;
+}
+.mqt-pill:hover {
+  background: #ff7d55;
+}
+.mqt-pill:active {
+  transform: scale(0.98);
+}
+.mqt-pill-in,
+.mqt-pill-out {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #111213;
+  color: #fff;
+  transition: transform 0.52s var(--mqt-ease);
+}
+.mqt-pill-in {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translate(calc(-100% - 10px), -50%);
+}
+.mqt-pill-label {
+  display: inline-block;
+  transition: transform 0.52s var(--mqt-ease);
+}
+.mqt-pill.is-on-dark .mqt-pill-in,
+.mqt-pill.is-on-dark .mqt-pill-out {
+  background: #fff;
+  color: #111213;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mqt-pill:hover .mqt-pill-in,
+  .mqt-pill:focus-visible .mqt-pill-in {
+    transform: translate(0, -50%);
+  }
+  .mqt-pill:hover .mqt-pill-label,
+  .mqt-pill:focus-visible .mqt-pill-label {
+    transform: translateX(34px);
+  }
+  .mqt-pill:hover .mqt-pill-out,
+  .mqt-pill:focus-visible .mqt-pill-out {
+    transform: translateX(calc(100% + 10px));
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce) { .mqt-pill, .mqt-pill-in, .mqt-pill-out, .mqt-pill-label { transition: none; } }
+
