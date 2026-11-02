@@ -9,6 +9,12 @@ import {
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService } from "@/lib/bankrollService";
 import type { CS2Strategy } from "@/types/strategy";
+import {
+  checkRecord,
+  rulesOf,
+  violationLabel,
+  type ViolationCode,
+} from "@/components/strategy/strategyView";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -103,10 +109,12 @@ export interface BetRecord {
 }
 
 export interface StrategyViolation {
-  type: "odds" | "format" | "betType";
+  type: "odds" | "format" | "betType" | "limit";
   message: string;
   severity: "acceptable" | "serious";
   explanation: string;
+  /** "block" stops the record; "warn" asks to confirm. */
+  mode?: "warn" | "block";
 }
 
 export interface Goal {
@@ -544,59 +552,69 @@ export function useBettingForm({
   ]);
 
   // ── Strategy validation ──
+  // Rules come from strategyView.rulesOf: strategies saved by the new form
+  // (rulesVersion 2) can block a record per rule; older ones only warn.
   const validateAgainstStrategy = useCallback(() => {
-    if (!primaryStrategy || formData.betCategory !== "Ординар") {
+    if (!primaryStrategy) {
       setStrategyViolations([]);
       return;
     }
-    const violations: StrategyViolation[] = [];
-    const odds = parseFloat(formData.odds);
-    if (odds && primaryStrategy.minOdds && odds < primaryStrategy.minOdds) {
-      const d = primaryStrategy.minOdds - odds;
-      violations.push({
-        type: "odds",
-        message: `Коефіцієнт ${odds} нижче рекомендованого ${primaryStrategy.minOdds}`,
-        severity: d > 0.3 ? "serious" : "acceptable",
-        explanation:
-          d > 0.3
-            ? "Низькі коефіцієнти зменшують потенційний прибуток."
-            : "Незначне відхилення.",
-      });
+    const rules = rulesOf(primaryStrategy);
+    const express = formData.betCategory === "Експрес";
+    const odds = express
+      ? expressEvents.map((e) => parseFloat(e.odds)).filter((o) => o > 0)
+      : [parseFloat(formData.odds)].filter((o) => o > 0);
+    const codes = checkRecord(rules, {
+      kind: express ? "Експрес" : "Ординар",
+      odds,
+      format: formData.format || undefined,
+      events: express ? expressEvents.length : undefined,
+    });
+    if (rules.limit) {
+      const today = new Date().toDateString();
+      const madeToday = apiBets.filter(
+        (b) =>
+          (b.strategy || "").trim() === primaryStrategy.name.trim() &&
+          new Date(
+            typeof b.createdAt === "number" || typeof b.createdAt === "string" ? b.createdAt : b.date,
+          ).toDateString() === today,
+      ).length;
+      if (madeToday >= rules.limit.perDay) codes.push("limit");
     }
-    if (odds && primaryStrategy.maxOdds && odds > primaryStrategy.maxOdds) {
-      const d = odds - primaryStrategy.maxOdds;
-      violations.push({
-        type: "odds",
-        message: `Коефіцієнт ${odds} вище рекомендованого ${primaryStrategy.maxOdds}`,
-        severity: d > 0.5 ? "serious" : "acceptable",
-        explanation:
-          d > 0.5
-            ? "Високі коефіцієнти = низька ймовірність."
-            : "Відхилення в межах.",
-      });
-    }
-    if (
-      primaryStrategy.allowedFormats?.length &&
-      !primaryStrategy.allowedFormats.includes(formData.format)
-    )
-      violations.push({
-        type: "format",
-        message: `Формат ${formData.format} не рекомендований`,
-        severity: "acceptable",
-        explanation: "Стратегія для інших форматів.",
-      });
-    if (
-      primaryStrategy.allowedBetTypes?.length &&
-      !primaryStrategy.allowedBetTypes.includes(formData.betCategory)
-    )
-      violations.push({
-        type: "betType",
-        message: `Тип "${formData.betCategory}" не рекомендований`,
-        severity: "serious",
-        explanation: "Стратегія для інших типів ставок.",
-      });
-    setStrategyViolations(violations);
-  }, [formData.odds, formData.format, formData.betCategory, primaryStrategy]);
+    const modeOf: Record<ViolationCode, "warn" | "block"> = {
+      oddsLow: rules.odds?.mode ?? "warn",
+      oddsHigh: rules.odds?.mode ?? "warn",
+      format: rules.formats?.mode ?? "warn",
+      type: rules.types?.mode ?? "warn",
+      events: rules.types?.mode ?? "warn",
+      limit: rules.limit?.mode ?? "warn",
+    };
+    const typeOf: Record<ViolationCode, StrategyViolation["type"]> = {
+      oddsLow: "odds",
+      oddsHigh: "odds",
+      format: "format",
+      type: "betType",
+      events: "betType",
+      limit: "limit",
+    };
+    const explain: Record<ViolationCode, string> = {
+      oddsLow: "Коефіцієнт нижче діапазону вашої стратегії.",
+      oddsHigh: "Коефіцієнт вище діапазону вашої стратегії.",
+      format: `Стратегія дозволяє: ${rules.formats?.list.join(", ") || "—"}.`,
+      type: `Стратегія дозволяє: ${rules.types?.list.join(", ") || "—"}.`,
+      events: "Експрес довший, ніж дозволяє стратегія.",
+      limit: "Денний ліміт записів за стратегією вичерпано.",
+    };
+    setStrategyViolations(
+      codes.map((c) => ({
+        type: typeOf[c],
+        message: violationLabel(c, rules),
+        severity: modeOf[c] === "block" ? "serious" : "acceptable",
+        explanation: explain[c],
+        mode: modeOf[c],
+      })),
+    );
+  }, [formData.odds, formData.format, formData.betCategory, expressEvents, apiBets, primaryStrategy]);
 
   useEffect(() => {
     validateAgainstStrategy();
@@ -1023,6 +1041,11 @@ export function useBettingForm({
         toast.error(`Заповніть коефіцієнти (${mo.length} без)`);
         return;
       }
+    }
+    const blocking = strategyViolations.filter((v) => v.mode === "block");
+    if (blocking.length > 0) {
+      toast.error(`Стратегія блокує цей запис: ${blocking.map((v) => v.message).join("; ")}`);
+      return;
     }
     if (strategyViolations.length > 0) {
       setShowViolationDialog(true);

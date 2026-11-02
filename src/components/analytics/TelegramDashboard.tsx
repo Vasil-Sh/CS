@@ -275,6 +275,7 @@ function SwapPill({
   className = "",
   type = "button",
   form,
+  disabled = false,
   icon = <ArrowUpRight size={16} strokeWidth={2.2} />,
 }: {
   label: string;
@@ -282,12 +283,14 @@ function SwapPill({
   className?: string;
   type?: "button" | "submit";
   form?: string;
+  disabled?: boolean;
   icon?: ReactNode;
 }) {
   return (
     <button
       type={type}
       form={form}
+      disabled={disabled}
       className={`mqt-pill ${className}`.trim()}
       onClick={onClick}
     >
@@ -301,7 +304,7 @@ function SwapPill({
     </button>
   );
 }
-export { SwapPill };
+export { SwapPill, AnimatedNumber };
 
 const GUIDE_KEY = "matchiq_tg_guide_collapsed";
 const readGuideCollapsed = () => {
@@ -722,13 +725,11 @@ export default function TelegramDashboard({
           aria-labelledby="mqt-how-title"
         >
           <div className="mqt-guide-head">
-            <div>
+            <div className="mqt-guide-titles">
               <p className="mqp-kicker">
                 <i>02</i> Як це працює
               </p>
-              <h2 id="mqt-how-title">
-                {guideCollapsed ? "Як це працює" : "Три кроки до чесної статистики"}
-              </h2>
+              <h2 id="mqt-how-title">Три кроки до чесної статистики</h2>
             </div>
             <button
               type="button"

@@ -9,10 +9,11 @@ export interface RiskyTeam {
 }
 
 export interface StrategyViolation {
-  type: "odds" | "format" | "betType";
+  type: "odds" | "format" | "betType" | "limit";
   message: string;
   severity: "acceptable" | "serious";
   explanation: string;
+  mode?: "warn" | "block";
 }
 
 export interface Goal {

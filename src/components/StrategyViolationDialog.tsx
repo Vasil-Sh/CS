@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 
 interface StrategyViolation {
-  type: "odds" | "format" | "betType";
+  type: "odds" | "format" | "betType" | "limit";
   message: string;
 }
 

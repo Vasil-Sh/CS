@@ -59,6 +59,7 @@ const Strategy = safeLazy(
   () => import("@/pages/StrategyWorkspace"),
 );
 const RiskyTeams = safeLazy("RiskyTeams", () => import("@/pages/RiskyTeams"));
+const Goals = safeLazy("Goals", () => import("@/pages/Goals"));
 const TelegramPage = safeLazy("TelegramPage", () => import("@/pages/Telegram"));
 const NotFound = safeLazy("NotFound", () => import("@/pages/NotFound"));
 const LegalPage = lazy(() => import("@/pages/LegalPage"));
@@ -189,7 +190,7 @@ export default function App() {
               element={
                 <ErrorBoundary>
                   <Suspense fallback={<PageLoader />}>
-                    <Strategy />
+                    <Goals />
                   </Suspense>
                 </ErrorBoundary>
               }

@@ -317,6 +317,20 @@
   z-index: 10;
   padding: 0 4%;
 }
+html:has(.mq-site:not(.mq-reduced)),
+body:has(.mq-site:not(.mq-reduced)),
+#root:has(.mq-site:not(.mq-reduced)) {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:has(.mq-site), body:has(.mq-site), #root:has(.mq-site) {
+    scroll-behavior: auto;
+  }
+}
+.mq-header > .mqt-pill {
+  align-self: center;
+  flex-shrink: 0;
+}
 .mq-header {
   display: flex;
   align-items: center;

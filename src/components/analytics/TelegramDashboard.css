@@ -205,6 +205,18 @@
 .mqt-row:hover {
   background: #fbfaf7;
 }
+/* Each group is its own soft grey block */
+.mqt-list li.mqt-row {
+  margin-bottom: 6px;
+  border-top-color: transparent;
+  background: #f3f2ee;
+}
+.mqt-list li.mqt-row:hover {
+  background: #efeee9;
+}
+.mqt-list li.mqt-row:last-child {
+  margin-bottom: 0;
+}
 .mqt-row.is-head {
   padding-top: 0;
   padding-bottom: 12px;
@@ -551,8 +563,18 @@
   gap: 0;
   padding: 12px 0 24px;
 }
+/* Collapsed rail keeps the numbered kicker; both lines read bottom-up */
+.mqt-guide.is-collapsed .mqt-guide-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
 .mqt-guide.is-collapsed .mqp-kicker {
-  display: none;
+  display: flex;
+  margin: 0;
+  white-space: nowrap;
 }
 .mqt-guide.is-collapsed .mqt-guide-head {
   animation: mqt-guide-in 700ms ease-in-out;
@@ -579,8 +601,6 @@
   font-weight: 600;
   letter-spacing: -0.01em;
   white-space: nowrap;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
 }
 @media (max-width: 900px) {
   .mqt-guide.is-collapsed {
@@ -591,7 +611,8 @@
     flex-direction: row;
     justify-content: space-between;
   }
-  .mqt-guide.is-collapsed h2 {
+  .mqt-guide.is-collapsed .mqt-guide-titles {
+    gap: 6px;
     writing-mode: horizontal-tb;
     transform: none;
   }

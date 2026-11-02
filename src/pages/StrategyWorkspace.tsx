@@ -1,19 +1,16 @@
-import { useLocation } from "react-router-dom";
-import StrategyOverview from "@/components/StrategyOverview";
-import GoalsManager from "@/components/GoalsManager";
-import ErrorBoundary from "@/components/ErrorBoundary";
-import "./StrategyWorkspace.css";
+import { logRender } from "@/lib/devLogger";
+import StrategiesScreen from "@/components/strategy/StrategiesScreen";
+import "@/components/profile/ProfileRedesign.css";
+import "@/components/profile/ProfileSections.css";
+import "./telegram.css";
+
 export default function StrategyWorkspace() {
-  const goals = useLocation().pathname === "/app/goals";
+  logRender("Strategies");
   return (
-    <div className="strategy-workspace">
-      <ErrorBoundary key={goals ? "goals" : "strategies"}>
-        {goals ? (
-          <GoalsManager focusLayout />
-        ) : (
-          <StrategyOverview focusLayout />
-        )}
-      </ErrorBoundary>
+    <div className="mqp-page strategies-page">
+      <div className="mqp-content">
+        <StrategiesScreen />
+      </div>
     </div>
   );
 }
