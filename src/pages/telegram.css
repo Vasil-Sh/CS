@@ -1,1152 +1,667 @@
-@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
-
+/* Telegram page wrapper + dialogs (rendered in a portal, so styled globally). */
 .telegram-page {
-  --tg-paper: #f4f3ef;
-  --tg-ink: #151715;
-  --tg-orange: #ff693b;
-  --tg-muted: #73776f;
-  width: 100%;
-  max-width: none;
-  padding: 0;
-  margin: 0;
-  color: var(--tg-ink);
-  font-family: "Manrope", sans-serif;
-}
-.telegram-page * {
-  box-sizing: border-box;
-}
-.telegram-screen {
-  min-height: 100%;
-  background: var(--tg-paper);
-}
-.telegram-hero {
-  background: #151715;
-  color: #f7f6f0;
-  padding: 32px max(38px, 4.6vw) 0;
-}
-.telegram-heading {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
-  margin: 0;
-}
-.telegram-heading h1,
-.telegram-groups h2,
-.telegram-guide h2 {
-  margin: 0;
-  font-family: "Oswald", "Arial Narrow", sans-serif;
-  font-weight: 600;
-  letter-spacing: -0.035em;
-}
-.telegram-heading h1 {
-  color: #fff;
-  font-size: clamp(42px, 4.1vw, 64px);
-  line-height: 1;
-  text-transform: uppercase;
-}
-.telegram-heading p {
-  margin: 9px 0 0;
-  color: #c4c6be;
-  font-size: 14px;
-}
-.telegram-heading::after {
-  content: "ГРУПИ";
-  position: absolute;
-  margin-top: 114px;
-  color: #f8f7f2;
-  font-size: 12px;
-  font-weight: 700;
-}
-.telegram-heading > button {
-  height: 46px;
-  border: 0;
-  border-radius: 7px;
-  background: var(--tg-orange);
-  color: #fff;
-  box-shadow: none;
-  font-weight: 700;
-}
-.telegram-heading > button:hover {
-  background: #ff8059;
-}
-.telegram-metrics {
-  margin-top: 51px;
-  border-top: 1px solid #ffffff26;
-}
-.telegram-metrics > div {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  padding: 28px 0 32px;
-}
-.telegram-metrics > div > div {
-  display: grid;
-  gap: 3px;
-  padding: 0 32px;
-}
-.telegram-metrics > div > div:first-child {
-  padding-left: 0;
-}
-.telegram-metrics > div > div + div {
-  border-left: 1px solid #ffffff33;
-}
-.telegram-metrics p {
-  margin: 0;
-}
-.telegram-metrics p:first-child {
-  font-family: "Oswald", sans-serif;
-  font-size: 42px;
-  line-height: 1;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  color: #fff;
-  font-variant-numeric: tabular-nums;
-}
-.telegram-metrics p:last-child {
-  color: #c2c4bc;
-  font-size: 13px;
-}
-.telegram-metrics .is-accent p:first-child {
-  color: var(--tg-orange);
-}
-.telegram-metrics .is-orange p:first-child {
-  color: var(--tg-orange);
-}
-.telegram-metrics .is-green p:first-child {
-  color: #67d08e;
-}
-.telegram-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 285px;
-  gap: 28px;
-  align-items: stretch;
-  padding: 27px max(38px, 4.6vw) 48px;
-}
-.telegram-main {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-.telegram-main .tg-empty {
-  flex: 1;
-}
-.telegram-main > section.space-y-4 {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
-.telegram-main > section.space-y-4 > :not([hidden]) ~ :not([hidden]) {
-  margin-top: 0;
-}
-.telegram-main > section.space-y-4 > div:first-child {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 255px;
-  gap: 18px;
-}
-.telegram-page input,
-.telegram-page button[role="combobox"] {
-  height: 44px;
-  border: 1px solid #d9dad5;
-  border-radius: 7px;
-  background: #fff;
-  box-shadow: none;
-  color: #242624;
-  font-size: 13px;
-}
-.telegram-page input:focus,
-.telegram-page button[role="combobox"]:focus {
-  border-color: #777a73;
-}
-.telegram-page input:focus-visible {
-  outline: none;
-  box-shadow: none;
-  --tw-ring-color: transparent;
-}
-.telegram-groups {
-  overflow: hidden;
-  border: 1px solid #dedfd9;
-  border-radius: 8px;
-  background: #fff;
-  padding: 0 16px 10px;
-  box-shadow: none;
-}
-.telegram-groups > div:first-child {
-  display: flex;
-  align-items: center;
-  min-height: 67px;
-  padding: 16px 0 12px;
-  border: 0;
-}
-.telegram-groups h2 {
-  color: #171917;
-  font-size: 28px;
-  line-height: 1;
-}
-.telegram-groups table {
-  width: 100%;
-  font-size: 13px;
-  table-layout: fixed;
-}
-.telegram-groups th {
-  padding: 11px 10px 14px;
-  color: #73776f;
-  font-size: 11px;
-  font-weight: 500;
-}
-.telegram-groups th:nth-child(2) {
-  width: 80px;
-}
-.telegram-groups th:nth-child(3) {
-  width: 60px;
-}
-.telegram-groups th:nth-child(4) {
-  width: 66px;
-}
-.telegram-groups th:nth-child(5) {
-  width: 110px;
-}
-.telegram-groups th:nth-child(6) {
-  width: 124px;
-}
-.telegram-groups th:nth-child(7) {
-  width: 82px;
-}
-.telegram-groups td {
-  height: 87px;
-  padding: 14px 10px;
-}
-.telegram-groups th:not(:first-child),
-.telegram-groups td:not(:first-child) {
-  overflow: hidden;
-}
-.telegram-groups th:first-child,
-.telegram-groups td:first-child {
-  width: auto;
-  padding-left: 0;
-  border-left: 0;
-}
-.telegram-groups td:first-child > div {
-  min-width: 0;
-}
-.telegram-groups td:first-child > div > div {
-  min-width: 0;
-}
-.telegram-groups th:last-child,
-.telegram-groups td:last-child {
-  padding-right: 0;
-}
-.telegram-groups th:not(:first-child),
-.telegram-groups td:not(:first-child) {
-  border-left: 1px solid #e9e9e4;
-}
-.telegram-groups tr {
-  border-color: #e9e9e4 !important;
-}
-.telegram-groups tbody tr:hover {
-  background: #fafaf7 !important;
-}
-.telegram-groups td:first-child > div > div:first-child {
-  width: 46px;
-  height: 46px;
-  background: #242624;
-  font-size: 13px;
-}
-.telegram-groups td:first-child p:first-child {
-  color: #1c1e1c;
-  font-size: 13px;
-}
-.telegram-groups td:first-child p:last-child,
-.telegram-groups td:nth-child(2) {
-  color: #7c7f77;
-  font-size: 11px;
-}
-.telegram-groups a:hover,
-.telegram-groups button:hover {
-  color: var(--tg-orange) !important;
-  background: #ff693b0d !important;
-}
-.telegram-groups .bg-emerald-50 {
-  border: 1px solid #c7ebd6;
-  background: #f0f9f3;
-  color: #24864e;
-}
-.telegram-guide {
-  min-width: 0;
-}
-.telegram-guide > section {
-  padding: 24px;
-  border: 1px solid #d8d9d2;
-  border-radius: 5px;
-  background: #fff;
-}
-.telegram-guide h2 {
-  color: #171917;
-  font-size: 25px;
-  line-height: 1.1;
-  text-transform: uppercase;
-}
-.telegram-guide ol {
-  position: relative;
-  display: grid;
-  gap: 0;
-  padding: 0;
-  margin: 30px 0 0;
-  list-style: none;
-}
-.telegram-guide li {
-  position: relative;
-  display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
-  gap: 12px;
-  padding-bottom: 34px;
-}
-.telegram-guide li:last-child {
-  padding-bottom: 0;
-}
-.telegram-guide li > span {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #edeef0;
-  color: #636771;
-  font-family: "Oswald", sans-serif;
-  font-size: 22px;
-  font-weight: 600;
-  line-height: 1;
-}
-.telegram-guide li p {
-  margin: 0;
-}
-.telegram-guide li p:first-child {
-  color: #1b1d1b;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.4;
-}
-.telegram-guide li p:last-child {
-  margin-top: 4px;
-  color: #73776f;
-  font-size: 12px;
-  line-height: 1.5;
-}
-.telegram-guide-support {
-  margin-top: 34px;
-  padding-top: 20px;
-  border-top: 1px solid #d8d9d2;
-}
-.telegram-guide-support a {
-  display: flex;
-  align-items: flex-start;
-  gap: 11px;
-  color: #60635d;
-  font-size: 11px;
-}
-.telegram-guide-support svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  color: #252725;
-}
-.telegram-guide-support strong {
-  display: block;
-  color: #4a4c47;
-  font-weight: 600;
-  text-decoration: underline;
-}
-.telegram-guide-support a:hover strong {
-  color: var(--tg-orange);
-}
-.telegram-main > .flex.min-h-\[440px\] {
-  min-height: 400px;
-  border-color: #dedfd9;
-  border-radius: 8px;
-  box-shadow: none;
+  min-height: 100vh;
 }
 
-/* ── Add/Edit group dialog (matches "Створити ціль") ── */
-.tg-group-dialog {
-  width: calc(100% - 32px);
-  max-width: 480px;
-  max-height: 90dvh;
+/* ---------- Dialog shell (overrides shadcn DialogContent defaults) ---------- */
+.mqt-dialog.mqt-dialog {
   display: flex;
   flex-direction: column;
   gap: 0;
+  width: calc(100% - 32px);
+  max-width: 560px;
+  max-height: calc(100dvh - 32px);
   padding: 0;
   overflow: hidden;
-  border: 1px solid #454740;
-  border-radius: 7px;
+  border: 0;
+  border-radius: 28px;
   background: #fff;
-  color: #171916;
-  font-family: "Manrope", sans-serif;
+  box-shadow:
+    0 1px 2px #1718190d,
+    0 30px 70px #17181959;
+  color: #171819;
+  font-family: Manrope, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
-.tg-group-dialog > button {
-  color: #fff;
-  top: 18px;
-  right: 18px;
+.mqt-dialog.is-wide {
+  max-width: 780px;
 }
-.tg-group-header {
-  flex-shrink: 0;
-  padding: 22px 26px;
-  background: #171916;
-  text-align: left;
+.mqt-dialog.is-narrow {
+  max-width: 480px;
 }
-.tg-group-header h2 {
-  font:
-    600 32px/1.2 "Oswald",
-    sans-serif;
-  color: #f8f8f5;
-  text-transform: uppercase;
-  padding-right: 24px;
-  margin: 0;
-}
-.tg-group-header p {
-  font-size: 14px;
-  color: #caccce;
-  margin-top: 7px;
-}
-.tg-group-body {
-  padding: 20px 24px;
-  overflow-y: auto;
-  min-height: 0;
-}
-.tg-group-body > * + * {
-  margin-top: 18px;
-}
-.tg-group-body label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #171916;
-}
-.tg-group-body input {
-  height: 40px;
-  border: 1px solid #cfd1ce;
-  border-radius: 5px;
-  background: #fff;
-  font-size: 14px;
-  box-shadow: none;
-}
-.tg-group-body textarea {
-  min-height: 64px;
-  padding: 9px 12px;
-  border: 1px solid #cfd1ce;
-  border-radius: 5px;
-  background: #fff;
-  font-size: 14px;
-  line-height: 1.5;
-  resize: vertical;
-  box-shadow: none;
-}
-.tg-group-body select {
-  width: 100%;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid #cfd1ce;
-  border-radius: 5px;
-  background: #fff;
-  font-size: 14px;
-  color: #171916;
-  box-shadow: none;
-  cursor: pointer;
-}
-.tg-group-games {
-  display: flex;
-  gap: 10px;
-}
-.tg-group-body .tg-group-game-option {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 10px 12px;
-  border: 1px solid #e7e9e5;
-  border-radius: 8px;
-  background: #fafbfa;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  color: #171916;
-}
-.tg-group-body .tg-group-game-option input {
-  flex-shrink: 0;
-  height: 16px;
-  width: 16px;
-  margin: 0;
-  accent-color: #ff693b;
-  cursor: pointer;
-}
-.tg-group-body input:focus-visible,
-.tg-group-body textarea:focus-visible,
-.tg-group-body select:focus-visible {
+.mqt-dialog :is(button, a, input, textarea):focus-visible {
   outline: 2px solid #ff693b;
   outline-offset: 2px;
-  --tw-ring-color: transparent;
-  border-color: #cfd1ce;
 }
-.tg-group-body label.tg-group-channel-toggle {
+
+.mqt-dialog-head {
   display: flex;
+  flex: none;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 30px 32px 28px;
+  background: #111213;
+  color: #fff;
+}
+.mqt-dialog-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.mqt-dialog-kicker {
+  margin: 0;
+  color: #ff693b;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.mqt-dialog-kicker.is-danger {
+  margin-bottom: 10px;
+  color: #b02e12;
+}
+.mqt-dialog h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: clamp(26px, 4vw, 34px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+}
+.mqt-dialog-head h2 {
+  color: #fff;
+}
+.mqt-dialog-head p:not(.mqt-dialog-kicker) {
+  margin: 0;
+  color: #c9c9c6;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.mqt-dialog-meta {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin: 18px 0 0;
-  padding: 12px 14px;
-  border: 1px solid #e7e9e5;
-  border-radius: 8px;
-  background: #fafbfa;
+}
+.mqt-dialog-meta p:not(.mqt-dialog-kicker) {
+  color: #a9aaad;
+}
+.mqt-chip.is-private {
+  border-color: #ff693b59;
+  background: #ff693b26;
+  color: #ffb59c;
+}
+.mqt-dialog-close {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  border: 1px solid #ffffff2b;
+  border-radius: 50%;
+  background: transparent;
+  color: #c9c9c6;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  color: #171916;
 }
-.tg-group-body label.tg-group-channel-toggle input {
-  flex-shrink: 0;
-  height: 18px;
-  width: 18px;
-  margin: 0;
-  accent-color: #ff693b;
-  cursor: pointer;
+.mqt-dialog-close:hover {
+  background: #ffffff14;
+  color: #fff;
 }
-.tg-group-body label.tg-group-channel-toggle span {
-  user-select: none;
+.mqt-dialog-close.is-light {
+  border-color: #17181926;
+  color: #686960;
 }
-.tg-detail-body {
-  padding: 16px 24px;
+.mqt-dialog-close.is-light:hover {
+  background: #f6f5f1;
+  color: #171819;
+}
+
+.mqt-dialog-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+  padding: 28px 32px 30px;
   overflow-y: auto;
 }
-.tg-detail-head {
+.mqt-dialog.is-wide .mqt-dialog-body {
+  gap: 24px;
+}
+.mqt-dialog-foot {
   display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 18px 32px;
+  border-top: 1px solid #1718191a;
+  background: #fbfaf7;
+}
+.mqt-dialog-foot.is-split {
+  justify-content: space-between;
+}
+
+/* ---------- Form ---------- */
+.mqt-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.mqt-field > label,
+.mqt-field > legend {
+  padding: 0;
+  color: #171819;
+  font-size: 13px;
+  font-weight: 600;
+}
+.mqt-field > legend {
+  margin-bottom: 8px;
+}
+.mqt-field input,
+.mqt-field textarea {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid #17181926;
+  background: #fff;
+  color: #171819;
+  font: 500 14px/1.5 Manrope, system-ui, sans-serif;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.mqt-field input {
+  height: 48px;
+  padding: 0 18px;
+  border-radius: 999px;
+}
+.mqt-field textarea {
+  min-height: 92px;
+  padding: 14px 18px;
+  border-radius: 20px;
+  resize: vertical;
+}
+.mqt-field input::placeholder,
+.mqt-field textarea::placeholder {
+  color: #8a8b85;
+}
+.mqt-field input:focus,
+.mqt-field textarea:focus {
+  border-color: #ff693b;
+  box-shadow: 0 0 0 3px #ff693b33;
+  outline: none;
+}
+.mqt-field small {
+  padding-left: 18px;
+  color: #686960;
+  font-size: 12px;
+}
+.mqt-pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.mqt-check {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  height: 48px;
+  padding: 0 20px;
+  border: 1px solid #17181926;
+  border-radius: 999px;
+  background: #fff;
+  color: #171819;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    color 0.15s;
 }
-.tg-detail-head strong {
-  font-size: 15px;
-  color: #171916;
+.mqt-check.is-on {
+  border-color: #171819;
+  background: #171819;
+  color: #fff;
 }
-.tg-detail-stats {
+.mqt-check input,
+.mqt-toggle input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: #ff693b;
+}
+.mqt-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: #f6f5f1;
+  cursor: pointer;
+}
+.mqt-toggle input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+.mqt-toggle span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mqt-toggle strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.mqt-toggle small {
+  color: #686960;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ---------- Buttons ---------- */
+.mqt-btn-outline,
+.mqt-btn-dark,
+.mqt-btn-danger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 20px;
+  border: 1px solid #17181926;
+  border-radius: 999px;
+  background: transparent;
+  color: #171819;
+  font: 500 14px/1 Manrope, system-ui, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
+}
+.mqt-btn-outline:hover {
+  border-color: #17181966;
+}
+.mqt-btn-dark {
+  border-color: #171819;
+  background: #171819;
+  color: #fff;
+}
+.mqt-btn-dark:hover {
+  background: #2a2c2e;
+}
+.mqt-btn-danger {
+  border-color: #b02e12;
+  background: #b02e12;
+  color: #fff;
+}
+.mqt-btn-danger:hover {
+  background: #952510;
+}
+/* ---------- Statistics ---------- */
+.mqt-note {
+  margin: 0;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: #f6f5f1;
+  color: #3e3f3a;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.mqt-tiles {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
-  margin: 16px 0;
 }
-.tg-detail-stats > div {
-  background: #f7f8f7;
-  border: 1px solid #edf0ed;
-  border-radius: 8px;
-  padding: 10px 8px;
-  text-align: center;
-  min-width: 0;
-}
-.tg-detail-stats span {
-  display: block;
-  font-size: 11px;
-  line-height: 16px;
-  color: #8a908b;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.tg-detail-stats strong {
-  display: block;
-  margin-top: 2px;
-  font-size: 18px;
-  font-weight: 700;
-  color: #171916;
-}
-.tg-detail-chart-section {
-  margin-top: 14px;
-}
-.tg-detail-chart-section h3 {
-  font-size: 13px;
-  font-weight: 600;
-  color: #171916;
-  margin-bottom: 10px;
-}
-.tg-detail-chart {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  height: 130px;
-  padding-top: 6px;
-}
-.tg-detail-bar {
-  flex: 1;
-  min-width: 0;
-  height: 100%;
+.mqt-tile {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: #f6f5f1;
 }
-.tg-detail-bar-track {
-  flex: 1;
-  width: 100%;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  background: #f2f4f2;
-  border-radius: 4px;
-  overflow: hidden;
-}
-.tg-detail-bar-fill {
-  width: 60%;
-  border-radius: 3px 3px 0 0;
-}
-.tg-detail-bar-fill.is-win {
-  background: #10b981;
-}
-.tg-detail-bar-fill.is-loss {
-  background: #ef4444;
-}
-.tg-detail-bar-label {
+.mqt-tile span {
+  color: #686960;
   font-size: 10px;
-  color: #8a908b;
-  margin-top: 4px;
-  white-space: nowrap;
-}
-.tg-group-footer {
-  flex-shrink: 0;
-  padding: 14px 20px;
-  gap: 10px;
-  border-top: 1px solid #dedfdb;
-}
-.tg-group-footer button {
-  border-radius: 5px;
-  height: 42px;
-  padding: 0 20px;
-  font-size: 14px;
   font-weight: 600;
-  box-shadow: none;
-}
-.tg-group-footer button[data-slot="dialog-footer"] {
-  border-radius: 5px;
-}
-.tg-group-footer .tg-group-submit {
-  background: #ff693b;
-  color: #171916;
-}
-.tg-group-footer .tg-group-submit:hover {
-  background: #f25b2e;
-}
-
-/* ── Delete group confirm (matches "Створити ціль") ── */
-.tg-delete-header {
-  flex-shrink: 0;
-  padding: 22px 26px;
-  background: #171916;
-  text-align: left;
-}
-.tg-delete-header h2 {
-  font:
-    600 32px/1.2 "Oswald",
-    sans-serif;
-  color: #f8f8f5;
-  text-transform: uppercase;
-  padding-right: 24px;
-  margin: 0;
-}
-.tg-delete-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #ff693b;
-  color: #171916;
-  flex-shrink: 0;
-}
-.tg-delete-body {
-  padding: 24px;
-  display: grid;
-  gap: 16px;
-  overflow-y: auto;
-  min-height: 0;
-}
-.tg-delete-name {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 18px;
-  background: #f3f4f4;
-  border: 1px solid #cfd1ce;
-  border-radius: 5px;
-}
-.tg-delete-name p {
-  color: #171916;
-  margin: 0;
-}
-.tg-delete-warning {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 14px 16px;
-  background: #fff;
-  border: 1px solid #f3c2c2;
-  border-radius: 5px;
-}
-.tg-delete-warning p {
-  color: #991b1b;
-  font-size: 13px;
-  line-height: 1.5;
-  margin: 0;
-}
-.tg-group-footer .tg-delete-submit {
-  background: #dc2626;
-  color: #fff;
-}
-.tg-group-footer .tg-delete-submit:hover {
-  background: #b91c1c;
-}
-
-/* ── Telegram group dialogs ────────────────────────────────────────────────
-   The group form and statistics are one dialog family: a restrained graphite
-   identity strip, a readable form/metric surface and a single coral action. */
-.tg-group-dialog {
-  width: min(560px, calc(100vw - 32px)) !important;
-  max-width: 560px !important;
-  border-color: #343936;
-  border-radius: 14px;
-  box-shadow: 0 28px 84px rgb(7 10 8 / 38%);
-}
-
-.tg-detail-dialog {
-  width: min(680px, calc(100vw - 32px)) !important;
-  max-width: 680px !important;
-}
-
-.tg-group-dialog > button {
-  top: 21px;
-  right: 21px;
-  z-index: 2;
-  border-radius: 7px;
-  color: rgb(255 255 255 / 78%);
-}
-
-.tg-group-dialog > button:hover {
-  background: rgb(255 255 255 / 10%);
-  color: #fff;
-}
-
-.tg-group-header {
-  padding: 27px 58px 26px 28px;
-  background: #171a1b;
-}
-
-.tg-dialog-eyebrow {
-  margin: 0 0 7px;
-  color: var(--tg-orange);
-  font-size: 11px;
-  font-weight: 800;
   letter-spacing: 0.09em;
-  line-height: 1.15;
   text-transform: uppercase;
 }
-
-.tg-group-header h2 {
-  font-family: "Manrope", sans-serif;
-  font-size: clamp(26px, 4vw, 32px);
-  font-weight: 800;
-  letter-spacing: -0.045em;
+.mqt-tile strong {
+  font-size: 24px;
+  font-weight: 500;
   line-height: 1.1;
-  text-transform: none;
-}
-
-.tg-group-header p:last-child {
-  margin: 8px 0 0;
-  color: #c5c9c6;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.tg-group-body {
-  display: grid;
-  gap: 19px;
-  padding: 27px 28px 31px;
-}
-
-.tg-group-body > * + * {
-  margin-top: 0;
-}
-
-.tg-group-body label:not(.tg-group-channel-toggle) {
-  margin-bottom: 8px;
-  color: #202421;
-  font-size: 13px;
-  font-weight: 750;
-}
-
-.tg-group-body input,
-.tg-group-body textarea {
-  border-color: #d4d7d3;
-  border-radius: 9px;
-  background: #fff;
-  color: #171a18;
-}
-
-.tg-group-body input {
-  height: 48px;
-  padding-inline: 14px;
-}
-
-.tg-group-body textarea {
-  min-height: 98px;
-  padding: 13px 14px;
-  resize: vertical;
-}
-
-.tg-group-body input::placeholder,
-.tg-group-body textarea::placeholder {
-  color: #9a9f9a;
-}
-
-.tg-group-body input:focus-visible,
-.tg-group-body textarea:focus-visible {
-  border-color: var(--tg-orange);
-  outline: 3px solid rgb(255 105 59 / 13%);
-  outline-offset: 0;
-}
-
-.tg-group-body label.tg-group-channel-toggle {
-  align-items: flex-start;
-  gap: 13px;
-  margin: 1px 0 0;
-  padding: 15px 16px;
-  border-color: #e1e4df;
-  border-radius: 10px;
-  background: #fafbf9;
-  font-weight: 400;
-}
-
-.tg-group-body label.tg-group-channel-toggle input {
-  width: 19px;
-  height: 19px;
-  margin-top: 1px;
-  border-radius: 5px;
-}
-
-.tg-group-body label.tg-group-channel-toggle span {
-  display: grid;
-  gap: 3px;
-}
-
-.tg-group-body label.tg-group-channel-toggle strong {
-  color: #202421;
-  font-size: 14px;
-  line-height: 1.35;
-}
-
-.tg-group-body label.tg-group-channel-toggle small {
-  color: #7d837d;
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-.tg-group-footer {
-  justify-content: flex-end;
-  padding: 18px 28px;
-  border-color: #e1e3df;
-  background: #fbfcfa;
-}
-
-.tg-group-footer button {
-  height: 46px;
-  min-width: 124px;
-  border-radius: 9px;
-  font-size: 14px;
-}
-
-.tg-group-footer .tg-group-submit {
-  min-width: 148px;
-  background: var(--tg-orange);
-  color: #fff;
-}
-
-.tg-group-footer .tg-group-submit:hover {
-  background: #ec5830;
-}
-
-.tg-detail-header {
-  display: flex;
-  flex-direction: row !important;
-  align-items: center;
-  gap: 16px;
-  padding: 25px 58px 24px 28px;
-  background: #171a1b;
-  color: #fff;
-  text-align: left;
-}
-
-.tg-detail-header > div:first-child {
-  width: 58px;
-  height: 58px;
-  border: 2px solid rgb(255 255 255 / 12%);
-}
-
-.tg-detail-header-copy {
-  min-width: 0;
-}
-
-.tg-detail-header h2 {
-  overflow: hidden;
-  margin: 0;
-  color: #fff;
-  font-family: "Manrope", sans-serif;
-  font-size: clamp(21px, 3vw, 27px);
-  font-weight: 800;
   letter-spacing: -0.04em;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
-
-.tg-detail-header p:last-child {
-  margin: 5px 0 0;
-  color: #c5c9c6;
-  font-size: 13px;
+.mqt-dialog .is-up {
+  color: #1d7a46;
 }
-
-.tg-detail-body {
-  padding: 27px 28px 29px;
-  background: #fff;
+.mqt-dialog .is-down {
+  color: #b02e12;
 }
-
-.tg-detail-head {
-  display: none;
-}
-
-.tg-detail-stats {
-  gap: 12px;
-  margin: 0;
-}
-
-.tg-detail-stats > div {
-  min-height: 105px;
-  padding: 17px 10px 14px;
-  border-color: #e5e8e4;
-  border-radius: 11px;
-  background: #f8f9f7;
-}
-
-.tg-detail-stats span {
-  color: #7d837d;
-  font-size: 11px;
-  line-height: 1.35;
-}
-
-.tg-detail-stats strong {
-  display: grid;
-  min-height: 44px;
-  place-items: center;
-  margin-top: 5px;
-  color: #161a17;
-  font-size: 22px;
-  line-height: 1.14;
-}
-
-.tg-detail-chart-section {
-  margin-top: 25px;
-}
-
-.tg-detail-chart-section h3 {
-  margin: 0 0 12px;
-  color: #202421;
-  font-size: 15px;
-  font-weight: 800;
-}
-
-.tg-detail-empty-chart {
-  display: grid;
-  min-height: 140px;
-  place-content: center;
-  gap: 4px;
-  padding: 20px;
-  border: 1px solid #edf0eb;
-  border-radius: 11px;
-  background: #fafbf9;
-  color: #727971;
-  text-align: center;
-}
-
-.tg-detail-empty-chart strong {
-  color: #4f564f;
-  font-size: 14px;
-}
-
-.tg-detail-empty-chart p {
-  max-width: 310px;
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
-}
-.tg-empty {
+.mqt-chart-section {
   display: flex;
-  min-height: 310px;
   flex-direction: column;
+  gap: 14px;
+}
+.mqt-chart-head {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 36px 20px;
-  border: 1px solid #dedfd9;
-  border-radius: 8px;
-  background: #fff;
-  color: #73776f;
-  text-align: center;
+  justify-content: space-between;
+  gap: 10px;
 }
-.tg-empty strong {
-  color: #171917;
-  font-family: "Oswald", "Arial Narrow", sans-serif;
-  font-size: 25px;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-.tg-empty p {
+.mqt-chart-head h3 {
   margin: 0;
-  font-size: 13px;
-  max-width: 320px;
+  font-size: 15px;
+  font-weight: 600;
 }
-.tg-empty .tg-empty-button {
+.mqt-legend {
+  display: flex;
+  gap: 16px;
+  color: #686960;
+  font-size: 12px;
+}
+.mqt-legend span {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 10px;
-  min-height: 42px;
-  padding: 8px 18px;
-  border: 1px solid #ff693b;
-  border-radius: 7px;
+  gap: 6px;
+}
+.mqt-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+.mqt-legend i.is-plus,
+.mqt-chart-up i {
   background: #ff693b;
-  color: #fff;
+}
+.mqt-legend i.is-minus,
+.mqt-chart-down i {
+  background: #171819;
+}
+.mqt-chart {
+  display: flex;
+  justify-content: space-around;
+  gap: 14px;
+  height: 190px;
+  padding: 18px 18px 12px;
+  border: 1px solid #1718191a;
+  border-radius: 18px;
+}
+.mqt-chart-col {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  max-width: 96px;
+}
+.mqt-chart-up,
+.mqt-chart-down {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+.mqt-chart-up {
+  justify-content: flex-end;
+  border-bottom: 1px solid #17181933;
+}
+.mqt-chart-up i {
+  border-radius: 6px 6px 0 0;
+}
+.mqt-chart-down i {
+  border-radius: 0 0 6px 6px;
+}
+.mqt-chart-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding-top: 8px;
+}
+.mqt-chart-label b {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.mqt-chart-label small {
+  color: #686960;
+  font-size: 11px;
+}
+.mqt-chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 36px 20px;
+  border: 1px dashed #17181933;
+  border-radius: 18px;
+  text-align: center;
+}
+.mqt-chart-empty strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+.mqt-chart-empty p {
+  margin: 0;
+  color: #686960;
+  font-size: 13px;
+}
+
+/* ---------- Delete ---------- */
+.mqt-dialog-body.is-delete {
+  gap: 18px;
+  padding-bottom: 26px;
+}
+.mqt-delete-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.mqt-delete-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #f8e7e2;
+  color: #b02e12;
+}
+.mqt-delete-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: #f6f5f1;
+}
+.mqt-delete-card > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.mqt-delete-card strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+.mqt-delete-card small {
+  color: #686960;
+  font-size: 13px;
+}
+.mqt-danger-text {
+  margin: 0;
+  color: #8a2e10;
   font-size: 14px;
-  font-weight: 700;
+  line-height: 1.6;
 }
-.tg-empty .tg-empty-button:hover {
-  background: #ff825d;
-  border-color: #ff825d;
+
+@media (max-width: 640px) {
+  .mqt-dialog-head,
+  .mqt-dialog-body {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+  .mqt-dialog-foot {
+    padding: 14px 22px;
+  }
+  .mqt-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mqt-dialog-foot > * {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
+/* ---------- Orange landing pill with icon swap (page + dialogs) ---------- */
+.mqt-pill {
+  --mqt-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  height: 48px;
+  padding: 0 6px 0 22px;
+  overflow: hidden;
+  isolation: isolate;
+  border: 0;
+  border-radius: 999px;
+  background: #ff693b;
+  color: #111213;
+  font: 600 14px/1 Manrope, system-ui, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    transform 0.2s var(--mqt-ease),
+    background-color 0.15s;
+}
+.mqt-pill:hover {
+  background: #ff7d55;
+}
+.mqt-pill:active {
+  transform: scale(0.98);
+}
+.mqt-pill-in,
+.mqt-pill-out {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #111213;
   color: #fff;
+  transition: transform 0.52s var(--mqt-ease);
 }
-@media (max-width: 1400px) {
-  .telegram-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .telegram-guide ol {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
-  }
-  .telegram-guide li {
-    grid-template-columns: 40px minmax(0, 1fr);
-  }
-  .telegram-guide-support {
-    max-width: 300px;
-  }
+.mqt-pill-in {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translate(calc(-100% - 10px), -50%);
 }
-@media (max-width: 720px) {
-  .telegram-hero {
-    padding: 26px 20px 0;
+.mqt-pill-label {
+  display: inline-block;
+  transition: transform 0.52s var(--mqt-ease);
+}
+.mqt-pill.is-on-dark .mqt-pill-in,
+.mqt-pill.is-on-dark .mqt-pill-out {
+  background: #fff;
+  color: #111213;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mqt-pill:hover .mqt-pill-in,
+  .mqt-pill:focus-visible .mqt-pill-in {
+    transform: translate(0, -50%);
   }
-  .telegram-heading {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 17px;
+  .mqt-pill:hover .mqt-pill-label,
+  .mqt-pill:focus-visible .mqt-pill-label {
+    transform: translateX(34px);
   }
-  .telegram-heading > button {
-    width: 100%;
-  }
-  .telegram-heading::after {
-    display: none;
-  }
-  .telegram-metrics {
-    margin-top: 25px;
-  }
-  .telegram-metrics > div {
-    grid-template-columns: 1fr 1fr;
-    gap: 20px 0;
-    padding: 22px 0;
-  }
-  .telegram-metrics > div > div {
-    padding: 0 16px;
-  }
-  .telegram-metrics > div > div:nth-child(odd) {
-    border-left: 0;
-    padding-left: 0;
-  }
-  .telegram-metrics p:first-child {
-    font-size: 34px;
-  }
-  .telegram-grid {
-    gap: 23px;
-    padding: 20px 16px 34px;
-  }
-  .telegram-main > section.space-y-4 > div:first-child {
-    grid-template-columns: 1fr;
-  }
-  .telegram-guide ol {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
-  .tg-group-dialog,
-  .tg-detail-dialog {
-    width: calc(100vw - 24px) !important;
-    max-height: calc(100dvh - 24px);
-  }
-
-  .tg-group-header,
-  .tg-detail-header {
-    padding: 22px 50px 21px 20px;
-  }
-
-  .tg-group-header h2 {
-    font-size: 27px;
-  }
-
-  .tg-detail-header {
-    gap: 12px;
-  }
-
-  .tg-detail-header > div:first-child {
-    width: 46px;
-    height: 46px;
-  }
-
-  .tg-detail-header h2 {
-    font-size: 20px;
-  }
-
-  .tg-group-body,
-  .tg-detail-body {
-    padding: 21px 20px 23px;
-  }
-
-  .tg-detail-stats {
-    gap: 8px;
-  }
-
-  .tg-detail-stats > div {
-    min-height: 88px;
-    padding: 12px 5px 10px;
-  }
-
-  .tg-detail-stats strong {
-    min-height: 35px;
-    font-size: 18px;
-  }
-
-  .tg-group-footer {
-    padding: 14px 20px;
-  }
-
-  .tg-group-footer button,
-  .tg-group-footer .tg-group-submit {
-    min-width: 0;
-    flex: 1;
+  .mqt-pill:hover .mqt-pill-out,
+  .mqt-pill:focus-visible .mqt-pill-out {
+    transform: translateX(calc(100% + 10px));
   }
 }
+
+/* ---------- Rounded select (sort) ---------- */
+.mqt-select.mqt-select {
+  width: auto;
+  min-width: 190px;
+  height: 44px;
+  gap: 10px;
+  padding: 0 14px 0 18px;
+  border: 1px solid #17181926;
+  border-radius: 999px;
+  background: #fff;
+  color: #171819;
+  font: 500 14px Manrope, system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.mqt-select.mqt-select:hover,
+.mqt-select.mqt-select[data-state="open"] {
+  border-color: #17181966;
+}
+.mqt-select.mqt-select:focus {
+  box-shadow: none;
+}
+.mqt-select.mqt-select:focus-visible {
+  outline: 2px solid #ff693b;
+  outline-offset: 2px;
+}
+.mqt-select.mqt-select > svg {
+  opacity: 0.6;
+  transition: transform 0.2s;
+}
+.mqt-select.mqt-select[data-state="open"] > svg {
+  transform: rotate(180deg);
+}
+.mqt-select-menu.mqt-select-menu {
+  min-width: var(--radix-select-trigger-width);
+  padding: 2px;
+  border: 1px solid #1718191a;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow:
+    0 1px 2px #1718190d,
+    0 14px 34px #17181924;
+  color: #171819;
+  font-family: Manrope, system-ui, sans-serif;
+}
+.mqt-select-menu [role="option"] {
+  min-height: 40px;
+  padding: 0 12px 0 34px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.mqt-select-menu [role="option"][data-highlighted] {
+  background: #f6f5f1;
+  color: #171819;
+}
+.mqt-select-menu [role="option"][data-state="checked"] {
+  color: #e2501f;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .telegram-page *,
-  .telegram-page *::before,
-  .telegram-page *::after {
-    transition: none !important;
+  .mqt-pill,
+  .mqt-pill-in,
+  .mqt-pill-out,
+  .mqt-pill-label {
+    transition: none;
   }
 }

@@ -293,36 +293,32 @@ export default function ProfileOverview(p: Props) {
         </div>
       </section>
 
-      <nav className="mqp-metrics" aria-label="Огляд вашого журналу">
-        {metrics.map(({ label, value, Icon, href, cta }) => (
+      <nav className="mqp-metrics is-strip" aria-label="Огляд вашого журналу">
+        {metrics.map(({ label, value, href, cta }) => (
           <Link
             className={`mqp-metric${value ? "" : " is-empty"}`}
             to={href}
             key={href}
           >
-            <span className="mqp-metric-top">
-              <span className="mqp-icon">
-                <Icon size={19} strokeWidth={1.8} aria-hidden="true" />
-              </span>
-              {value ? (
+            <span className="mqp-metric-label">{label}</span>
+            <strong className="mqp-count">
+              <CountUp value={value} />
+            </strong>
+            {value ? (
+              <span className="mqp-metric-note">
+                Відкрити
                 <ArrowUpRight
                   className="mqp-metric-arrow"
-                  size={16}
+                  size={14}
                   aria-hidden="true"
                 />
-              ) : (
-                <span className="mqp-metric-cta">
-                  {cta}
-                  <i aria-hidden="true">+</i>
-                </span>
-              )}
-            </span>
-            <span className="mqp-metric-copy">
-              <strong className="mqp-count">
-                <CountUp value={value} />
-              </strong>
-              <small>{label}</small>
-            </span>
+              </span>
+            ) : (
+              <span className="mqp-metric-cta">
+                {cta}
+                <i aria-hidden="true">+</i>
+              </span>
+            )}
           </Link>
         ))}
       </nav>

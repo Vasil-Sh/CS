@@ -128,7 +128,7 @@ describe("Telegram", () => {
       </TestWrapper>,
     );
     expect(
-      screen.getByRole("heading", { name: /Всі ваші джерела/ }),
+      screen.getByRole("heading", { name: /Telegram-групи/ }),
     ).toBeTruthy();
   });
 });

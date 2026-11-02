@@ -1,83 +1,43 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { api } from "@/lib/apiClient";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { UserDataService } from "@/lib/userDataService";
 import { useAuth } from "@/contexts/AuthContext";
 import { logRender } from "@/lib/devLogger";
 import { toast } from "sonner";
-import {
-  Trash2,
-  Users,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  Pencil,
-  X,
-  AlertTriangle,
-  RefreshCw,
-  Megaphone,
-} from "lucide-react";
-import TelegramDashboard from "./TelegramDashboard";
-import { CHART_CARD_SHADOW } from "@/lib/cardStyles";
+import { Check, Lock, Pencil, Trash2, X } from "lucide-react";
+import TelegramDashboard, {
+  ChannelAvatar,
+  GameChip,
+  SwapPill,
+  channelGames,
+  money,
+  tgHandle,
+} from "./TelegramDashboard";
+import "@/pages/telegram.css";
 
 // ── Helpers ──
 
-/** Extract handle from Telegram link for display */
-function tgHandle(link: string): string {
-  if (!link) return "";
-  const match = link.match(/t\.me\/(?:s\/)?([^/\s?#]+)/);
-  return match ? "@" + match[1] : link;
+/** Ukrainian plural: 1 ставка, 2 ставки, 5 ставок. */
+function plural(n: number, one: string, few: string, many: string) {
+  const a = Math.abs(n) % 100;
+  const b = a % 10;
+  if (a > 10 && a < 20) return many;
+  if (b === 1) return one;
+  if (b >= 2 && b <= 4) return few;
+  return many;
 }
 
-/** Raw username (no "@") from a Telegram link — used to build the avatar URL */
-function tgUsername(link: string): string {
-  return tgHandle(link).replace(/^@/, "");
-}
-
-/** Group avatar: real Telegram photo with a group icon fallback */
-function GroupAvatar({ link, name }: { link: string; name: string }) {
-  const [failed, setFailed] = useState(false);
-  const username = tgUsername(link);
-  const showPhoto = Boolean(username) && !failed;
-  return (
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#0c2347] text-white">
-      {showPhoto ? (
-        <img
-          src={`https://t.me/i/userpic/320/${username}.jpg`}
-          alt={name}
-          loading="lazy"
-          className="h-full w-full object-cover"
-          onError={() => setFailed(true)}
-          onLoad={(e) => {
-            if (e.currentTarget.naturalWidth <= 1) setFailed(true);
-          }}
-        />
-      ) : (
-        <Users size={20} strokeWidth={1.75} />
-      )}
-    </div>
-  );
-}
+const signedPct = (value: number) =>
+  `${value > 0 ? "+" : value < 0 ? "−" : ""}${Math.abs(value).toFixed(0)}%`;
+const toneOf = (value: number) =>
+  value > 0 ? "is-up" : value < 0 ? "is-down" : "";
 
 function MonthlyProfitBars({
   data,
@@ -86,20 +46,26 @@ function MonthlyProfitBars({
 }) {
   const maxAbs = Math.max(1, ...data.map((d) => Math.abs(d.profit)));
   return (
-    <div className="tg-detail-chart">
+    <div
+      className="mqt-chart"
+      role="img"
+      aria-label={`Прибуток по місяцях: ${data.map((d) => `${d.month} ${money(d.profit)}`).join(", ")}`}
+    >
       {data.map((d, i) => {
-        const h = Math.max(5, (Math.abs(d.profit) / maxAbs) * 100);
+        const height = `${(Math.abs(d.profit) / maxAbs) * 100}%`;
         return (
-          <div className="tg-detail-bar" key={`${d.month}-${i}`}>
-            <div className="tg-detail-bar-track">
-              <div
-                className={`tg-detail-bar-fill ${d.profit >= 0 ? "is-win" : "is-loss"}`}
-                style={{ height: `${h}%` }}
-                title={`${d.month}: ${d.profit >= 0 ? "+" : ""}${d.profit.toFixed(0)} ₴`}
-              />
-            </div>
-            <span className="tg-detail-bar-label">{d.month}</span>
-          </div>
+          <span className="mqt-chart-col" key={`${d.month}-${i}`}>
+            <span className="mqt-chart-up">
+              {d.profit > 0 && <i style={{ height }} />}
+            </span>
+            <span className="mqt-chart-down">
+              {d.profit < 0 && <i style={{ height }} />}
+            </span>
+            <span className="mqt-chart-label">
+              <b className={toneOf(d.profit)}>{money(d.profit)}</b>
+              <small>{d.month}</small>
+            </span>
+          </span>
         );
       })}
     </div>
@@ -258,12 +224,8 @@ export default function TelegramGroups() {
     null,
   );
 
-  // Filters & sort
-  const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>("all");
-  const [resultFilter, setResultFilter] = useState<string>("all");
+  // Group details
   const [detailGroupId, setDetailGroupId] = useState<string | null>(null);
-  const [sortBy] = useState<"date" | "odds" | "profit">("date");
-  const [sortOrder] = useState<"asc" | "desc">("desc");
 
   // ── Group CRUD ──
 
@@ -378,20 +340,6 @@ export default function TelegramGroups() {
     setDeleteGroupConfirm(null);
   };
 
-  const handleDeleteBet = (betId: string) => {
-    const newBets = betsRef.current.filter((b) => b.id !== betId);
-    setBets(newBets);
-    if (currentUser)
-      UserDataService.setUserDataSync(currentUser, "tg_bets", newBets);
-    toast.success("Ставку видалено");
-  };
-
-  const openEditBet = () => {
-    toast.info(
-      "Редагування ставок з Telegram буде доступне в наступних оновленнях",
-    );
-  };
-
   // ── Stats calculation ──
 
   const groupStats = useMemo((): GroupStats[] => {
@@ -486,128 +434,168 @@ export default function TelegramGroups() {
     });
   }, [groups, bets]);
 
-  // ── Filtered bets ──
-
-  const filteredBets = useMemo(() => {
-    let result = bets;
-    if (selectedGroupFilter !== "all") {
-      result = result.filter((b) => b.groupId === selectedGroupFilter);
-    }
-    if (resultFilter !== "all") {
-      result = result.filter((b) => b.result === resultFilter);
-    }
-    return [...result].sort((a, b) => {
-      let cmp = 0;
-      if (sortBy === "date")
-        cmp = new Date(a.date).getTime() - new Date(b.date).getTime();
-      if (sortBy === "odds") cmp = a.odds - b.odds;
-      if (sortBy === "profit") cmp = (a.profit || 0) - (b.profit || 0);
-      return sortOrder === "asc" ? cmp : -cmp;
+  // ── Shared UI ──
+  const openEditGroup = (group: TelegramGroup) => {
+    setEditingGroup(group);
+    setGroupForm({
+      name: group.name,
+      link: group.link,
+      comment: group.comment,
+      hasChannel: group.hasChannel,
+      game: group.game || "",
     });
-  }, [bets, selectedGroupFilter, resultFilter, sortBy, sortOrder]);
-
-  const getGroupName = (groupId: string) =>
-    groups.find((g) => g.id === groupId)?.name || "—";
-
-  const resultBadge = (result: string) => {
-    switch (result) {
-      case "Win":
-        return (
-          <Badge className="bg-[#DCFCE7] text-green-600 border border-green-200 text-xs font-medium rounded-full">
-            <CheckCircle2 className="h-3 w-3 mr-1" strokeWidth={1.5} />
-            Виграш
-          </Badge>
-        );
-      case "Loss":
-        return (
-          <Badge className="bg-red-50 text-red-600 border border-red-200 text-xs font-medium rounded-full">
-            <XCircle className="h-3 w-3 mr-1" strokeWidth={1.5} />
-            Програш
-          </Badge>
-        );
-      default:
-        return (
-          <Badge className="bg-gray-100 text-gray-500 border border-gray-200 text-xs font-medium rounded-full">
-            <Clock className="h-3 w-3 mr-1" strokeWidth={1.5} />
-            Очікує
-          </Badge>
-        );
-    }
+    setGroupDialogOpen(true);
   };
 
-  // ── Shared UI ──
+  const toggleGame = (value: string) =>
+    setGroupForm((p) => {
+      const list = (p.game || "").split(",").filter((g) => g.length > 0);
+      const next = list.includes(value)
+        ? list.filter((g) => g !== value)
+        : [...list, value];
+      return { ...p, game: next.join(",") };
+    });
+
+  const detailGroup = detailGroupId
+    ? groups.find((g) => g.id === detailGroupId) || null
+    : null;
+  const detailStats = detailGroupId
+    ? groupStats.find((s) => s.groupId === detailGroupId) || null
+    : null;
+  const deleteGroup = deleteGroupConfirm
+    ? groups.find((g) => g.id === deleteGroupConfirm) || null
+    : null;
+  const deleteBetCount = deleteGroup
+    ? bets.filter((b) => b.groupId === deleteGroup.id).length
+    : 0;
+
+  const detailTiles: [string, string, string][] = detailStats
+    ? (() => {
+        const done = detailStats.wins + detailStats.losses;
+        const s = detailStats.streak;
+        return [
+          ["Ставок", String(detailStats.totalBets), ""],
+          ["Виграші", String(detailStats.wins), ""],
+          ["Програші", String(detailStats.losses), ""],
+          ["Очікують", String(detailStats.pending), ""],
+          [
+            "Відсоток перемог",
+            done ? `${detailStats.winRate.toFixed(0)}%` : "—",
+            "",
+          ],
+          [
+            "ROI",
+            detailStats.totalBets ? signedPct(detailStats.roi) : "—",
+            toneOf(detailStats.roi),
+          ],
+          ["Стабільність", detailStats.stabilityLabel, ""],
+          [
+            "Серія",
+            s === 0
+              ? "—"
+              : s > 0
+                ? `${s} ${plural(s, "виграш", "виграші", "виграшів")}`
+                : `${-s} ${plural(-s, "програш", "програші", "програшів")}`,
+            "",
+          ],
+        ];
+      })()
+    : [];
+
+  const closeButton = (light = false) => (
+    <DialogClose
+      className={`mqt-dialog-close${light ? " is-light" : ""}`}
+      aria-label="Закрити"
+    >
+      <X size={18} strokeWidth={1.8} aria-hidden="true" />
+    </DialogClose>
+  );
+
   const renderDialogs = () => (
     <>
-      {/* ===== Group Dialog ===== */}
+      {/* ===== Add / edit group ===== */}
       <Dialog open={groupDialogOpen} onOpenChange={setGroupDialogOpen}>
-        <DialogContent className="tg-group-dialog">
-          <DialogHeader className="tg-group-header">
-            <p className="tg-dialog-eyebrow">Telegram група</p>
-            <DialogTitle>
-              {editingGroup ? "Редагувати групу" : "Додати групу"}
-            </DialogTitle>
-            <DialogDescription>
-              Підключіть канал, щоб відстежувати прогнози та результати.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="tg-group-body">
-            <div>
-              <Label htmlFor="tg-group-name">Назва групи *</Label>
-              <Input
+        <DialogContent hideCloseButton className="mqt-dialog">
+          <div className="mqt-dialog-head">
+            <div className="mqt-dialog-titles">
+              <p className="mqt-dialog-kicker">Telegram-група</p>
+              <DialogTitle>
+                {editingGroup ? "Редагувати групу" : "Додати групу"}
+              </DialogTitle>
+              <DialogDescription>
+                {editingGroup
+                  ? "Зміни застосуються до статистики групи одразу."
+                  : "Підключіть джерело, щоб відстежувати його прогнози та результати."}
+              </DialogDescription>
+            </div>
+            {closeButton()}
+          </div>
+          <form
+            id="mqt-group-form"
+            className="mqt-dialog-body"
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSaveGroup();
+            }}
+          >
+            <div className="mqt-field">
+              <label htmlFor="tg-group-name">Назва групи *</label>
+              <input
                 id="tg-group-name"
                 value={groupForm.name}
                 onChange={(e) =>
                   setGroupForm((p) => ({ ...p, name: e.target.value }))
                 }
-                placeholder="Pro Betting 🇺🇦"
+                placeholder="Наприклад, Кіберпрогноз UA"
+                autoComplete="off"
               />
             </div>
-            <div>
-              <Label htmlFor="tg-group-link">Посилання</Label>
-              <Input
+            <div className="mqt-field">
+              <label htmlFor="tg-group-link">Посилання</label>
+              <input
                 id="tg-group-link"
+                inputMode="url"
                 value={groupForm.link}
                 onChange={(e) =>
                   setGroupForm((p) => ({ ...p, link: e.target.value }))
                 }
-                placeholder="https://t.me/groupname"
+                placeholder="https://t.me/назва_групи"
+                autoComplete="off"
+                aria-describedby="tg-group-link-hint"
               />
+              <small id="tg-group-link-hint">
+                Публічне посилання на групу або канал — за ним підтягнеться
+                аватар.
+              </small>
             </div>
-            <div>
-              <Label>Гра</Label>
-              <div className="tg-group-games">
+            <fieldset className="mqt-field">
+              <legend>Гра</legend>
+              <div className="mqt-pick">
                 {(
                   [
                     ["cs2", "CS2"],
                     ["dota2", "Dota 2"],
                   ] as const
-                ).map(([value, label]) => (
-                  <label key={value} className="tg-group-game-option">
-                    <input
-                      type="checkbox"
-                      checked={groupForm.game?.includes(value) ?? false}
-                      onChange={() =>
-                        setGroupForm((p) => {
-                          const list = (p.game || "")
-                            .split(",")
-                            .filter((g) => g.length > 0);
-                          const next = list.includes(value)
-                            ? list.filter((g) => g !== value)
-                            : [...list, value];
-                          return { ...p, game: next.join(",") };
-                        })
-                      }
-                    />
-                    <span>{label}</span>
-                  </label>
-                ))}
+                ).map(([value, label]) => {
+                  const on = groupForm.game?.includes(value) ?? false;
+                  return (
+                    <label key={value} className={`mqt-check${on ? " is-on" : ""}`}>
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        onChange={() => toggleGame(value)}
+                      />
+                      {label}
+                    </label>
+                  );
+                })}
               </div>
-            </div>
-            <div>
-              <Label htmlFor="tg-group-comment">Коментар</Label>
-              <Textarea
+            </fieldset>
+            <div className="mqt-field">
+              <label htmlFor="tg-group-comment">Коментар</label>
+              <textarea
                 id="tg-group-comment"
-                rows={2}
+                rows={3}
                 value={groupForm.comment}
                 onChange={(e) =>
                   setGroupForm((p) => ({ ...p, comment: e.target.value }))
@@ -615,7 +603,7 @@ export default function TelegramGroups() {
                 placeholder="Наприклад: платна група, тільки CS2"
               />
             </div>
-            <label className="tg-group-channel-toggle">
+            <label className="mqt-toggle">
               <input
                 type="checkbox"
                 checked={groupForm.hasChannel}
@@ -625,216 +613,182 @@ export default function TelegramGroups() {
               />
               <span>
                 <strong>Також є приватний канал</strong>
-                <small>
-                  Крім відкритого, група має платний закритий канал.
-                </small>
+                <small>Крім відкритої групи, є платний закритий канал.</small>
               </span>
             </label>
-          </div>
-          <DialogFooter className="tg-group-footer">
-            <Button variant="outline" onClick={() => setGroupDialogOpen(false)}>
+          </form>
+          <div className="mqt-dialog-foot">
+            <button
+              type="button"
+              className="mqt-btn-outline"
+              onClick={() => setGroupDialogOpen(false)}
+            >
               Скасувати
-            </Button>
-            <Button onClick={handleSaveGroup} className="tg-group-submit">
-              {editingGroup ? "Зберегти зміни" : "Додати групу"}
-            </Button>
-          </DialogFooter>
+            </button>
+            <SwapPill
+              type="submit"
+              form="mqt-group-form"
+              label={editingGroup ? "Зберегти зміни" : "Додати групу"}
+              icon={<Check size={16} strokeWidth={2.2} />}
+            />
+          </div>
         </DialogContent>
       </Dialog>
 
-      {/* ===== Delete Group Confirm ===== */}
-      <Dialog
-        open={!!deleteGroupConfirm}
-        onOpenChange={() => setDeleteGroupConfirm(null)}
-      >
-        <DialogContent className="tg-group-dialog">
-          <DialogHeader className="tg-delete-header">
-            <div className="flex items-center gap-3">
-              <div className="tg-delete-icon">
-                <Trash2 className="h-5 w-5" strokeWidth={1.5} />
-              </div>
-              <DialogTitle>Видалити групу?</DialogTitle>
-            </div>
-          </DialogHeader>
-
-          <div className="tg-delete-body">
-            <div className="tg-delete-name">
-              <DialogDescription className="text-lg font-bold text-center">
-                {(deleteGroupConfirm &&
-                  groups.find((g) => g.id === deleteGroupConfirm)?.name) ||
-                  "—"}
-              </DialogDescription>
-              {deleteGroupConfirm &&
-                (() => {
-                  const g = groups.find((x) => x.id === deleteGroupConfirm);
-                  return g?.link ? (
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {tgHandle(g.link)}
-                    </p>
-                  ) : null;
-                })()}
-            </div>
-
-            <div className="tg-delete-warning">
-              <AlertTriangle
-                className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5"
-                strokeWidth={1.5}
-              />
-              <p>
-                Усі ставки цієї групи також будуть видалені. Ця дія незворотна.
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter className="tg-group-footer">
-            <Button
-              variant="outline"
-              onClick={() => setDeleteGroupConfirm(null)}
-            >
-              Скасувати
-            </Button>
-            <Button
-              onClick={() =>
-                deleteGroupConfirm && handleDeleteGroup(deleteGroupConfirm)
-              }
-              className="tg-delete-submit"
-            >
-              <Trash2 className="h-4 w-4 mr-2" strokeWidth={1.5} />
-              Видалити
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* ===== Group Details ===== */}
+      {/* ===== Group statistics ===== */}
       <Dialog
         open={!!detailGroupId}
         onOpenChange={(open) => {
           if (!open) setDetailGroupId(null);
         }}
       >
-        <DialogContent className="tg-group-dialog tg-detail-dialog">
-          <DialogHeader className="tg-detail-header">
-            {(() => {
-              const group = detailGroupId
-                ? groups.find((x) => x.id === detailGroupId)
-                : null;
-              return (
-                <>
-                  <GroupAvatar
-                    link={group?.link || ""}
-                    name={group?.name || ""}
-                  />
-                  <div className="tg-detail-header-copy">
-                    <p className="tg-dialog-eyebrow">Статистика групи</p>
-                    <DialogTitle>
-                      {group?.name || "Статистика групи"}
-                    </DialogTitle>
+        <DialogContent hideCloseButton className="mqt-dialog is-wide">
+          {detailGroup && detailStats ? (
+            <>
+              <div className="mqt-dialog-head">
+                <ChannelAvatar group={detailGroup} size="lg" />
+                <div className="mqt-dialog-titles">
+                  <p className="mqt-dialog-kicker">Статистика групи</p>
+                  <DialogTitle>{detailGroup.name}</DialogTitle>
+                  <div className="mqt-dialog-meta">
                     <DialogDescription>
-                      {group?.link ? tgHandle(group.link) : "Дані каналу"}
+                      {tgHandle(detailGroup.link) || "Без посилання"}
                     </DialogDescription>
-                  </div>
-                </>
-              );
-            })()}
-          </DialogHeader>
-          {(() => {
-            const g = detailGroupId
-              ? groups.find((x) => x.id === detailGroupId)
-              : null;
-            const stats = detailGroupId
-              ? groupStats.find((x) => x.groupId === detailGroupId)
-              : null;
-            if (!g || !stats) return null;
-            const streakLabel =
-              stats.streak === 0
-                ? "—"
-                : stats.streak > 0
-                  ? `${stats.streak}W`
-                  : `${Math.abs(stats.streak)}L`;
-            return (
-              <div className="tg-detail-body">
-                <div className="tg-detail-head">
-                  <GroupAvatar link={g.link} name={g.name} />
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <strong className="truncate text-slate-800">
-                        {g.name}
-                      </strong>
-                      {g.hasChannel && (
-                        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
-                          <Megaphone className="h-3 w-3" strokeWidth={2} />Є
-                          приватний канал
-                        </span>
-                      )}
-                    </div>
-                    <p className="truncate text-xs text-slate-400">
-                      {tgHandle(g.link) || "Без посилання"}
-                    </p>
-                    {g.comment && (
-                      <p className="mt-0.5 whitespace-pre-wrap break-words text-xs text-slate-500">
-                        {g.comment}
-                      </p>
+                    {channelGames(detailGroup, bets).map((g) => (
+                      <GameChip key={g} game={g} dark />
+                    ))}
+                    {detailGroup.hasChannel && (
+                      <span className="mqt-chip is-private">
+                        <Lock size={12} strokeWidth={2} aria-hidden="true" />
+                        Приватний канал
+                      </span>
                     )}
                   </div>
                 </div>
-
-                <div className="tg-detail-stats">
-                  <div>
-                    <span>Ставок</span>
-                    <strong>{stats.totalBets}</strong>
-                  </div>
-                  <div>
-                    <span>Виграші</span>
-                    <strong>{stats.wins}</strong>
-                  </div>
-                  <div>
-                    <span>Програші</span>
-                    <strong>{stats.losses}</strong>
-                  </div>
-                  <div>
-                    <span>Очікує</span>
-                    <strong>{stats.pending}</strong>
-                  </div>
-                  <div>
-                    <span>Win Rate</span>
-                    <strong>
-                      {stats.totalBets ? `${stats.winRate.toFixed(0)}%` : "—"}
-                    </strong>
-                  </div>
-                  <div>
-                    <span>ROI</span>
-                    <strong>{stats.roi.toFixed(0)}%</strong>
-                  </div>
-                  <div>
-                    <span>Стабільність</span>
-                    <strong>{stats.stabilityLabel}</strong>
-                  </div>
-                  <div>
-                    <span>Серія</span>
-                    <strong>{streakLabel}</strong>
-                  </div>
+                {closeButton()}
+              </div>
+              <div className="mqt-dialog-body">
+                {detailGroup.comment && (
+                  <p className="mqt-note">{detailGroup.comment}</p>
+                )}
+                <div className="mqt-tiles">
+                  {detailTiles.map(([label, value, cls]) => (
+                    <div className="mqt-tile" key={label}>
+                      <span>{label}</span>
+                      <strong className={cls}>{value}</strong>
+                    </div>
+                  ))}
                 </div>
-
-                <div className="tg-detail-chart-section">
-                  <h3>Прибуток по місяцях</h3>
-                  {stats.monthlyProfit.length ? (
-                    <MonthlyProfitBars data={stats.monthlyProfit} />
+                <section className="mqt-chart-section">
+                  <div className="mqt-chart-head">
+                    <h3>Прибуток по місяцях</h3>
+                    <span className="mqt-legend" aria-hidden="true">
+                      <span>
+                        <i className="is-plus" />
+                        плюс
+                      </span>
+                      <span>
+                        <i className="is-minus" />
+                        мінус
+                      </span>
+                    </span>
+                  </div>
+                  {detailStats.monthlyProfit.length ? (
+                    <MonthlyProfitBars data={detailStats.monthlyProfit} />
                   ) : (
-                    <div className="tg-detail-empty-chart">
-                      <strong>Немає даних</strong>
-                      <p>Поки що немає інформації про прибуток за місяцями.</p>
+                    <div className="mqt-chart-empty">
+                      <strong>Ще немає даних</strong>
+                      <p>
+                        Графік з'явиться, щойно до групи буде прив'язано
+                        записи.
+                      </p>
                     </div>
                   )}
-                </div>
+                </section>
               </div>
-            );
-          })()}
-          <DialogFooter className="tg-group-footer">
-            <Button variant="outline" onClick={() => setDetailGroupId(null)}>
-              Закрити
-            </Button>
-          </DialogFooter>
+              <div className="mqt-dialog-foot is-split">
+                <button
+                  type="button"
+                  className="mqt-btn-outline"
+                  onClick={() => {
+                    const g = detailGroup;
+                    setDetailGroupId(null);
+                    openEditGroup(g);
+                  }}
+                >
+                  <Pencil size={15} strokeWidth={1.8} aria-hidden="true" />
+                  Редагувати групу
+                </button>
+                <DialogClose className="mqt-btn-dark">Закрити</DialogClose>
+              </div>
+            </>
+          ) : (
+            <DialogTitle className="sr-only">Статистика групи</DialogTitle>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ===== Delete group ===== */}
+      <Dialog
+        open={!!deleteGroupConfirm}
+        onOpenChange={() => setDeleteGroupConfirm(null)}
+      >
+        <DialogContent
+          hideCloseButton
+          role="alertdialog"
+          className="mqt-dialog is-narrow"
+        >
+          <div className="mqt-dialog-body is-delete">
+            <div className="mqt-delete-top">
+              <span className="mqt-delete-icon">
+                <Trash2 size={22} strokeWidth={1.8} aria-hidden="true" />
+              </span>
+              {closeButton(true)}
+            </div>
+            <div>
+              <p className="mqt-dialog-kicker is-danger">Видалення</p>
+              <DialogTitle>Видалити групу?</DialogTitle>
+            </div>
+            {deleteGroup && (
+              <div className="mqt-delete-card">
+                <ChannelAvatar group={deleteGroup} />
+                <span>
+                  <strong>{deleteGroup.name}</strong>
+                  <small>
+                    {[
+                      tgHandle(deleteGroup.link),
+                      `${deleteBetCount} ${plural(deleteBetCount, "ставка", "ставки", "ставок")}`,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </small>
+                </span>
+              </div>
+            )}
+            <DialogDescription className="mqt-danger-text">
+              Разом із групою буде видалено всі її ставки. Дію неможливо
+              скасувати.
+            </DialogDescription>
+          </div>
+          <div className="mqt-dialog-foot">
+            <button
+              type="button"
+              className="mqt-btn-outline"
+              onClick={() => setDeleteGroupConfirm(null)}
+            >
+              Скасувати
+            </button>
+            <button
+              type="button"
+              className="mqt-btn-danger"
+              onClick={() =>
+                deleteGroupConfirm && handleDeleteGroup(deleteGroupConfirm)
+              }
+            >
+              <Trash2 size={16} strokeWidth={1.8} aria-hidden="true" />
+              Видалити групу
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </>
@@ -859,189 +813,8 @@ export default function TelegramGroups() {
         onAdd={openNewGroup}
         onDetails={setDetailGroupId}
         onDelete={setDeleteGroupConfirm}
-        onEdit={(group) => {
-          setEditingGroup(group);
-          setGroupForm({
-            name: group.name,
-            link: group.link,
-            comment: group.comment,
-            hasChannel: group.hasChannel,
-            game: group.game || "",
-          });
-          setGroupDialogOpen(true);
-        }}
-      >
-        {bets.length > 0 && (
-          <Card
-            className="border border-gray-100 rounded-2xl bg-white overflow-hidden"
-            style={{ boxShadow: CHART_CARD_SHADOW }}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Ставки з Telegram{" "}
-                  <span className="text-gray-400 font-normal">
-                    ({filteredBets.length})
-                  </span>
-                </h3>
-                <div className="flex items-center gap-2">
-                  <Select
-                    value={selectedGroupFilter}
-                    onValueChange={setSelectedGroupFilter}
-                  >
-                    <SelectTrigger className="w-[160px] h-9 rounded-xl border-gray-200 text-xs">
-                      <SelectValue placeholder="Всі групи" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Всі групи</SelectItem>
-                      {groups.map((g) => (
-                        <SelectItem key={g.id} value={g.id}>
-                          {g.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select value={resultFilter} onValueChange={setResultFilter}>
-                    <SelectTrigger className="w-[130px] h-9 rounded-xl border-gray-200 text-xs">
-                      <SelectValue placeholder="Всі результати" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Всі</SelectItem>
-                      <SelectItem value="Win">Виграш</SelectItem>
-                      <SelectItem value="Loss">Програш</SelectItem>
-                      <SelectItem value="Pending">Очікує</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      toast.info(
-                        "Парсер даних з Telegram з'явиться в наступних оновленнях",
-                      )
-                    }
-                    className="rounded-xl border-gray-200 hover:border-gray-300 text-gray-500 hover:text-gray-900 text-xs font-medium"
-                  >
-                    <RefreshCw
-                      className="h-3.5 w-3.5 mr-1.5"
-                      strokeWidth={1.5}
-                    />
-                    Отримати данні
-                  </Button>
-                </div>
-              </div>
-
-              {filteredBets.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-gray-100">
-                        <th className="text-left py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                          Група
-                        </th>
-                        <th className="text-left py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                          Дата
-                        </th>
-                        <th className="text-left py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                          Матч
-                        </th>
-                        <th className="text-center py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                          Коеф.
-                        </th>
-                        <th className="text-center py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                          Сума
-                        </th>
-                        <th className="text-center py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                          Рез-т
-                        </th>
-                        <th className="text-right py-2 px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                          Прибуток
-                        </th>
-                        <th className="w-10" />
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredBets.map((bet) => (
-                        <tr
-                          key={bet.id}
-                          className="border-b border-gray-50 hover:bg-gray-50 transition-colors"
-                        >
-                          <td className="py-2.5 px-3">
-                            <span className="text-xs font-medium text-gray-900">
-                              {getGroupName(bet.groupId)}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3">
-                            <span className="text-xs text-gray-500">
-                              {new Date(bet.date).toLocaleDateString("uk-UA", {
-                                day: "2-digit",
-                                month: "2-digit",
-                              })}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3">
-                            <span className="text-xs font-medium text-gray-900">
-                              {bet.match ||
-                                (bet.team1 && bet.team2
-                                  ? `${bet.team1} vs ${bet.team2}`
-                                  : "—")}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
-                            <span className="text-xs font-semibold text-gray-900">
-                              {bet.odds}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
-                            <span className="text-xs text-gray-500">
-                              {bet.amount > 0 ? bet.amount : "—"}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-3 text-center">
-                            {resultBadge(bet.result)}
-                          </td>
-                          <td className="py-2.5 px-3 text-right">
-                            <span
-                              className={`text-xs font-semibold ${(bet.profit || 0) >= 0 ? "text-green-600" : "text-red-600"}`}
-                            >
-                              {(bet.profit || 0) >= 0 ? "+" : ""}
-                              {(bet.profit || 0).toFixed(0)}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-1">
-                            <div className="flex gap-0.5">
-                              <button
-                                onClick={() => openEditBet()}
-                                className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-900 transition-colors"
-                                title="Редагувати"
-                              >
-                                <Pencil className="h-3 w-3" strokeWidth={1.5} />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteBet(bet.id)}
-                                className="p-1 rounded-md hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"
-                                title="Видалити"
-                              >
-                                <X className="h-3 w-3" strokeWidth={1.5} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="py-10 text-center">
-                  <p className="text-sm text-gray-400">
-                    Немає ставок за обраними фільтрами
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-      </TelegramDashboard>
+        onEdit={openEditGroup}
+      />
     </>
   );
 }

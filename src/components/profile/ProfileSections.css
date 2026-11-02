@@ -364,3 +364,85 @@
     transition: none;
   }
 }
+
+/* ===== Metrics as one strip (same look as Telegram KPIs) ===== */
+.mqp-metrics.is-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid #1718191a;
+  border-radius: 26px;
+  background: #fff;
+}
+.mqp-metrics.is-strip .mqp-metric {
+  gap: 14px;
+  padding: 26px 28px;
+  border: 0;
+  border-left: 1px solid #1718191a;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+  transition: background-color 0.2s ease;
+}
+.mqp-metrics.is-strip .mqp-metric:first-child {
+  border-left: 0;
+}
+.mqp-metrics.is-strip .mqp-metric:hover {
+  border-color: #1718191a;
+  background: #fbfaf8;
+  transform: none;
+}
+.mqp-metric-label {
+  color: #686960;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.mqp-metrics.is-strip .mqp-count {
+  color: var(--mqp-ink);
+  font-size: clamp(36px, 3.4vw, 46px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.055em;
+}
+.mqp-metrics.is-strip .mqp-metric.is-empty .mqp-count {
+  color: #b9b8b0;
+}
+.mqp-metric-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #686960;
+  font-size: 13px;
+  font-weight: 500;
+}
+.mqp-metrics.is-strip .mqp-metric-cta {
+  align-self: flex-start;
+  height: 26px;
+  margin-left: -10px;
+  padding: 0 8px 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.mqp-metrics.is-strip .mqp-metric-cta i {
+  width: 16px;
+  height: 16px;
+}
+@media (max-width: 760px) {
+  .mqp-metrics.is-strip {
+    grid-template-columns: 1fr 1fr;
+  }
+  .mqp-metrics.is-strip .mqp-metric {
+    padding: 20px;
+    border-left: 0;
+    border-top: 1px solid #1718191a;
+  }
+  .mqp-metrics.is-strip .mqp-metric:nth-child(-n + 2) {
+    border-top: 0;
+  }
+  .mqp-metrics.is-strip .mqp-metric:nth-child(even) {
+    border-left: 1px solid #1718191a;
+  }
+}

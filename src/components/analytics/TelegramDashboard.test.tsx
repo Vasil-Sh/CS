@@ -82,9 +82,11 @@ describe("Telegram dashboard", () => {
     fireEvent.change(screen.getByLabelText("Пошук групи"), {
       target: { value: "" },
     });
-    fireEvent.change(screen.getByLabelText("Гра"), {
-      target: { value: "dota2" },
-    });
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Гра" })).getByRole("button", {
+        name: "Dota 2",
+      }),
+    );
     expect(
       screen.getByRole("button", { name: "Dota 2 Journal" }),
     ).toBeInTheDocument();
