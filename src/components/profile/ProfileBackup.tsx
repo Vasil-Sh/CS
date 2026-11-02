@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import "./ProfileBackup.css";
 import "./ProfileRedesign.css";
+import "./ProfileSections.css";
 
 interface Props {
   header?: ReactNode;
@@ -81,7 +82,7 @@ export default function ProfileBackup({
 
   return (
     <>
-      <section className="mqp-hero is-compact is-photo" aria-label="Дані та бекап">
+      <section className="mqp-hero is-compact is-photo is-backup" aria-label="Дані та бекап">
         {header}
       </section>
       <div className="mqp-backup" aria-busy={busy}>
@@ -138,7 +139,6 @@ export default function ProfileBackup({
               </span>
             </button>
           </section>
-          <div className="mqp-photo-tile" role="img" aria-label="Стос білих жетонів, верхній помаранчевий" />
           <section className="mqp-card" aria-labelledby="backup-contents-title">
             <div className="mqp-card-head">
               <h2 id="backup-contents-title">Що входить у копію</h2>

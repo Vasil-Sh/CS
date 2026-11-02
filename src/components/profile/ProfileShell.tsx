@@ -13,6 +13,8 @@ import {
   CircleHelp,
   Menu,
   X,
+  ChevronsLeft,
+  ChevronsRight,
   type LucideIcon,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -42,6 +44,8 @@ const BrandMarkIcon = ({ size = 21 }: { size?: number }) => (
     <path d="M8 14v7" />
   </svg>
 );
+
+const NAV_COLLAPSED_KEY = "matchiq_nav_collapsed";
 
 type NavItem = { label: string; href: string; Icon: LucideIcon };
 
@@ -79,30 +83,69 @@ export default function ProfileShell({
 }) {
   useTheme();
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(NAV_COLLAPSED_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
   const { pathname } = useLocation();
   const close = () => setOpen(false);
+  const toggleCollapsed = () =>
+    setCollapsed((value) => {
+      const next = !value;
+      try {
+        localStorage.setItem(NAV_COLLAPSED_KEY, next ? "1" : "0");
+      } catch {
+        /* storage unavailable — keep in memory only */
+      }
+      return next;
+    });
 
-  const navLink = ({ label, href, Icon }: NavItem) => (
-    <Link
-      key={href}
-      to={href}
-      className="mq-nav-link"
-      aria-current={pathname === href ? "page" : undefined}
-      onClick={close}
-    >
-      <Icon size={19} strokeWidth={1.8} aria-hidden="true" />
-      {label}
-    </Link>
-  );
-
-  const navigation = (
-    <>
-      <Link to="/app/matches" className="mq-brand" onClick={close}>
-        <span className="mq-brand-mark">
-          <BrandMarkIcon />
-        </span>
-        MatchIQ
+  const navigation = (compact: boolean) => {
+    const navLink = ({ label, href, Icon }: NavItem) => (
+      <Link
+        key={href}
+        to={href}
+        className="mq-nav-link"
+        aria-current={pathname === href ? "page" : undefined}
+        title={compact ? label : undefined}
+        onClick={close}
+      >
+        <Icon size={19} strokeWidth={1.8} aria-hidden="true" />
+        <span className="mq-nav-label">{label}</span>
       </Link>
+    );
+    return (
+    <>
+      <div className="mq-brand-row">
+        <Link
+          to="/app/matches"
+          className="mq-brand"
+          onClick={close}
+          aria-label="MatchIQ — матчі"
+        >
+          <span className="mq-brand-mark">
+            <BrandMarkIcon />
+          </span>
+          <span className="mq-nav-label">MatchIQ</span>
+        </Link>
+        <button
+          type="button"
+          className="mq-collapse"
+          onClick={toggleCollapsed}
+          aria-pressed={compact}
+          aria-label={compact ? "Розгорнути меню" : "Згорнути меню"}
+          title={compact ? "Розгорнути меню" : "Згорнути меню"}
+        >
+          {compact ? (
+            <ChevronsRight size={16} strokeWidth={2} />
+          ) : (
+            <ChevronsLeft size={16} strokeWidth={2} />
+          )}
+        </button>
+      </div>
       <nav className="mq-nav" aria-label="Основна навігація">
         {getSections().map((section) => (
           <div className="mq-nav-group" key={section.title}>
@@ -118,21 +161,28 @@ export default function ProfileShell({
           href="https://t.me/cs2beet"
           target="_blank"
           rel="noopener noreferrer"
+          title={compact ? "Допомога та підтримка" : undefined}
         >
           <CircleHelp size={18} strokeWidth={1.8} aria-hidden="true" />
-          Допомога та підтримка
+          <span className="mq-nav-label">Допомога та підтримка</span>
         </a>
-        <button type="button" className="mq-nav-link is-small" onClick={onLogout}>
+        <button
+          type="button"
+          className="mq-nav-link is-small"
+          onClick={onLogout}
+          title={compact ? t("app.logout") : undefined}
+        >
           <LogOut size={18} strokeWidth={1.8} aria-hidden="true" />
-          {t("app.logout")}
+          <span className="mq-nav-label">{t("app.logout")}</span>
         </button>
       </div>
     </>
-  );
+    );
+  };
 
   return (
-    <div className="profile-shell mq-shell">
-      <aside className="mq-sidebar">{navigation}</aside>
+    <div className={`profile-shell mq-shell${collapsed ? " is-collapsed" : ""}`}>
+      <aside className="mq-sidebar">{navigation(collapsed)}</aside>
       <div className="mq-mobile-header">
         <Link to="/app/matches" className="mq-brand">
           <span className="mq-brand-mark">
@@ -160,7 +210,7 @@ export default function ProfileShell({
           >
             <X size={20} />
           </button>
-          {navigation}
+          {navigation(false)}
         </SheetContent>
       </Sheet>
       <main className="profile-main mq-main">{children}</main>

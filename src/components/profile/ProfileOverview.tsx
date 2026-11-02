@@ -6,7 +6,6 @@ import {
   Target,
   Flag,
   Send,
-  Download,
   Copy,
   ArrowUpRight,
   ArrowRight,
@@ -22,6 +21,8 @@ import { journalKey } from "@/components/mybets/journalModel";
 import type { ThemePreference } from "@/hooks/useTheme";
 import type { Lang } from "@/lib/i18n";
 import "./ProfileRedesign.css";
+import "./ProfileSections.css";
+import CountUp from "./CountUp";
 import { toast } from "sonner";
 import {
   profileDate,
@@ -261,7 +262,7 @@ export default function ProfileOverview(p: Props) {
 
   return (
     <>
-      <section className="mqp-hero is-photo" aria-label="Ваш профіль">
+      <section className="mqp-hero is-photo is-compact" aria-label="Ваш профіль">
         {p.header}
         <div className="mqp-identity">
           <div className="mqp-avatar">
@@ -310,11 +311,16 @@ export default function ProfileOverview(p: Props) {
                   aria-hidden="true"
                 />
               ) : (
-                <span className="mqp-metric-cta">{cta} +</span>
+                <span className="mqp-metric-cta">
+                  {cta}
+                  <i aria-hidden="true">+</i>
+                </span>
               )}
             </span>
             <span className="mqp-metric-copy">
-              <strong>{value.toLocaleString("uk-UA")}</strong>
+              <strong className="mqp-count">
+                <CountUp value={value} />
+              </strong>
               <small>{label}</small>
             </span>
           </Link>
@@ -323,13 +329,25 @@ export default function ProfileOverview(p: Props) {
 
       <div className="mqp-grid">
         <div className="mqp-col">
-          <section className="mqp-card" aria-labelledby="profile-activity-title">
-            <div className="mqp-card-head">
-              <h2 id="profile-activity-title">Остання активність</h2>
-              <Link to="/app/my-bets?tab=records" className="mqp-link">
-                Усі записи <ArrowRight size={16} aria-hidden="true" />
-              </Link>
-            </div>
+          <div className="mqp-sheet">
+            <section
+              className="mqp-sheet-section"
+              aria-labelledby="profile-activity-title"
+            >
+              <div className="mqp-sec-head">
+                <div>
+                  <p className="mqp-kicker">
+                    <i>01</i> Журнал
+                  </p>
+                  <h2 id="profile-activity-title">Остання активність</h2>
+                </div>
+                <Link
+                  to="/app/my-bets?tab=records"
+                  className="mqp-btn-outline is-sm"
+                >
+                  Усі записи <ArrowRight size={15} aria-hidden="true" />
+                </Link>
+              </div>
             {isLoading ? (
               <div
                 className="mqp-loading"
@@ -352,7 +370,6 @@ export default function ProfileOverview(p: Props) {
                         to="/app/my-bets?tab=records"
                         aria-label={`Деталі: ${summary.title}`}
                       >
-                        <span className="mqp-badge">{summary.game}</span>
                         <span className="mqp-pair" aria-hidden="true">
                           {summary.express ? (
                             <span className="mqp-team">
@@ -367,7 +384,6 @@ export default function ProfileOverview(p: Props) {
                               />
                               {summary.team2 && (
                                 <>
-                                  <span className="mqp-vs">vs</span>
                                   <TeamMark
                                     url={bet.logoTeam2}
                                     name={summary.team2}
@@ -380,7 +396,9 @@ export default function ProfileOverview(p: Props) {
                         </span>
                         <span className="mqp-record-copy">
                           <strong>{summary.title}</strong>
-                          <small>{summary.description}</small>
+                          <small>
+                            {summary.game} · {summary.description}
+                          </small>
                         </span>
                         <time dateTime={date}>
                           {date ? profileDate(new Date(date)) : "Без дати"}
@@ -399,49 +417,66 @@ export default function ProfileOverview(p: Props) {
               <div className="mqp-empty">
                 <strong>Ваш журнал починається тут</strong>
                 <p>Нові записи з’являться в цьому блоці.</p>
-                <Link className="mqp-link" to="/app/my-bets?tab=records">
+                <Link className="mqp-btn-outline is-sm" to="/app/my-bets?tab=records">
                   Перейти до журналу <ArrowRight size={16} aria-hidden="true" />
                 </Link>
               </div>
             )}
-          </section>
+            </section>
 
-          <section className="mqp-card" aria-labelledby="profile-settings-title">
-            <div className="mqp-card-head">
-              <h2 id="profile-settings-title">Налаштування</h2>
-            </div>
-            <fieldset className="mqp-themes">
-              <legend>Тема інтерфейсу</legend>
-              <div className="mqp-theme-options">
-                {(
-                  [
-                    ["light", "Світла"],
-                    ["dark", "Темна"],
-                    ["system", "Системна"],
-                  ] as const
-                ).map(([mode, label]) => (
-                  <label className="mqp-theme" key={mode}>
-                    <input
-                      type="radio"
-                      name="profile-theme"
-                      value={mode}
-                      checked={p.theme === mode}
-                      onChange={() => p.onThemeChange(mode)}
-                    />
-                    <span className="mqp-theme-frame">
-                      <ThemePreview mode={mode} />
-                      <span className="mqp-theme-check">
-                        <Check size={13} strokeWidth={3} />
-                      </span>
-                    </span>
-                    <span className="mqp-theme-label">{label}</span>
-                  </label>
-                ))}
+            <section
+              className="mqp-sheet-section"
+              aria-labelledby="profile-settings-title"
+            >
+              <div className="mqp-sec-head">
+                <div>
+                  <p className="mqp-kicker">
+                    <i>02</i> Налаштування
+                  </p>
+                  <h2 id="profile-settings-title">Як вам зручно</h2>
+                </div>
               </div>
-            </fieldset>
-            <div className="mqp-fields">
-              <div className="mqp-field">
-                <label htmlFor="profile-language">Мова</label>
+              <div className="mqp-setrows">
+                <div
+                  className="mqp-setrow"
+                  role="radiogroup"
+                  aria-labelledby="profile-theme-label"
+                >
+                  <span className="mqp-setrow-label" id="profile-theme-label">
+                    Тема інтерфейсу
+                  </span>
+                  <div className="mqp-setrow-control">
+                  <div className="mqp-theme-options">
+                    {(
+                      [
+                        ["light", "Світла"],
+                        ["dark", "Темна"],
+                        ["system", "Системна"],
+                      ] as const
+                    ).map(([mode, label]) => (
+                      <label className="mqp-theme" key={mode}>
+                        <input
+                          type="radio"
+                          name="profile-theme"
+                          value={mode}
+                          checked={p.theme === mode}
+                          onChange={() => p.onThemeChange(mode)}
+                        />
+                        <span className="mqp-theme-frame">
+                          <ThemePreview mode={mode} />
+                          <span className="mqp-theme-check">
+                            <Check size={13} strokeWidth={3} />
+                          </span>
+                        </span>
+                        <span className="mqp-theme-label">{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  </div>
+                </div>
+                <div className="mqp-setrow mqp-setrow--pair">
+                  <div className="mqp-setrow-field">
+                    <label htmlFor="profile-language">Мова</label>
                 <select
                   id="profile-language"
                   className="mqp-input"
@@ -451,9 +486,9 @@ export default function ProfileOverview(p: Props) {
                   <option value="uk">Українська</option>
                   <option value="en">English</option>
                 </select>
-              </div>
-              <div className="mqp-field">
-                <label htmlFor="profile-rate">Курс USD → UAH</label>
+                  </div>
+                  <div className="mqp-setrow-field">
+                    <label htmlFor="profile-rate">Курс USD → UAH</label>
                 <div className="mqp-rate">
                   <input
                     id="profile-rate"
@@ -487,9 +522,6 @@ export default function ProfileOverview(p: Props) {
                     />
                   </button>
                 </div>
-                <small id="profile-rate-help">
-                  Для конвертації сум у журналі та аналітиці
-                </small>
                 {rateError && (
                   <small
                     className="mqp-error"
@@ -499,15 +531,23 @@ export default function ProfileOverview(p: Props) {
                     {rateError}
                   </small>
                 )}
+                    <small id="profile-rate-help">Для конвертації сум</small>
+                  </div>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+          </div>
         </div>
 
         <aside className="mqp-col mqp-rail">
           <section className="mqp-card" aria-labelledby="profile-public-title">
-            <div className="mqp-card-head">
-              <h2 id="profile-public-title">Публічний профіль</h2>
+            <div className="mqp-sec-head">
+              <div>
+                <p className="mqp-kicker">
+                  <i>03</i> Профіль
+                </p>
+                <h2 id="profile-public-title">Публічний профіль</h2>
+              </div>
             </div>
             <div className="mqp-player is-photo">
               <div className="mqp-player-top">
@@ -579,18 +619,20 @@ export default function ProfileOverview(p: Props) {
             )}
           </section>
 
-          <section className="mqp-card" aria-labelledby="profile-backup-title">
-            <div className="mqp-card-head is-start">
-              <span className="mqp-icon is-accent">
-                <Download size={19} strokeWidth={1.8} aria-hidden="true" />
-              </span>
-              <h2 id="profile-backup-title">Резервна копія</h2>
-            </div>
+          <section
+            className="mqp-card mqp-backup-card"
+            aria-labelledby="profile-backup-title"
+          >
+            <p className="mqp-kicker">
+              <i>04</i> Резервна копія
+            </p>
+            <h2 id="profile-backup-title">Збережіть свій журнал.</h2>
             <p className="mqp-text">
               {p.lastBackupDate
                 ? `Остання копія: ${profileDate(p.lastBackupDate)}.`
-                : "Ви ще не створювали резервну копію."}{" "}
-              Збережіть журнал і налаштування, перш ніж щось змінювати.
+                : "Копії ще немає."}{" "}
+              Один JSON-файл із журналом і налаштуваннями: про всяк випадок і
+              для перенесення.
             </p>
             {p.needsBackupReminder && p.lastBackupDate && (
               <small className="mqp-note">

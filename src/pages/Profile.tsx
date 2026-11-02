@@ -463,7 +463,7 @@ export default function Profile() {
           <i aria-hidden="true" />
           Особистий простір
         </p>
-        <h1>Ваш профіль</h1>
+        <h1>{activeTab === "backup" ? "Бекап" : "Ваш профіль"}</h1>
       </div>
       <nav className="mqp-tabs" aria-label="Розділи профілю">
         <button

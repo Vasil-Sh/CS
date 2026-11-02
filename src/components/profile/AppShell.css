@@ -198,3 +198,94 @@
   color: #fff;
   cursor: pointer;
 }
+
+/* ===== Collapsible sidebar (icons only) ===== */
+.mq-sidebar {
+  transition: width 0.2s ease;
+}
+.mq-shell .profile-main.mq-main {
+  transition: margin-left 0.2s ease;
+}
+.mq-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding-bottom: 18px;
+}
+.mq-brand-row .mq-brand {
+  padding-bottom: 0;
+}
+.mq-collapse {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #8d8e91;
+  cursor: pointer;
+}
+.mq-collapse:hover {
+  background: #ffffff0d;
+  color: #fff;
+}
+.mq-collapse:focus-visible {
+  outline: 2px solid var(--mq-orange);
+  outline-offset: 2px;
+}
+.mq-mobile-menu .mq-collapse {
+  display: none;
+}
+
+.mq-shell.is-collapsed {
+  --mq-sidebar-w: 76px;
+}
+.mq-shell.is-collapsed .mq-sidebar {
+  padding-inline: 12px;
+}
+.mq-shell.is-collapsed .mq-sidebar .mq-nav-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.mq-shell.is-collapsed .mq-brand-row {
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.mq-shell.is-collapsed .mq-brand {
+  padding: 4px 0 0;
+}
+.mq-shell.is-collapsed .mq-sidebar .mq-nav-link {
+  justify-content: center;
+  padding: 0;
+}
+.mq-shell.is-collapsed .mq-nav-title {
+  height: 1px;
+  margin: 12px 10px;
+  padding: 0;
+  overflow: hidden;
+  background: #ffffff14;
+  color: transparent;
+}
+.mq-shell.is-collapsed .mq-nav-group:first-child .mq-nav-title {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .mq-shell.is-collapsed .profile-main.mq-main {
+    margin-left: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mq-sidebar,
+  .mq-shell .profile-main.mq-main {
+    transition: none;
+  }
+}

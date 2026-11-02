@@ -37,7 +37,7 @@
   isolation: isolate;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 16px;
   padding: clamp(22px, 3.4vw, 36px);
   border-radius: 30px;
   background: var(--mqp-dark);
@@ -1010,8 +1010,8 @@
 }
 .mqp-hero.is-photo {
   min-height: 340px;
-  justify-content: space-between;
-  background: #d7d8d5 url("/assets/app/profile-hero.webp") right center / cover
+  justify-content: flex-start;
+  background: #d7d8d5 url("/assets/app/profile-controller.webp") right center / cover
     no-repeat;
   color: var(--mqp-ink);
 }
@@ -1090,13 +1090,6 @@
   color: var(--mqp-ink);
 }
 
-.mqp-photo-tile {
-  flex: 1 1 260px;
-  min-height: 220px;
-  border-radius: 24px;
-  background: #e2e3e0 url("/assets/app/backup-tokens.webp") center / cover
-    no-repeat;
-}
 
 @media (max-width: 700px) {
   .mqp-hero.is-photo {

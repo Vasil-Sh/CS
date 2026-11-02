@@ -1,0 +1,366 @@
+/* Profile: numbered sections (01 Журнал, 02 Налаштування) and backup hero. */
+.mqp-hero.is-photo:not(.is-backup) {
+  background-color: #d4d4d3;
+  background-image: url("/assets/app/profile-controller.webp");
+  background-position: right center;
+  background-size: cover;
+}
+.mqp-hero.is-photo.is-backup {
+  background-color: #ced2d3;
+  background-image: url("/assets/app/backup-stack.webp");
+  background-position: center;
+  background-size: cover;
+}
+
+/* Avatar row must not touch the heading in the compact profile hero */
+.mqp-hero.is-photo.is-compact .mqp-identity {
+  margin-top: 22px;
+}
+
+/* ===== Sheet with numbered sections (from v2) ===== */
+.mqp-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  padding: clamp(24px, 3vw, 40px);
+  border: 1px solid #1718191a;
+  border-radius: 26px;
+  background: #fff;
+}
+.mqp-sheet-section {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.mqp-sec-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.mqp-sec-head h2 {
+  margin: 0;
+  color: #171819;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+}
+.mqp-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  color: #686960;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.mqp-kicker i {
+  color: var(--mqp-orange-text);
+  font-style: normal;
+}
+.mqp-btn-outline.is-sm {
+  gap: 8px;
+  height: 44px;
+  padding: 0 18px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.mqp-btn-outline.is-sm:hover {
+  color: var(--mqp-ink);
+}
+
+.mqp-sheet .mqp-record {
+  grid-template-columns: 52px minmax(0, 1fr) auto 16px;
+  gap: 18px;
+  padding: 18px 0;
+  border-top: 1px solid #1718191a;
+}
+.mqp-sheet .mqp-record:hover {
+  background: transparent;
+}
+.mqp-sheet .mqp-record:hover strong {
+  color: var(--mqp-orange-text);
+}
+.mqp-sheet .mqp-pair {
+  gap: 0;
+}
+.mqp-sheet .mqp-pair > :nth-child(2) {
+  margin-left: -8px;
+}
+.mqp-sheet .mqp-team,
+.mqp-sheet .mqp-team-logo {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #17181926;
+  background: #fff;
+  font-size: 9px;
+  font-weight: 600;
+}
+.mqp-sheet .mqp-record-copy strong {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  transition: color 0.15s;
+}
+.mqp-sheet .mqp-record-copy small,
+.mqp-sheet .mqp-record time {
+  color: #686960;
+}
+.mqp-sheet .mqp-record-arrow {
+  color: #b9b8b0;
+}
+.mqp-sheet .mqp-empty {
+  background: #fbfaf8;
+}
+
+.mqp-setrows {
+  border-bottom: 1px solid #1718191a;
+}
+.mqp-setrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px 32px;
+  padding: 20px 0;
+  border-top: 1px solid #1718191a;
+}
+.mqp-setrow-label {
+  display: flex;
+  flex: 0 0 180px;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 12px;
+  color: #171819;
+  font-size: 14px;
+  font-weight: 500;
+}
+.mqp-setrow-label label {
+  font-weight: 500;
+}
+.mqp-setrow-label small {
+  color: #686960;
+  font-size: 12px;
+  font-weight: 400;
+}
+.mqp-setrow-control {
+  display: flex;
+  flex: 1 1 360px;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.mqp-setrow-control.is-narrow {
+  flex-basis: 240px;
+  max-width: 320px;
+}
+.mqp-setrow .mqp-input {
+  height: 44px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+.mqp-setrow .mqp-round {
+  width: 44px;
+  height: 44px;
+}
+.mqp-setrow .mqp-error {
+  color: #b02e12;
+  font-size: 12px;
+  font-weight: 600;
+}
+.mqp-setrow .mqp-theme-frame {
+  padding: 5px;
+  border-width: 1px;
+  border-radius: 14px;
+}
+.mqp-setrow .mqp-theme input:checked + .mqp-theme-frame {
+  box-shadow: 0 0 0 1px var(--mqp-orange);
+}
+.mqp-setrow .mqp-theme-label {
+  font-weight: 500;
+  text-align: left;
+}
+.mqp-setrow .mqp-theme input:checked ~ .mqp-theme-label {
+  font-weight: 500;
+}
+
+@media (max-width: 700px) {
+  .mqp-hero.is-photo.is-backup {
+    background-position: 64% center;
+  }
+  .mqp-sheet .mqp-record {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .mqp-sheet .mqp-pair,
+  .mqp-sheet .mqp-record-arrow {
+    display: none;
+  }
+  .mqp-setrow-label {
+    flex-basis: 100%;
+    padding-top: 0;
+  }
+  .mqp-setrow-control.is-narrow {
+    max-width: none;
+  }
+}
+
+/* Language + rate side by side */
+.mqp-setrow--pair {
+  gap: 18px 24px;
+}
+.mqp-setrow-field {
+  display: flex;
+  flex: 1 1 220px;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.mqp-setrow-field > label {
+  color: #171819;
+  font-size: 14px;
+  font-weight: 500;
+}
+.mqp-setrow-field > small {
+  color: #686960;
+  font-size: 12px;
+}
+.mqp-setrow-field .mqp-input {
+  height: 44px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+.mqp-setrow-field .mqp-round {
+  width: 44px;
+  height: 44px;
+}
+.mqp-setrow-field .mqp-error {
+  color: #b02e12;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* 03 / 04 rail cards */
+.mqp-rail .mqp-card {
+  gap: 16px;
+  padding: 28px;
+  border: 1px solid #1718191a;
+  border-radius: 26px;
+  box-shadow: none;
+}
+.mqp-rail .mqp-sec-head h2,
+.mqp-backup-card h2 {
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+.mqp-backup-card .mqp-kicker {
+  margin-bottom: 0;
+}
+.mqp-backup-card .mqp-text {
+  color: #686960;
+  line-height: 1.75;
+}
+
+/* Public card: nick sits right above the buttons */
+.mqp-player.is-photo {
+  justify-content: flex-start;
+  gap: 16px;
+}
+.mqp-player.is-photo .mqp-player-bottom {
+  margin-top: auto;
+  margin-bottom: -6px;
+}
+
+/* Metric cards match the journal / rail panels: thin grey border, no shadow */
+.mqp-metric {
+  border: 1px solid #1718191a;
+  box-shadow: none;
+}
+.mqp-metric:hover {
+  border-color: #17181933;
+}
+
+/* ===== Metric animations ===== */
+.mqp-count {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  animation: mqp-count-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.mqp-metric:nth-child(2) .mqp-count { animation-delay: 0.05s; }
+.mqp-metric:nth-child(3) .mqp-count { animation-delay: 0.1s; }
+.mqp-metric:nth-child(4) .mqp-count { animation-delay: 0.15s; }
+.mqp-metric:nth-child(5) .mqp-count { animation-delay: 0.2s; }
+@keyframes mqp-count-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+.mqp-metric-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px 0 12px;
+  border-radius: 999px;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    padding 0.2s ease;
+}
+.mqp-metric-cta i {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+.mqp-metric:hover .mqp-metric-cta,
+.mqp-metric:focus-visible .mqp-metric-cta {
+  background: #ff693b1a;
+  color: #b93d14;
+}
+.mqp-metric:hover .mqp-metric-cta i,
+.mqp-metric:focus-visible .mqp-metric-cta i {
+  background: var(--mqp-orange);
+  color: #111213;
+  transform: rotate(90deg) scale(1.1);
+}
+.mqp-metric:active .mqp-metric-cta i {
+  transform: rotate(90deg) scale(0.9);
+}
+.mqp-metric .mqp-metric-arrow {
+  transition: transform 0.25s ease, color 0.2s ease;
+}
+.mqp-metric:hover .mqp-metric-arrow {
+  color: var(--mqp-ink);
+  transform: translate(2px, -2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mqp-count {
+    animation: none;
+  }
+  .mqp-metric-cta,
+  .mqp-metric-cta i,
+  .mqp-metric .mqp-metric-arrow {
+    transition: none;
+  }
+}
