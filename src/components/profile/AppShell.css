@@ -289,3 +289,14 @@
     transition: none;
   }
 }
+
+/* ===== App ground: a clearly darker warm grey so white cards stand out ===== */
+.mq-shell {
+  --mq-ground: #ebeae5;
+  background: var(--mq-ground);
+}
+.mq-shell .mq-main,
+.mq-shell .mqp-page {
+  --mqp-ground: var(--mq-ground);
+  background: var(--mq-ground);
+}

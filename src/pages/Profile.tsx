@@ -1,3 +1,4 @@
+import { pt, profileLocale } from "@/lib/profileTranslations";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -16,7 +17,7 @@ import "./Profile.css";
 import "@/components/profile/ProfileRedesign.css";
 import { useTheme, type ThemePreference } from "@/hooks/useTheme";
 import { useAuth } from "@/contexts/AuthContext";
-import { setLang, getLang, type Lang } from "@/lib/i18n";
+import { setLang, getLang, t, onLangChange, type Lang } from "@/lib/i18n";
 import { logRender } from "@/lib/devLogger";
 
 export default function Profile() {
@@ -26,6 +27,7 @@ export default function Profile() {
   const { preference, setTheme } = useTheme();
   const isAdmin = user?.role === "admin";
   const [language, setLanguage] = useState<Lang>(getLang);
+  useEffect(() => onLangChange(setLanguage), []);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
@@ -58,14 +60,12 @@ export default function Profile() {
         UserDataService.saveUserPrefs({
           preferences: { exchangeRate: rounded },
         }).catch(() => {});
-        toast.success(`Курс оновлено: 1 USD = ${rounded} UAH`);
+        toast.success(pt("rateUpdated", { rate: rounded }));
       } else {
         throw new Error("No UAH rate");
       }
     } catch {
-      toast.error(
-        "Не вдалося отримати курс. Перевірте інтернет або введіть вручну.",
-      );
+      toast.error(t("profile.ui.rateFailed"));
     } finally {
       setIsFetchingRate(false);
     }
@@ -99,7 +99,7 @@ export default function Profile() {
           console.warn("[Profile] API reset failed:", err);
       }
       if (!apiOk) {
-        toast.error("Сервер повернув помилку. Спробуйте ще раз.");
+        toast.error(t("profile.ui.serverFailed"));
         setIsClearing(false);
         return;
       }
@@ -119,12 +119,12 @@ export default function Profile() {
         }
       }
       keysToRemove.forEach((k) => localStorage.removeItem(k));
-      toast.success("Усі дані очищено!", {
-        description: `Видалено ${keysToRemove.length} записів.`,
+      toast.success(t("profile.ui.cleared"), {
+        description: pt("deletedCount", { count: keysToRemove.length }),
       });
       setTimeout(() => window.location.reload(), 1000);
     } catch {
-      toast.error("Помилка очищення");
+      toast.error(t("profile.ui.clearFailed"));
     } finally {
       setIsClearing(false);
     }
@@ -134,17 +134,19 @@ export default function Profile() {
     setTheme(newTheme);
     toast.success(
       newTheme === "system"
-        ? "Тема відповідає налаштуванням пристрою"
+        ? t("profile.ui.themeSystem")
         : newTheme === "dark"
-          ? "Темна тема активована"
-          : "Світла тема активована",
+          ? t("profile.ui.themeDark")
+          : t("profile.ui.themeLight"),
     );
   };
 
   const handleLanguageChange = (newLang: Lang) => {
     setLang(newLang);
     setLanguage(newLang);
-    toast.success(newLang === "uk" ? "Мова: Українська" : "Language: English");
+    toast.success(
+      newLang === "uk" ? t("profile.ui.languageUk") : "Language: English",
+    );
   };
 
   // ── Shared keys (everyone) ──
@@ -344,14 +346,16 @@ export default function Profile() {
       localStorage.setItem("matchiq_last_backup_date", exportedAt);
       setLastBackup(exportedAt);
 
-      toast.success("Повний бекап створено!", {
-        description: `Файл: matchiq-backup-${new Date().toISOString().slice(0, 10)}.json`,
+      toast.success(t("profile.ui.exported"), {
+        description: pt("exportFilename", {
+          date: new Date().toISOString().slice(0, 10),
+        }),
       });
     } catch (error) {
       if (import.meta.env.DEV)
         console.warn("[Profile] Backup export error:", error);
-      toast.error("Помилка створення бекапу", {
-        description: "Не вдалося експортувати дані",
+      toast.error(t("profile.ui.exportFailed"), {
+        description: t("profile.ui.exportFailedDetail"),
       });
     } finally {
       setIsExporting(false);
@@ -367,9 +371,8 @@ export default function Profile() {
         const parsed = JSON.parse(content);
 
         if (!parsed._meta || parsed._meta.format !== "matchiq-full-backup") {
-          toast.error("Невірний формат файлу", {
-            description:
-              'Файл не є бекапом MatchIQ. Використовуйте файл, створений через "Повний бекап".',
+          toast.error(t("profile.ui.invalidFile"), {
+            description: t("profile.ui.invalidBackup"),
           });
           setIsImporting(false);
           return;
@@ -427,13 +430,18 @@ export default function Profile() {
           restoredCount++;
         });
 
-        const msg = `Бекап відновлено! (${restoredCount} записів)`;
+        const msg = pt("restoredCount", { count: restoredCount });
         const descTail =
           isAdminBackup && !isAdmin
-            ? ` (${skippedAdmin} адмін-записів пропущено)`
+            ? pt("skippedCount", { count: skippedAdmin })
             : "";
         toast.success(msg, {
-          description: `Дані з ${new Date(parsed._meta.exportDate).toLocaleDateString("uk-UA")} відновлені.${descTail} Сторінка перезавантажиться.`,
+          description: pt("restoredDescription", {
+            date: new Date(parsed._meta.exportDate).toLocaleDateString(
+              profileLocale(),
+            ),
+            tail: descTail,
+          }),
         });
 
         setTimeout(() => {
@@ -441,8 +449,8 @@ export default function Profile() {
         }, 1500);
       } catch (error) {
         if (import.meta.env.DEV) console.error("Backup import error:", error);
-        toast.error("Помилка відновлення", {
-          description: "Не вдалося прочитати файл бекапу. Перевірте формат.",
+        toast.error(t("profile.ui.restoreFailed"), {
+          description: t("profile.ui.readFailedDetail"),
         });
       } finally {
         setIsImporting(false);
@@ -451,7 +459,7 @@ export default function Profile() {
 
     reader.onerror = () => {
       setIsImporting(false);
-      toast.error("Не вдалося прочитати файл бекапу");
+      toast.error(t("profile.ui.readFailed"));
     };
     reader.readAsText(file);
   };
@@ -460,25 +468,30 @@ export default function Profile() {
     <header className="mqp-heading">
       <div>
         <p className="mqp-eyebrow">
-          <i aria-hidden="true" />
-          Особистий простір
+          <i aria-hidden="true" /> {t("profile.ui.personalSpace")}{" "}
         </p>
-        <h1>{activeTab === "backup" ? "Бекап" : "Ваш профіль"}</h1>
+        <h1>
+          {activeTab === "backup"
+            ? t("profile.ui.backup")
+            : t("profile.ui.yourProfile")}
+        </h1>
       </div>
-      <nav className="mqp-tabs" aria-label="Розділи профілю">
+      <nav className="mqp-tabs" aria-label={t("profile.ui.sections")}>
         <button
           type="button"
           aria-current={activeTab === "interface" ? "page" : undefined}
           onClick={() => setActiveTab("interface")}
         >
-          Профіль
+          {" "}
+          {t("profile.ui.profile")}{" "}
         </button>
         <button
           type="button"
           aria-current={activeTab === "backup" ? "page" : undefined}
           onClick={() => setActiveTab("backup")}
         >
-          Дані та бекап
+          {" "}
+          {t("profile.ui.dataBackup")}{" "}
         </button>
       </nav>
     </header>
@@ -491,7 +504,6 @@ export default function Profile() {
           <ProfileOverview
             header={profileHeader}
             username={username}
-            telegram={user?.telegram || ""}
             stats={stats}
             theme={preference}
             language={language}
@@ -503,7 +515,7 @@ export default function Profile() {
               localStorage.setItem("matchiq_exchange_rate", String(value));
               UserDataService.saveUserPrefs({
                 preferences: { exchangeRate: value },
-              }).catch(() => toast.error("Не вдалося синхронізувати курс"));
+              }).catch(() => toast.error(t("profile.ui.syncRateFailed")));
             }}
             onFetchRate={fetchExchangeRate}
             isFetchingRate={isFetchingRate}
@@ -530,16 +542,15 @@ export default function Profile() {
         <Dialog open={clearConfirmOpen} onOpenChange={setClearConfirmOpen}>
           <DialogContent className="profile-studio-dialog backup-confirm-dialog">
             <DialogHeader>
-              <DialogTitle>Очистити всі дані?</DialogTitle>
+              <DialogTitle>{t("profile.ui.clearTitle")}</DialogTitle>
               <DialogDescription>
-                Цю дію неможливо скасувати. Обліковий запис, тема та мова
-                залишаться.
+                {" "}
+                {t("profile.ui.clearHint")}{" "}
               </DialogDescription>
             </DialogHeader>
             <p className="backup-confirm-warning">
-              Будуть видалені ваші ставки, стратегії, цілі, ризикові команди,
-              Telegram-групи та банкрол на сервері, а також локальні записи
-              цього браузера. Локальний JSON-бекап не відновлює серверні дані.
+              {" "}
+              {t("profile.ui.clearWarning")}{" "}
             </p>
             <DialogFooter>
               <button
@@ -547,7 +558,8 @@ export default function Profile() {
                 onClick={() => setClearConfirmOpen(false)}
                 className="profile-button"
               >
-                Скасувати
+                {" "}
+                {t("profile.ui.cancel")}{" "}
               </button>
               <button
                 type="button"
@@ -555,7 +567,8 @@ export default function Profile() {
                 disabled={isClearing}
                 className="profile-button backup-confirm-delete"
               >
-                Видалити
+                {" "}
+                {t("profile.ui.delete")}{" "}
               </button>
             </DialogFooter>
           </DialogContent>

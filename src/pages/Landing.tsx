@@ -25,7 +25,6 @@ import {
   ChevronDown,
   Download,
   FileJson,
-  Menu,
   Pause,
   Play,
   ShieldAlert,
@@ -807,7 +806,7 @@ function SiteHeader() {
         </nav>
 <Link
           to="/login"
-          className="mqt-pill "
+          className="mqt-pill mq-header-login"
           data-track="cta_login"
           data-track-place="header"
         >
@@ -826,7 +825,10 @@ function SiteHeader() {
           aria-controls="mq-mobile-menu"
           onClick={() => setMenu(!menu)}
         >
-          {menu ? <X size={20} /> : <Menu size={20} />}
+          <span className="mq-burger" data-open={menu} aria-hidden="true">
+            <i />
+            <i />
+          </span>
         </button>
       </header>
       {menu && (
@@ -853,7 +855,9 @@ function SiteHeader() {
           <a href="#faq" onClick={() => setMenu(false)}>
             FAQ
           </a>
-          <Link to="/login">Увійти ↗</Link>
+          <Link to="/login" onClick={() => setMenu(false)}>
+            Увійти ↗
+          </Link>
         </nav>
       )}
     </div>
@@ -895,18 +899,28 @@ function Hero() {
               <span className="mqt-pill-out" aria-hidden="true"><ArrowUpRight size={18} /></span>
             </a>
             <a
-              className="mq-outline-button"
+              className="mq-text-link"
               href="#possibilities"
               data-track="cta_demo"
               data-track-place="hero"
             >
-              Спробувати на прикладі <ArrowUpRight size={18} />
+              Спробувати на прикладі <ArrowDown size={16} aria-hidden="true" />
             </a>
           </div>
+          <ul className="mq-risk" aria-label="Без ризику">
+            <li>
+              <Check size={14} aria-hidden="true" /> Без автосписань
+            </li>
+            <li>
+              <Check size={14} aria-hidden="true" /> Приклади без реєстрації
+            </li>
+            <li>
+              <Check size={14} aria-hidden="true" /> Дані можна забрати в CSV
+            </li>
+          </ul>
           <p className="mq-legal-note">
-            Доступ — через Telegram @cs2beet. Приклади — без реєстрації.
-            <br />
-            18+. MatchIQ не приймає ставки та не зберігає кошти.
+            Доступ через Telegram @cs2beet. 18+. MatchIQ не приймає ставки та
+            не зберігає кошти.
           </p>
         </div>
         <HeroPreview />
@@ -1287,12 +1301,12 @@ const startSteps = [
 const comparisonRows = [
   [
     "Записати ставку",
-    "Заповнюєш рядок вручну, формули легко зламати",
+    "Вносиш матч, суму й коефіцієнт у стовпці",
     "Обираєш матч із розкладу, сума в UAH або USD з конвертацією",
   ],
   [
     "Причина рішення",
-    "Окремий стовпчик, який швидко перестаєш заповнювати",
+    "Додаєш стовпчик для нотаток",
     "Нотатка в кожному записі, поруч із результатом",
   ],
   [
@@ -1302,12 +1316,12 @@ const comparisonRows = [
   ],
   [
     "Порівняння стратегій",
-    "Фільтри й копії аркушів",
+    "Налаштовуєш фільтри або зведену таблицю за стратегіями",
     "Ігри, періоди й стратегії порівнюються в одному місці",
   ],
   [
     "Дисципліна",
-    "Правила тримаєш у голові",
+    "Налаштовуєш власні формули та перевірки значень",
     "Перевірка коефіцієнта й попередження про ризикову команду до запису",
   ],
   [
@@ -1360,7 +1374,7 @@ function Comparison() {
             </div>
           ))}
           <footer className="mq-vs-foot">
-            Усе тримається на твоїй уважності й формулах.
+            Структуру обліку та розрахунки налаштовуєш самостійно.
           </footer>
         </article>
         <span className="mq-vs-badge" aria-hidden="true">
@@ -1400,6 +1414,73 @@ function Comparison() {
     </section>
   );
 }
+const TAGLINE = [
+  "Кожна ставка залишає слід.",
+  "MatchIQ перетворює його на висновки,",
+  "які можна перевірити фактами.",
+];
+/** Large tagline whose words light up one by one while it scrolls into view. */
+function TaglineReveal() {
+  const reduced = useContext(ReducedMotion);
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [lit, setLit] = useState(0);
+  const words = TAGLINE.map((line) => line.split(" "));
+  const total = words.flat().length;
+  useEffect(() => {
+    if (reduced) {
+      setLit(total);
+      return;
+    }
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const el = ref.current;
+      if (!el) return;
+      const spans = el.querySelectorAll<HTMLElement>("[data-word]");
+      // A word lights up once it crosses 65% of the viewport height.
+      const trigger = window.innerHeight * 0.65;
+      let count = 0;
+      spans.forEach((span) => {
+        if (span.getBoundingClientRect().top < trigger) count += 1;
+      });
+      setLit(count);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, [reduced, total]);
+  let index = 0;
+  return (
+    <section className="mq-section mq-tagline" aria-label={TAGLINE.join(" ")}>
+      <p ref={ref} className="mq-tagline-text" aria-hidden="true">
+        {words.map((line, l) => (
+          <span key={l} className="mq-tagline-line">
+            {line.map((word) => {
+              const i = index++;
+              return (
+                <span
+                  key={i}
+                  data-word
+                  className={i < lit ? "is-lit" : undefined}
+                >
+                  {word}{" "}
+                </span>
+              );
+            })}
+          </span>
+        ))}
+      </p>
+    </section>
+  );
+}
 function Journey() {
   const [active, setActive] = useState(0);
   const item = journey[active];
@@ -1410,13 +1491,13 @@ function Journey() {
         label="02 / ВІД ЗАПИСУ ДО ВИСНОВКУ"
         title={
           <>
-            Невеликі кроки.
+            Чотири кроки
             <br />
-            Повна картина.
+            від матчу до висновку.
           </>
         }
       >
-        Один демонстраційний запис — від вибору матчу до особистого висновку.
+        Натискай на кроки: демозапис покаже, що відбувається на кожному етапі.
       </SectionHeading>
       <div className="mq-journey-layout">
         <div className="mq-process-list">
@@ -1434,9 +1515,11 @@ function Journey() {
                   <ArrowUpRight size={20} />
                 </button>
               </h3>
-              <p id={`mq-step-${i}`} hidden={active !== i}>
-                {step.body}
-              </p>
+              <div className="mq-process-reveal" id={`mq-step-${i}`} aria-hidden={active !== i} inert={active !== i}>
+                <div className="mq-process-reveal-inner">
+                  <p>{step.body}</p>
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -1472,9 +1555,9 @@ function Tools() {
         label="04 / БІЛЬШЕ КОНТЕКСТУ"
         title={
           <>
-            Менше припущень.
+            Порахуй EV до ставки,
             <br />
-            <span>Більше розуміння.</span>
+            <span>а не після програшу.</span>
           </>
         }
       >
@@ -1655,6 +1738,20 @@ function Pricing() {
           </Reveal>
         ))}
       </div>
+      <ul className="mq-risk mq-risk-pricing" aria-label="Без ризику">
+        <li>
+          <Check size={14} aria-hidden="true" /> Без автосписань: кожен
+          період оплачуєш сам
+        </li>
+        <li>
+          <Check size={14} aria-hidden="true" /> Спершу спробуй приклади без
+          реєстрації
+        </li>
+        <li>
+          <Check size={14} aria-hidden="true" /> Твої записи завжди можна
+          експортувати
+        </li>
+      </ul>
       <div className="mq-start" aria-labelledby="mq-start-title">
         <div className="mq-start-head">
           <h3 id="mq-start-title">Як почати</h3>
@@ -1689,7 +1786,26 @@ function Pricing() {
 function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
   const [showAll, setShowAll] = useState(false);
-  const visible = showAll ? faq : faq.slice(0, 5);
+  const renderItem = (item: (typeof faq)[number], i: number) => (
+    <div key={item.question} className={`mq-faq-item${open === i ? " is-open" : ""}`}>
+      <h3>
+        <button
+          type="button"
+          aria-expanded={open === i}
+          aria-controls={`mq-faq-${i}`}
+          onClick={() => setOpen(open === i ? null : i)}
+        >
+          <span>{item.question}</span>
+          <ChevronDown size={18} aria-hidden="true" />
+        </button>
+      </h3>
+      <div id={`mq-faq-${i}`} className="mq-process-reveal" aria-hidden={open !== i} inert={open !== i}>
+        <div className="mq-process-reveal-inner">
+          <p>{item.answer}</p>
+        </div>
+      </div>
+    </div>
+  );
   return (
     <section
       className="mq-section mq-faq"
@@ -1705,30 +1821,24 @@ function FAQ() {
         <HairlineFigure kind="query" />
       </div>
       <div className="mq-faq-list">
-        {visible.map((item, i) => (
-          <div key={item.question} className="mq-faq-item">
-            <h3>
-              <button
-                type="button"
-                aria-expanded={open === i}
-                aria-controls={`mq-faq-${i}`}
-                onClick={() => setOpen(open === i ? null : i)}
-              >
-                <span>{item.question}</span>
-                <ChevronDown size={18} aria-hidden="true" />
-              </button>
-            </h3>
-            <div id={`mq-faq-${i}`} hidden={open !== i}>
-              <p>{item.answer}</p>
-            </div>
+        {faq.slice(0, 5).map(renderItem)}
+        <div
+          id="mq-faq-extra"
+          className={`mq-process-reveal mq-faq-extra${showAll ? " is-open" : ""}`}
+          aria-hidden={!showAll}
+          inert={!showAll}
+        >
+          <div className="mq-process-reveal-inner">
+            {faq.slice(5).map((item, i) => renderItem(item, i + 5))}
           </div>
-        ))}
+        </div>
         {faq.length > 5 && (
           <button
             type="button"
             className="mq-faq-more"
             onClick={() => setShowAll((v) => !v)}
             aria-expanded={showAll}
+            aria-controls="mq-faq-extra"
           >
             {showAll ? "Показати менше" : `Показати більше (${faq.length - 5})`}
             <ChevronDown size={16} aria-hidden="true" />
@@ -1791,14 +1901,9 @@ export default function Landing() {
                 <div className="mq-about-bottom">
                   <HairlineFigure kind="settle" />
                   <p>
-                    Якщо ти вже робиш ставки на кіберспорт і ведеш облік у
-                    таблицях чи нотатках, MatchIQ збирає його в одному місці.
-                    <strong>
-                      {" "}
-                      Зберігай не лише результат, а й причину ставки.
-                    </strong>{" "}
-                    Після матчу ти зможеш повернутися до своїх аргументів,
-                    перевірити стратегію й побачити, як змінився банкрол.
+                    Для тих, хто вже робить ставки на кіберспорт і веде облік
+                    у таблицях чи нотатках. <strong>MatchIQ збирає матчі,
+                    записи та статистику в одному робочому просторі.</strong>
                   </p>
                 </div>
               </Reveal>
@@ -1816,15 +1921,12 @@ export default function Landing() {
                   Повернись до причини.
                 </h2>
                 <p>
-                  Журнал зберігає кожну ставку разом із її контекстом: матч,
-                  суму, коефіцієнт, стратегію та твою нотатку. Запиши, чому
-                  обрав саме це рішення, поки аргументи ще свіжі.
+                  Результат показує, що сталося. Нотатка зберігає, чому ти
+                  обрав цей матч і коефіцієнт.
                 </p>
                 <p>
-                  Після матчу зафіксуй результат і повернися до запису. Порівняй
-                  початкові очікування з тим, що сталося, та додай висновок. Так
-                  історія ставок допомагає помічати повторювані помилки й
-                  перевіряти власні правила на фактах.
+                  Повернися до своїх аргументів після матчу й додай висновок.
+                  Так ти зможеш відрізнити рішення за стратегією від імпульсивного.
                 </p>
 <a
                   className="mqt-pill"
@@ -1851,9 +1953,8 @@ export default function Landing() {
                   </>
                 }
               >
-                Обирай матч, зберігай запис і причину рішення, а після
-                результату — перевіряй свою статистику. Нижче — інтерактивні
-                приклади на демо-даних.
+                Перемикай ігри й типи записів, змінюй коефіцієнт.
+                Усі приклади працюють на демо-даних без реєстрації.
               </SectionHeading>
               <div className="mq-work-grid">
                 <WorkCard
@@ -1895,6 +1996,7 @@ export default function Landing() {
               </div>
             </section>
             <Journey />
+            <TaglineReveal />
             <Comparison />
             <Tools />
             {SHOW_PLACEHOLDERS && <SocialProofPlaceholder />}

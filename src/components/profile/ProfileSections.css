@@ -289,10 +289,18 @@
   font-variant-numeric: tabular-nums;
   animation: mqp-count-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.mqp-metric:nth-child(2) .mqp-count { animation-delay: 0.05s; }
-.mqp-metric:nth-child(3) .mqp-count { animation-delay: 0.1s; }
-.mqp-metric:nth-child(4) .mqp-count { animation-delay: 0.15s; }
-.mqp-metric:nth-child(5) .mqp-count { animation-delay: 0.2s; }
+.mqp-metric:nth-child(2) .mqp-count {
+  animation-delay: 0.05s;
+}
+.mqp-metric:nth-child(3) .mqp-count {
+  animation-delay: 0.1s;
+}
+.mqp-metric:nth-child(4) .mqp-count {
+  animation-delay: 0.15s;
+}
+.mqp-metric:nth-child(5) .mqp-count {
+  animation-delay: 0.2s;
+}
 @keyframes mqp-count-in {
   from {
     opacity: 0;
@@ -347,7 +355,9 @@
   transform: rotate(90deg) scale(0.9);
 }
 .mqp-metric .mqp-metric-arrow {
-  transition: transform 0.25s ease, color 0.2s ease;
+  transition:
+    transform 0.25s ease,
+    color 0.2s ease;
 }
 .mqp-metric:hover .mqp-metric-arrow {
   color: var(--mqp-ink);
@@ -445,4 +455,80 @@
   .mqp-metrics.is-strip .mqp-metric:nth-child(even) {
     border-left: 1px solid #1718191a;
   }
+}
+
+/* Personal profile: readable labels and adjacent team marks at every width. */
+.profile-view-interface .mqp-sheet .mqp-record {
+  grid-template-columns: 88px minmax(0, 1fr) auto 16px;
+  gap: 16px;
+}
+.profile-view-interface .mqp-sheet .mqp-pair {
+  display: flex;
+  gap: 8px;
+}
+.profile-view-interface .mqp-sheet .mqp-pair > :nth-child(2) {
+  margin-left: 0;
+}
+.profile-view-interface .mqp-sheet :is(.mqp-team, .mqp-team-logo) {
+  width: 40px;
+  height: 40px;
+  font-size: 12px;
+  line-height: 16px;
+}
+.profile-view-interface :is(.mqp-kicker, .mqp-metric-label) {
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.04em;
+}
+.profile-view-interface :is(.mqp-sec-head h2, .mqp-backup-card h2) {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.profile-view-interface
+  :is(
+    .mqp-record-copy small,
+    .mqp-record time,
+    .mqp-metric-note,
+    .mqp-metric-cta,
+    .mqp-theme-label
+  ) {
+  font-size: 14px;
+  line-height: 20px;
+}
+.profile-view-interface .mqp-record-copy strong {
+  line-height: 24px;
+}
+@media (max-width: 700px) {
+  .profile-view-interface .mqp-sheet .mqp-record {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .profile-view-interface .mqp-sheet :is(.mqp-team, .mqp-team-logo) {
+    width: 32px;
+    height: 32px;
+  }
+  .profile-view-interface .mqp-sheet .mqp-record-copy strong {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* Activity records as soft grey blocks (same as Telegram group rows) */
+.mqp-sheet .mqp-records li + li {
+  margin-top: 6px;
+}
+.mqp-sheet .mqp-record {
+  padding: 16px 14px;
+  border-top: 0;
+  border-radius: 16px;
+  background: #f3f2ee;
+  transition: background-color 0.15s;
+}
+.mqp-sheet .mqp-record:hover {
+  background: #efeee9;
+}
+.mqp-sheet .mqp-records {
+  padding-top: 4px;
 }

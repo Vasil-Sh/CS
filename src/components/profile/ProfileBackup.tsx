@@ -1,3 +1,5 @@
+import { pt, profileLocale } from "@/lib/profileTranslations";
+import { t } from "@/lib/i18n";
 import { useRef, useState, type ReactNode } from "react";
 import {
   Download,
@@ -52,7 +54,7 @@ export default function ProfileBackup({
   const busy = isExporting || isImporting || isClearing;
   const lastExport =
     lastBackupDate && !Number.isNaN(lastBackupDate.getTime())
-      ? lastBackupDate.toLocaleString("uk-UA", {
+      ? lastBackupDate.toLocaleString(profileLocale(), {
           day: "numeric",
           month: "short",
           year: "numeric",
@@ -61,7 +63,7 @@ export default function ProfileBackup({
         })
       : null;
   const localizedSize = Number.isFinite(Number(storageSize))
-    ? Number(storageSize).toLocaleString("uk-UA", {
+    ? Number(storageSize).toLocaleString(profileLocale(), {
         minimumFractionDigits: 1,
         maximumFractionDigits: 1,
       })
@@ -70,11 +72,11 @@ export default function ProfileBackup({
   const selectFile = (candidate?: File) => {
     if (!candidate || busy) return;
     if (!candidate.name.toLowerCase().endsWith(".json")) {
-      toast.error("Оберіть файл бекапу у форматі JSON");
+      toast.error(t("profile.ui.chooseJson"));
       return;
     }
     if (!candidate.size) {
-      toast.error("Файл порожній. Оберіть збережений бекап MatchIQ");
+      toast.error(t("profile.ui.emptyFile"));
       return;
     }
     setFile(candidate);
@@ -82,54 +84,59 @@ export default function ProfileBackup({
 
   return (
     <>
-      <section className="mqp-hero is-compact is-photo is-backup" aria-label="Дані та бекап">
+      <section
+        className="mqp-hero is-compact is-photo is-backup"
+        aria-label={t("profile.ui.dataBackup")}
+      >
         {header}
       </section>
       <div className="mqp-backup" aria-busy={busy}>
-        <section className="mqp-card" aria-label="Огляд локальних даних">
+        <section
+          className="mqp-card"
+          aria-label={t("profile.ui.localOverview")}
+        >
           <dl className="mqp-stats">
             <div>
-              <dt>Локальні дані</dt>
-              <dd>{localizedSize} КБ</dd>
+              <dt>{t("profile.ui.localData")}</dt>
+              <dd>
+                {localizedSize} {t("profile.ui.kb")}
+              </dd>
             </div>
             <div>
-              <dt>Останній експорт</dt>
+              <dt>{t("profile.ui.lastExport")}</dt>
               <dd>
                 {lastExport ? (
                   <time dateTime={lastBackupDate!.toISOString()}>
                     {lastExport}
                   </time>
                 ) : (
-                  "Ще не було"
+                  t("profile.ui.never")
                 )}
               </dd>
             </div>
             <div>
-              <dt>Формат копії</dt>
+              <dt>{t("profile.ui.format")}</dt>
               <dd>JSON</dd>
             </div>
           </dl>
         </section>
-        <p className="mqp-scope">
-          Експортуються дані цього браузера. Це не копія серверної бази.
-        </p>
+        <p className="mqp-scope"> {t("profile.ui.localScope")} </p>
 
         <div className="mqp-row">
           <section className="mqp-card" aria-labelledby="backup-export-title">
             <div className="mqp-card-head">
-              <h2 id="backup-export-title">Завантажити бекап</h2>
+              <h2 id="backup-export-title">{t("profile.ui.downloadBackup")}</h2>
             </div>
-            <p className="mqp-text">
-              Усі локальні дані в одному JSON-файлі. Збережіть копію перед
-              змінами або перенесенням на інший пристрій.
-            </p>
+            <p className="mqp-text"> {t("profile.ui.exportDescription")} </p>
             <button
               type="button"
               className="mqp-pill"
               onClick={onExport}
               disabled={busy}
             >
-              {isExporting ? "Створення копії…" : "Завантажити повний бекап"}
+              {isExporting
+                ? t("profile.ui.exporting")
+                : t("profile.ui.downloadFull")}
               <span className="mqp-pill-arrow" aria-hidden="true">
                 {isExporting ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -141,16 +148,16 @@ export default function ProfileBackup({
           </section>
           <section className="mqp-card" aria-labelledby="backup-contents-title">
             <div className="mqp-card-head">
-              <h2 id="backup-contents-title">Що входить у копію</h2>
+              <h2 id="backup-contents-title">{t("profile.ui.contents")}</h2>
             </div>
             <ul className="mqp-checklist">
               {[
-                "Ставки",
-                "Цілі",
-                "Ризикові команди",
-                "Telegram-групи",
-                "Стратегії",
-                "Налаштування",
+                t("profile.ui.bets"),
+                t("profile.ui.goals"),
+                t("profile.ui.riskyTeams"),
+                t("profile.ui.telegramGroups"),
+                t("profile.ui.strategies"),
+                t("profile.ui.settings"),
               ].map((item) => (
                 <li key={item}>
                   <span aria-hidden="true">
@@ -160,25 +167,22 @@ export default function ProfileBackup({
                 </li>
               ))}
             </ul>
-            <p className="mqp-note">Лише дані, доступні в цьому браузері.</p>
+            <p className="mqp-note">{t("profile.ui.availableLocal")}</p>
           </section>
         </div>
 
         <section className="mqp-card" aria-labelledby="backup-restore-title">
           <div className="mqp-card-head">
-            <h2 id="backup-restore-title">Відновити з бекапу</h2>
+            <h2 id="backup-restore-title">{t("profile.ui.restoreBackup")}</h2>
           </div>
-          <p className="mqp-text">Оберіть раніше збережений JSON-файл MatchIQ.</p>
+          <p className="mqp-text">{t("profile.ui.chooseSaved")}</p>
           <div className="mqp-warning">
             <AlertTriangle size={18} aria-hidden="true" />
-            <span>
-              Відновлення замінить відповідні локальні дані. Спочатку збережіть
-              поточну копію.
-            </span>
+            <span> {t("profile.ui.restoreWarning")} </span>
           </div>
           <div
             role="group"
-            aria-label="Вибір файлу для відновлення"
+            aria-label={t("profile.ui.chooseRestore")}
             aria-describedby="backup-restore-hint"
             className={`mqp-dropzone${dragging ? " is-dragging" : ""}${file ? " has-file" : ""}`}
             onDragEnter={(event) => {
@@ -208,11 +212,15 @@ export default function ProfileBackup({
               <Upload size={19} strokeWidth={1.8} aria-hidden="true" />
             </span>
             <div className="mqp-dropzone-copy" aria-live="polite">
-              <strong>{file ? file.name : "Перетягніть JSON-файл сюди"}</strong>
+              <strong>{file ? file.name : t("profile.ui.dropJson")}</strong>
               <span>
                 {file
-                  ? `${(file.size / 1024).toLocaleString("uk-UA", { maximumFractionDigits: 1 })} КБ · Файл обрано`
-                  : "або оберіть його на пристрої"}
+                  ? pt("selectedFile", {
+                      size: (file.size / 1024).toLocaleString(profileLocale(), {
+                        maximumFractionDigits: 1,
+                      }),
+                    })
+                  : t("profile.ui.chooseDevice")}
               </span>
             </div>
             <div className="mqp-dropzone-actions">
@@ -220,7 +228,7 @@ export default function ProfileBackup({
                 <button
                   type="button"
                   className="mqp-round"
-                  aria-label="Прибрати обраний файл"
+                  aria-label={t("profile.ui.removeFile")}
                   disabled={busy}
                   onClick={() => setFile(null)}
                 >
@@ -233,14 +241,14 @@ export default function ProfileBackup({
                 disabled={busy}
                 onClick={() => input.current?.click()}
               >
-                {file ? "Змінити файл" : "Обрати файл"}
+                {file ? t("profile.ui.changeFile") : t("profile.ui.chooseFile")}
               </button>
             </div>
             <input
               ref={input}
               type="file"
               accept=".json,application/json"
-              aria-label="Файл бекапу JSON"
+              aria-label={t("profile.ui.jsonFile")}
               hidden
               disabled={busy}
               onChange={(event) => {
@@ -250,7 +258,8 @@ export default function ProfileBackup({
             />
           </div>
           <p className="mqp-note" id="backup-restore-hint">
-            Дані зміняться лише після перевірки файлу та вашого підтвердження.
+            {" "}
+            {t("profile.ui.restoreHint")}{" "}
           </p>
           {file && (
             <div>
@@ -260,7 +269,9 @@ export default function ProfileBackup({
                 disabled={busy}
                 onClick={() => setConfirmOpen(true)}
               >
-                {isImporting ? "Відновлення…" : "Відновити дані"}
+                {isImporting
+                  ? t("profile.ui.restoring")
+                  : t("profile.ui.restoreData")}
                 <span className="mqp-pill-arrow" aria-hidden="true">
                   {isImporting ? (
                     <Loader2 size={16} className="animate-spin" />
@@ -278,11 +289,8 @@ export default function ProfileBackup({
           aria-labelledby="backup-clear-title"
         >
           <div>
-            <h2 id="backup-clear-title">Очистити дані</h2>
-            <p className="mqp-text">
-              Буде видалено ставки, команди, стратегії, цілі та Telegram-групи.
-              Обліковий запис, тема й мова залишаться. Дію неможливо скасувати.
-            </p>
+            <h2 id="backup-clear-title">{t("profile.ui.clearData")}</h2>
+            <p className="mqp-text"> {t("profile.ui.clearDescription")} </p>
           </div>
           <div className="mqp-danger-actions">
             <button
@@ -292,13 +300,17 @@ export default function ProfileBackup({
               onClick={onClear}
             >
               {isClearing ? (
-                <Loader2 size={17} className="animate-spin" aria-hidden="true" />
+                <Loader2
+                  size={17}
+                  className="animate-spin"
+                  aria-hidden="true"
+                />
               ) : (
                 <Trash2 size={17} aria-hidden="true" />
               )}
-              {isClearing ? "Очищення…" : "Очистити всі дані"}
+              {isClearing ? t("profile.ui.clearing") : t("profile.ui.clearAll")}
             </button>
-            <span>Потрібне підтвердження</span>
+            <span>{t("profile.ui.confirmationRequired")}</span>
           </div>
         </section>
       </div>
@@ -306,11 +318,9 @@ export default function ProfileBackup({
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent className="profile-studio-dialog backup-confirm-dialog">
           <DialogHeader>
-            <DialogTitle>Відновити локальні дані?</DialogTitle>
+            <DialogTitle>{t("profile.ui.restoreTitle")}</DialogTitle>
             <DialogDescription>
-              Файл «{file?.name}» перезапише відповідні записи цього браузера.
-              Серверні дані не відновлюються. Рекомендуємо спочатку завантажити
-              поточний бекап.
+              {pt("restoreFileDescription", { name: file?.name || "" })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -319,7 +329,8 @@ export default function ProfileBackup({
               className="profile-button"
               onClick={() => setConfirmOpen(false)}
             >
-              Скасувати
+              {" "}
+              {t("profile.ui.cancel")}{" "}
             </button>
             <button
               type="button"
@@ -330,7 +341,8 @@ export default function ProfileBackup({
                 if (file) onImport(file);
               }}
             >
-              Підтвердити відновлення
+              {" "}
+              {t("profile.ui.confirmRestore")}{" "}
             </button>
           </DialogFooter>
         </DialogContent>

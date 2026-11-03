@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   CalendarDays,
@@ -18,7 +18,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { t } from "@/lib/i18n";
+import { t, getLang, onLangChange } from "@/lib/i18n";
 import { useTheme } from "@/hooks/useTheme";
 import "@/pages/Profile.css";
 import "@/pages/ProfileLanding.css";
@@ -51,7 +51,7 @@ type NavItem = { label: string; href: string; Icon: LucideIcon };
 
 const getSections = (): { title: string; items: NavItem[] }[] => [
   {
-    title: "Головне",
+    title: t("profile.ui.main"),
     items: [
       { label: t("nav.matches"), href: "/app/matches", Icon: CalendarDays },
       { label: t("nav.addRecord"), href: "/app/my-bets", Icon: Plus },
@@ -59,19 +59,26 @@ const getSections = (): { title: string; items: NavItem[] }[] => [
     ],
   },
   {
-    title: "Дисципліна",
+    title: t("profile.ui.discipline"),
     items: [
-      { label: "Стратегії", href: "/app/strategy", Icon: Target },
-      { label: "Цілі", href: "/app/goals", Icon: Flag },
-      { label: t("nav.riskyTeams"), href: "/app/risky-teams", Icon: ShieldAlert },
+      {
+        label: t("profile.ui.strategies"),
+        href: "/app/strategy",
+        Icon: Target,
+      },
+      { label: t("profile.ui.goals"), href: "/app/goals", Icon: Flag },
+      {
+        label: t("nav.riskyTeams"),
+        href: "/app/risky-teams",
+        Icon: ShieldAlert,
+      },
     ],
   },
   {
-    title: "Інтеграції",
+    title: t("profile.ui.integrations"),
     items: [{ label: t("nav.telegram"), href: "/app/telegram", Icon: Send }],
   },
 ];
-
 
 export default function ProfileShell({
   onLogout,
@@ -82,6 +89,8 @@ export default function ProfileShell({
   children: ReactNode;
 }) {
   useTheme();
+  const [, setLanguage] = useState(getLang);
+  useEffect(() => onLangChange(setLanguage), []);
   const [open, setOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
     try {
@@ -118,70 +127,84 @@ export default function ProfileShell({
       </Link>
     );
     return (
-    <>
-      <div className="mq-brand-row">
-        <Link
-          to="/app/matches"
-          className="mq-brand"
-          onClick={close}
-          aria-label="MatchIQ — матчі"
-        >
-          <span className="mq-brand-mark">
-            <BrandMarkIcon />
-          </span>
-          <span className="mq-nav-label">MatchIQ</span>
-        </Link>
-        <button
-          type="button"
-          className="mq-collapse"
-          onClick={toggleCollapsed}
-          aria-pressed={compact}
-          aria-label={compact ? "Розгорнути меню" : "Згорнути меню"}
-          title={compact ? "Розгорнути меню" : "Згорнути меню"}
-        >
-          {compact ? (
-            <ChevronsRight size={16} strokeWidth={2} />
-          ) : (
-            <ChevronsLeft size={16} strokeWidth={2} />
-          )}
-        </button>
-      </div>
-      <nav className="mq-nav" aria-label="Основна навігація">
-        {getSections().map((section) => (
-          <div className="mq-nav-group" key={section.title}>
-            <span className="mq-nav-title">{section.title}</span>
-            {section.items.map(navLink)}
-          </div>
-        ))}
-      </nav>
-      <div className="mq-nav-footer">
-        {navLink({ label: t("nav.profile"), href: "/app/profile", Icon: User })}
-        <a
-          className="mq-nav-link is-small"
-          href="https://t.me/cs2beet"
-          target="_blank"
-          rel="noopener noreferrer"
-          title={compact ? "Допомога та підтримка" : undefined}
-        >
-          <CircleHelp size={18} strokeWidth={1.8} aria-hidden="true" />
-          <span className="mq-nav-label">Допомога та підтримка</span>
-        </a>
-        <button
-          type="button"
-          className="mq-nav-link is-small"
-          onClick={onLogout}
-          title={compact ? t("app.logout") : undefined}
-        >
-          <LogOut size={18} strokeWidth={1.8} aria-hidden="true" />
-          <span className="mq-nav-label">{t("app.logout")}</span>
-        </button>
-      </div>
-    </>
+      <>
+        <div className="mq-brand-row">
+          <Link
+            to="/app/matches"
+            className="mq-brand"
+            onClick={close}
+            aria-label={t("profile.ui.brandMatches")}
+          >
+            <span className="mq-brand-mark">
+              <BrandMarkIcon />
+            </span>
+            <span className="mq-nav-label">MatchIQ</span>
+          </Link>
+          <button
+            type="button"
+            className="mq-collapse"
+            onClick={toggleCollapsed}
+            aria-pressed={compact}
+            aria-label={
+              compact
+                ? t("profile.ui.expandMenu")
+                : t("profile.ui.collapseMenu")
+            }
+            title={
+              compact
+                ? t("profile.ui.expandMenu")
+                : t("profile.ui.collapseMenu")
+            }
+          >
+            {compact ? (
+              <ChevronsRight size={16} strokeWidth={2} />
+            ) : (
+              <ChevronsLeft size={16} strokeWidth={2} />
+            )}
+          </button>
+        </div>
+        <nav className="mq-nav" aria-label={t("profile.ui.mainNav")}>
+          {getSections().map((section) => (
+            <div className="mq-nav-group" key={section.title}>
+              <span className="mq-nav-title">{section.title}</span>
+              {section.items.map(navLink)}
+            </div>
+          ))}
+        </nav>
+        <div className="mq-nav-footer">
+          {navLink({
+            label: t("nav.profile"),
+            href: "/app/profile",
+            Icon: User,
+          })}
+          <a
+            className="mq-nav-link is-small"
+            href="https://t.me/cs2beet"
+            target="_blank"
+            rel="noopener noreferrer"
+            title={compact ? t("profile.ui.help") : undefined}
+          >
+            <CircleHelp size={18} strokeWidth={1.8} aria-hidden="true" />
+            <span className="mq-nav-label">{t("profile.ui.help")}</span>
+          </a>
+          <button
+            type="button"
+            className="mq-nav-link is-small"
+            onClick={onLogout}
+            title={compact ? t("app.logout") : undefined}
+          >
+            <LogOut size={18} strokeWidth={1.8} aria-hidden="true" />
+            <span className="mq-nav-label">{t("app.logout")}</span>
+          </button>
+        </div>
+      </>
     );
   };
 
   return (
-    <div className={`profile-shell mq-shell${collapsed ? " is-collapsed" : ""}`}>
+    <div
+      className={`profile-shell mq-shell${collapsed ? " is-collapsed" : ""}`}
+    >
       <aside className="mq-sidebar">{navigation(collapsed)}</aside>
       <div className="mq-mobile-header">
         <Link to="/app/matches" className="mq-brand">
@@ -194,19 +217,21 @@ export default function ProfileShell({
           type="button"
           className="mq-menu-button"
           onClick={() => setOpen(true)}
-          aria-label="Відкрити меню"
+          aria-label={t("profile.ui.openMenu")}
         >
           <Menu size={22} />
         </button>
       </div>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="mq-mobile-menu">
-          <SheetTitle className="sr-only">Навігація MatchIQ</SheetTitle>
+          <SheetTitle className="sr-only">
+            {t("profile.ui.navigation")}
+          </SheetTitle>
           <button
             type="button"
             className="mq-menu-close"
             onClick={close}
-            aria-label="Закрити меню"
+            aria-label={t("profile.ui.closeMenu")}
           >
             <X size={20} />
           </button>

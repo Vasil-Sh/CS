@@ -470,7 +470,7 @@
   outline: 2px solid #777;
 }
 
-/* ── Story panel: liquid backdrop + glass content ───────────────── */
+/* Supporting panel matches the landing page visual identity. */
 .mq-auth-story {
   background: #1a0d08;
 }
@@ -489,16 +489,14 @@
 }
 .mq-auth-story-content {
   margin: auto 0;
-  padding: clamp(28px, 3vw, 44px);
+  padding: clamp(24px, 3vw, 40px);
   max-width: 560px;
   background: #0f1011b8;
   border: 1px solid #ffffff2b;
   border-radius: 18px;
   -webkit-backdrop-filter: blur(22px) saturate(1.3);
   backdrop-filter: blur(22px) saturate(1.3);
-  box-shadow:
-    inset 0 1px 0 #ffffff26,
-    0 30px 80px #00000066;
+  box-shadow: inset 0 1px 0 #ffffff26, 0 30px 80px #00000066;
 }
 .mq-auth-story-content > p:last-of-type {
   color: #c3c5c6;
@@ -521,4 +519,76 @@
 }
 .mq-auth-back:active:not(:focus-visible) {
   transform: scale(0.98);
+}
+.mq-auth-description,
+.mq-auth-steps p {
+  font-size: 16px;
+  line-height: 24px;
+}
+.mq-auth-field label,
+.mq-auth-help,
+.mq-auth-footer,
+.mq-auth-story-bottom,
+.mq-auth-regular,
+.mq-auth-back,
+.mq-auth-field-help,
+.mq-auth-support,
+.mq-auth-caps {
+  font-size: 14px;
+  line-height: 20px;
+}
+.mq-auth-field-help {
+  margin: 8px 0 0;
+  color: #666;
+}
+.mq-auth-caps {
+  margin: 0;
+  color: #9a420f;
+}
+.mq-auth-caps:not(:empty) {
+  margin-top: 8px;
+}
+.mq-auth-support {
+  display: inline-block;
+  margin-top: 12px;
+  color: #444;
+  text-decoration: none;
+}
+.mq-auth-support span {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.mq-auth-support:hover {
+  color: #111;
+}
+.mq-auth-support:focus-visible,
+.mq-auth-help a:focus-visible {
+  outline: 2px solid #ff693b;
+  outline-offset: 4px;
+}
+.mq-auth-help a + a {
+  margin-top: 0;
+}
+.mq-auth-help {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding-top: 16px;
+}
+.mq-auth-help > span {
+  margin: 0;
+}
+.mq-auth-help > a:last-child {
+  flex-basis: 100%;
+  font-weight: 400;
+  color: #666;
+}
+.mq-auth-footer {
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+.mq-auth-story-heading h2 {
+  font-size: clamp(30px, 3vw, 48px);
+  line-height: 1.1;
 }

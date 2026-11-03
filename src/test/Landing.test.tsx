@@ -144,6 +144,20 @@ describe("Lumora landing", () => {
     window.removeEventListener("matchiq:track", listener);
     expect(events).toContainEqual({ event: "plan_select", place: "yearly" });
   });
+  it("keeps one primary hero CTA, a risk line and the tagline reveal", () => {
+    const { container } = setup();
+    const hero = container.querySelector<HTMLElement>(".mq-hero")!;
+    expect(hero.querySelectorAll(".mq-hero-actions .mqt-pill")).toHaveLength(1);
+    expect(
+      within(hero).getByRole("link", { name: /Спробувати на прикладі/ }).className,
+    ).toContain("mq-text-link");
+    expect(within(hero).getByText("Без автосписань")).toBeDefined();
+    const tagline = container.querySelector<HTMLElement>(".mq-tagline")!;
+    expect(tagline.getAttribute("aria-label")).toContain(
+      "Кожна ставка залишає слід.",
+    );
+    expect(tagline.querySelectorAll("[data-word]").length).toBeGreaterThan(8);
+  });
   it("switches screens in the hero app preview", () => {
     const { container } = setup();
     const preview = screen.getByRole("region", {

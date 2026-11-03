@@ -8,9 +8,9 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
+import { useLogin } from "@/hooks/useLogin";
 import { useReducedMotion } from "framer-motion";
 import { LiquidBackdrop } from "@/components/LiquidBackdrop";
-import { useLogin } from "@/hooks/useLogin";
 import { SEO } from "@/components/SEO";
 import "./LoginPage.css";
 
@@ -29,6 +29,7 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
     handleSubmit,
   } = useLogin();
   const [showPassword, setShowPassword] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
   const reducedMotion = Boolean(useReducedMotion());
   return (
     <main className="mq-auth">
@@ -86,8 +87,11 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
                 placeholder="Твій логін"
                 required
                 disabled={isLoading}
-                aria-describedby={error ? "mq-auth-error" : undefined}
+                aria-describedby={`mq-auth-username-help${error ? " mq-auth-error" : ""}`}
               />
+              <p id="mq-auth-username-help" className="mq-auth-field-help">
+                {demo ? "Логін демоакаунта." : "Логін, який ти отримав після оформлення доступу."}
+              </p>
             </div>
             <div className="mq-auth-field">
               <label htmlFor="password">Пароль</label>
@@ -99,10 +103,13 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
                   autoComplete="current-password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
+                  onKeyDown={(event) => setCapsLock(event.getModifierState("CapsLock"))}
+                  onKeyUp={(event) => setCapsLock(event.getModifierState("CapsLock"))}
+                  onBlur={() => setCapsLock(false)}
                   placeholder="Введи пароль"
                   required
                   disabled={isLoading}
-                  aria-describedby={error ? "mq-auth-error" : undefined}
+                  aria-describedby={[capsLock && "mq-auth-caps", error && "mq-auth-error"].filter(Boolean).join(" ") || undefined}
                 />
                 <button
                   type="button"
@@ -118,6 +125,12 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
                   {showPassword ? <EyeOff size={19} /> : <Eye size={19} />}
                 </button>
               </div>
+              <p id="mq-auth-caps" className="mq-auth-caps" role="status">
+                {capsLock ? "Увімкнено Caps Lock" : ""}
+              </p>
+              <a className="mq-auth-support" href="https://t.me/cs2beet" target="_blank" rel="noopener noreferrer">
+                Не можеш увійти? <span>Підтримка в Telegram</span>
+              </a>
             </div>
             {error && (
               <div className="mq-auth-error" id="mq-auth-error" role="alert">
@@ -147,8 +160,11 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
           </form>
           <div className="mq-auth-help">
             <span>
-              {demo ? "Немає демодоступу?" : "Хочеш спочатку ознайомитися?"}
+              {demo ? "Немає демодоступу?" : "Ще немає акаунта?"}
             </span>
+            <a href="https://t.me/cs2beet" target="_blank" rel="noopener noreferrer">
+              Отримати доступ <ArrowUpRight size={14} aria-hidden="true" />
+            </a>
             <Link to="/#possibilities">
               Переглянути приклади <ArrowUpRight size={14} aria-hidden="true" />
             </Link>
@@ -178,16 +194,12 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
             <div>
               <p className="mq-auth-eyebrow">ТРЕКЕР СТАВОК НА КІБЕРСПОРТ</p>
               <h2 id="mq-auth-story-title">
-                Кожен запис.
+                Твій журнал.
                 <br />
-                Більше <span>розуміння.</span>
+                Твої <span>висновки.</span>
               </h2>
             </div>
           </div>
-          <p>
-            Зберігай не лише результат, а й причину рішення. Повертайся до
-            фактів, коли емоції минуть.
-          </p>
           <ol className="mq-auth-steps">
             <li>
               <span>01</span>
@@ -199,15 +211,15 @@ export default function LoginPage({ demo = false }: LoginPageProps) {
             <li>
               <span>02</span>
               <div>
-                <h3>Розумій свої результати</h3>
-                <p>Банкрол, прибуток і збитки, порівняння стратегій.</p>
+                <h3>Аналізуй результати</h3>
+                <p>Банкрол і порівняння стратегій.</p>
               </div>
             </li>
             <li>
               <span>03</span>
               <div>
-                <h3>Дотримуйся власних правил</h3>
-                <p>Цілі, перевірки стратегії та ризиковані команди.</p>
+                <h3>Перевіряй рішення</h3>
+                <p>Власні правила, цілі та ризикові команди.</p>
               </div>
             </li>
           </ol>

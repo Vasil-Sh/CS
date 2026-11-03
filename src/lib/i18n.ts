@@ -1,3 +1,4 @@
+import { profileTranslations } from "./profileTranslationData";
 export type Lang = "uk" | "en";
 
 type TranslationMap = Record<string, Record<Lang, string>>;
@@ -7,6 +8,7 @@ type TranslationMap = Record<string, Record<Lang, string>>;
  * Key format: page.section.element (e.g. "nav.analytics")
  */
 const T: TranslationMap = {
+  ...profileTranslations,
   // ── App / Layout ──
   "app.name": { uk: "MatchIQ", en: "MatchIQ" },
   "app.help": { uk: "Потрібна допомога?", en: "Need help?" },

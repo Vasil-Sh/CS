@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { pt, profileLocale } from "@/lib/profileTranslations";
+import { t } from "@/lib/i18n";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   FileText,
@@ -14,7 +16,6 @@ import {
   RefreshCw,
   Layers,
 } from "lucide-react";
-import { UserDataService } from "@/lib/userDataService";
 import { useData } from "@/contexts/DataContext";
 import { proxyLogoUrl } from "@/lib/logoProxy";
 import { journalKey } from "@/components/mybets/journalModel";
@@ -34,7 +35,6 @@ import {
 interface Props {
   header?: ReactNode;
   username: string;
-  telegram?: string;
   stats: {
     bets: number;
     riskyTeams: number;
@@ -53,20 +53,6 @@ interface Props {
   lastBackupDate: Date | null;
   needsBackupReminder: boolean;
   onOpenBackup: () => void;
-}
-
-type Identity = { displayName: string; bio: string };
-const emptyIdentity: Identity = { displayName: "", bio: "" };
-function readIdentity(value: unknown): Identity {
-  const item =
-    value && typeof value === "object"
-      ? (value as Record<string, unknown>)
-      : {};
-  return {
-    displayName:
-      typeof item.displayName === "string" ? item.displayName.slice(0, 40) : "",
-    bio: typeof item.bio === "string" ? item.bio.slice(0, 140) : "",
-  };
 }
 
 function TeamMark({
@@ -144,16 +130,6 @@ function ThemePreview({ mode }: { mode: ThemePreference }) {
 
 export default function ProfileOverview(p: Props) {
   const { bets, isLoading } = useData();
-  const [identity, setIdentity] = useState<Identity>(() =>
-    readIdentity(
-      UserDataService.getUserData(
-        p.username,
-        "profile_identity",
-        emptyIdentity,
-      ),
-    ),
-  );
-  const identityRevision = useRef(0);
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
   const [rate, setRate] = useState(String(p.exchangeRate));
@@ -163,97 +139,56 @@ export default function ProfileOverview(p: Props) {
     setRate(String(p.exchangeRate));
   }, [p.exchangeRate]);
   useEffect(() => {
-    let cancelled = false;
-    const revision = identityRevision.current;
-    setIdentity(
-      readIdentity(
-        UserDataService.getUserData(
-          p.username,
-          "profile_identity",
-          emptyIdentity,
-        ),
-      ),
-    );
-    UserDataService.fetchUserPrefs()
-      .then((data) => {
-        const value = (data.preferences as Record<string, unknown>)
-          .profileIdentity;
-        if (!cancelled && revision === identityRevision.current && value) {
-          const next = readIdentity(value);
-          setIdentity(next);
-          UserDataService.setUserDataSync(p.username, "profile_identity", next);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, [p.username]);
-  useEffect(() => {
     if (!copied) return;
     const timeout = setTimeout(() => setCopied(false), 2500);
     return () => clearTimeout(timeout);
   }, [copied]);
 
-  const tgAvatarName = (() => {
-    const raw = (p.telegram || "").trim();
-    if (/^(https?:\/\/)?(www\.)?(t\.me|telegram\.me)\//i.test(raw)) {
-      try {
-        const url = new URL(/^https?:/i.test(raw) ? raw : `https://${raw}`);
-        return url.pathname.replace(/^\//, "").replace(/\/$/, "");
-      } catch {
-        return "";
-      }
-    }
-    return raw.replace(/^@/, "");
-  })();
-  const tgValid = /^[a-zA-Z0-9_]{5,32}$/.test(tgAvatarName);
-  const initial = Array.from(p.username)[0]?.toUpperCase() || "M";
   const publicUrl = `${window.location.origin}/user/${encodeURIComponent(p.username)}`;
   const recent = recentRecords(bets);
   const total = isLoading ? p.stats.bets : bets.length;
   const metrics = [
     {
-      label: "Ваші ставки",
+      label: t("profile.ui.yourBets"),
       value: total,
       Icon: FileText,
       href: "/app/my-bets",
-      cta: "Додати",
+      cta: t("profile.ui.add"),
     },
     {
-      label: "Ризикові команди",
+      label: t("profile.ui.riskyTeams"),
       value: p.stats.riskyTeams,
       Icon: ShieldAlert,
       href: "/app/risky-teams",
-      cta: "Додати",
+      cta: t("profile.ui.add"),
     },
     {
-      label: "Стратегії",
+      label: t("profile.ui.strategies"),
       value: p.stats.strategies,
       Icon: Target,
       href: "/app/strategy",
-      cta: "Створити",
+      cta: t("profile.ui.create"),
     },
     {
-      label: "Цілі",
+      label: t("profile.ui.goals"),
       value: p.stats.goals,
       Icon: Flag,
       href: "/app/goals",
-      cta: "Поставити",
+      cta: t("profile.ui.setGoal"),
     },
     {
-      label: "Telegram-групи",
+      label: t("profile.ui.telegramGroups"),
       value: p.stats.tgGroups,
       Icon: Send,
       href: "/app/telegram",
-      cta: "Підключити",
+      cta: t("profile.ui.connect"),
     },
   ];
 
   function commitRate() {
     const value = Number(rate.replace(",", "."));
     if (!Number.isFinite(value) || value <= 0) {
-      setRateError("Введіть курс, більший за нуль.");
+      setRateError(t("profile.ui.invalidRate"));
       return;
     }
     setRateError("");
@@ -262,38 +197,17 @@ export default function ProfileOverview(p: Props) {
 
   return (
     <>
-      <section className="mqp-hero is-photo is-compact" aria-label="Ваш профіль">
+      <section
+        className="mqp-hero is-photo is-compact"
+        aria-label={t("profile.ui.yourProfile")}
+      >
         {p.header}
-        <div className="mqp-identity">
-          <div className="mqp-avatar">
-            <span aria-hidden="true">{initial}</span>
-            {tgValid && (
-              <img
-                key={tgAvatarName}
-                src={`https://t.me/i/userpic/320/${tgAvatarName}.jpg`}
-                alt=""
-                onError={(e) => {
-                  e.currentTarget.hidden = true;
-                }}
-                onLoad={(e) => {
-                  if (e.currentTarget.naturalWidth <= 1)
-                    e.currentTarget.hidden = true;
-                }}
-              />
-            )}
-          </div>
-          <div className="mqp-identity-copy">
-            <h2>{identity.displayName || `@${p.username}`}</h2>
-            <span className="mqp-online">
-              <i aria-hidden="true" />
-              Активний{identity.displayName && <span> · @{p.username}</span>}
-            </span>
-            {identity.bio && <p>{identity.bio}</p>}
-          </div>
-        </div>
       </section>
 
-      <nav className="mqp-metrics is-strip" aria-label="Огляд вашого журналу">
+      <nav
+        className="mqp-metrics is-strip"
+        aria-label={t("profile.ui.overview")}
+      >
         {metrics.map(({ label, value, href, cta }) => (
           <Link
             className={`mqp-metric${value ? "" : " is-empty"}`}
@@ -302,11 +216,12 @@ export default function ProfileOverview(p: Props) {
           >
             <span className="mqp-metric-label">{label}</span>
             <strong className="mqp-count">
-              <CountUp value={value} />
+              <CountUp value={value} locale={profileLocale()} />
             </strong>
             {value ? (
               <span className="mqp-metric-note">
-                Відкрити
+                {" "}
+                {t("profile.ui.open")}{" "}
                 <ArrowUpRight
                   className="mqp-metric-arrow"
                   size={14}
@@ -333,91 +248,104 @@ export default function ProfileOverview(p: Props) {
               <div className="mqp-sec-head">
                 <div>
                   <p className="mqp-kicker">
-                    <i>01</i> Журнал
+                    <i>01</i> {t("profile.ui.journal")}{" "}
                   </p>
-                  <h2 id="profile-activity-title">Остання активність</h2>
+                  <h2 id="profile-activity-title">
+                    {t("profile.ui.activity")}
+                  </h2>
                 </div>
                 <Link
                   to="/app/my-bets?tab=records"
                   className="mqp-btn-outline is-sm"
                 >
-                  Усі записи <ArrowRight size={15} aria-hidden="true" />
+                  {" "}
+                  {t("profile.ui.allRecords")}{" "}
+                  <ArrowRight size={15} aria-hidden="true" />
                 </Link>
               </div>
-            {isLoading ? (
-              <div
-                className="mqp-loading"
-                role="status"
-                aria-label="Завантажуємо записи"
-              >
-                <span />
-                <span />
-                <span />
-              </div>
-            ) : recent.length ? (
-              <ul className="mqp-records">
-                {recent.map((bet) => {
-                  const summary = recordSummary(bet);
-                  const date = recordDate(bet);
-                  return (
-                    <li key={journalKey(bet)}>
-                      <Link
-                        className="mqp-record"
-                        to="/app/my-bets?tab=records"
-                        aria-label={`Деталі: ${summary.title}`}
-                      >
-                        <span className="mqp-pair" aria-hidden="true">
-                          {summary.express ? (
-                            <span className="mqp-team">
-                              <Layers size={16} />
-                            </span>
-                          ) : (
-                            <>
-                              <TeamMark
-                                url={bet.logoTeam1}
-                                name={summary.team1}
-                                game={bet.game}
-                              />
-                              {summary.team2 && (
-                                <>
-                                  <TeamMark
-                                    url={bet.logoTeam2}
-                                    name={summary.team2}
-                                    game={bet.game}
-                                  />
-                                </>
-                              )}
-                            </>
-                          )}
-                        </span>
-                        <span className="mqp-record-copy">
-                          <strong>{summary.title}</strong>
-                          <small>
-                            {summary.game} · {summary.description}
-                          </small>
-                        </span>
-                        <time dateTime={date}>
-                          {date ? profileDate(new Date(date)) : "Без дати"}
-                        </time>
-                        <ChevronRight
-                          size={16}
-                          className="mqp-record-arrow"
-                          aria-hidden="true"
-                        />
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <div className="mqp-empty">
-                <strong>Ваш журнал починається тут</strong>
-                <p>Нові записи з’являться в цьому блоці.</p>
-                <Link className="mqp-btn-outline is-sm" to="/app/my-bets?tab=records">
-                  Перейти до журналу <ArrowRight size={16} aria-hidden="true" />
-                </Link>
-              </div>
-            )}
+              {isLoading ? (
+                <div
+                  className="mqp-loading"
+                  role="status"
+                  aria-label={t("profile.ui.loadingRecords")}
+                >
+                  <span />
+                  <span />
+                  <span />
+                </div>
+              ) : recent.length ? (
+                <ul className="mqp-records">
+                  {recent.map((bet) => {
+                    const summary = recordSummary(bet);
+                    const date = recordDate(bet);
+                    return (
+                      <li key={journalKey(bet)}>
+                        <Link
+                          className="mqp-record"
+                          to="/app/my-bets?tab=records"
+                          aria-label={pt("recordDetails", {
+                            title: summary.title,
+                          })}
+                        >
+                          <span className="mqp-pair" aria-hidden="true">
+                            {summary.express ? (
+                              <span className="mqp-team">
+                                <Layers size={16} />
+                              </span>
+                            ) : (
+                              <>
+                                <TeamMark
+                                  url={bet.logoTeam1}
+                                  name={summary.team1}
+                                  game={bet.game}
+                                />
+                                {summary.team2 && (
+                                  <>
+                                    <TeamMark
+                                      url={bet.logoTeam2}
+                                      name={summary.team2}
+                                      game={bet.game}
+                                    />
+                                  </>
+                                )}
+                              </>
+                            )}
+                          </span>
+                          <span className="mqp-record-copy">
+                            <strong>{summary.title}</strong>
+                            <small>
+                              {summary.game} · {summary.description}
+                            </small>
+                          </span>
+                          <time dateTime={date}>
+                            {date
+                              ? profileDate(new Date(date))
+                              : t("profile.ui.noDate")}
+                          </time>
+                          <ChevronRight
+                            size={16}
+                            className="mqp-record-arrow"
+                            aria-hidden="true"
+                          />
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <div className="mqp-empty">
+                  <strong>{t("profile.ui.emptyTitle")}</strong>
+                  <p>{t("profile.ui.emptyDescription")}</p>
+                  <Link
+                    className="mqp-btn-outline is-sm"
+                    to="/app/my-bets?tab=records"
+                  >
+                    {" "}
+                    {t("profile.ui.openJournal")}{" "}
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </Link>
+                </div>
+              )}
             </section>
 
             <section
@@ -427,9 +355,11 @@ export default function ProfileOverview(p: Props) {
               <div className="mqp-sec-head">
                 <div>
                   <p className="mqp-kicker">
-                    <i>02</i> Налаштування
+                    <i>02</i> {t("profile.ui.settings")}{" "}
                   </p>
-                  <h2 id="profile-settings-title">Як вам зручно</h2>
+                  <h2 id="profile-settings-title">
+                    {t("profile.ui.preferences")}
+                  </h2>
                 </div>
               </div>
               <div className="mqp-setrows">
@@ -439,95 +369,102 @@ export default function ProfileOverview(p: Props) {
                   aria-labelledby="profile-theme-label"
                 >
                   <span className="mqp-setrow-label" id="profile-theme-label">
-                    Тема інтерфейсу
+                    {" "}
+                    {t("profile.ui.theme")}{" "}
                   </span>
                   <div className="mqp-setrow-control">
-                  <div className="mqp-theme-options">
-                    {(
-                      [
-                        ["light", "Світла"],
-                        ["dark", "Темна"],
-                        ["system", "Системна"],
-                      ] as const
-                    ).map(([mode, label]) => (
-                      <label className="mqp-theme" key={mode}>
-                        <input
-                          type="radio"
-                          name="profile-theme"
-                          value={mode}
-                          checked={p.theme === mode}
-                          onChange={() => p.onThemeChange(mode)}
-                        />
-                        <span className="mqp-theme-frame">
-                          <ThemePreview mode={mode} />
-                          <span className="mqp-theme-check">
-                            <Check size={13} strokeWidth={3} />
+                    <div className="mqp-theme-options">
+                      {(
+                        [
+                          ["light", t("profile.ui.light")],
+                          ["dark", t("profile.ui.dark")],
+                          ["system", t("profile.ui.system")],
+                        ] as const
+                      ).map(([mode, label]) => (
+                        <label className="mqp-theme" key={mode}>
+                          <input
+                            type="radio"
+                            name="profile-theme"
+                            value={mode}
+                            checked={p.theme === mode}
+                            onChange={() => p.onThemeChange(mode)}
+                          />
+                          <span className="mqp-theme-frame">
+                            <ThemePreview mode={mode} />
+                            <span className="mqp-theme-check">
+                              <Check size={13} strokeWidth={3} />
+                            </span>
                           </span>
-                        </span>
-                        <span className="mqp-theme-label">{label}</span>
-                      </label>
-                    ))}
-                  </div>
+                          <span className="mqp-theme-label">{label}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <div className="mqp-setrow mqp-setrow--pair">
                   <div className="mqp-setrow-field">
-                    <label htmlFor="profile-language">Мова</label>
-                <select
-                  id="profile-language"
-                  className="mqp-input"
-                  value={p.language}
-                  onChange={(e) => p.onLanguageChange(e.target.value as Lang)}
-                >
-                  <option value="uk">Українська</option>
-                  <option value="en">English</option>
-                </select>
+                    <label htmlFor="profile-language">
+                      {t("profile.ui.language")}
+                    </label>
+                    <select
+                      id="profile-language"
+                      className="mqp-input"
+                      value={p.language}
+                      onChange={(e) =>
+                        p.onLanguageChange(e.target.value as Lang)
+                      }
+                    >
+                      <option value="uk">{t("profile.ui.ukrainian")}</option>
+                      <option value="en">English</option>
+                    </select>
                   </div>
                   <div className="mqp-setrow-field">
-                    <label htmlFor="profile-rate">Курс USD → UAH</label>
-                <div className="mqp-rate">
-                  <input
-                    id="profile-rate"
-                    className="mqp-input"
-                    type="text"
-                    inputMode="decimal"
-                    value={rate}
-                    aria-invalid={!!rateError}
-                    aria-describedby={
-                      rateError ? "profile-rate-error" : "profile-rate-help"
-                    }
-                    onChange={(e) => {
-                      setRate(e.target.value);
-                      setRateError("");
-                    }}
-                    onBlur={commitRate}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") e.currentTarget.blur();
-                    }}
-                  />
-                  <button
-                    className="mqp-round"
-                    type="button"
-                    disabled={p.isFetchingRate}
-                    aria-label="Оновити курс"
-                    onClick={p.onFetchRate}
-                  >
-                    <RefreshCw
-                      size={17}
-                      className={p.isFetchingRate ? "animate-spin" : ""}
-                    />
-                  </button>
-                </div>
-                {rateError && (
-                  <small
-                    className="mqp-error"
-                    id="profile-rate-error"
-                    role="alert"
-                  >
-                    {rateError}
-                  </small>
-                )}
-                    <small id="profile-rate-help">Для конвертації сум</small>
+                    <label htmlFor="profile-rate">{t("profile.ui.rate")}</label>
+                    <div className="mqp-rate">
+                      <input
+                        id="profile-rate"
+                        className="mqp-input"
+                        type="text"
+                        inputMode="decimal"
+                        value={rate}
+                        aria-invalid={!!rateError}
+                        aria-describedby={
+                          rateError ? "profile-rate-error" : "profile-rate-help"
+                        }
+                        onChange={(e) => {
+                          setRate(e.target.value);
+                          setRateError("");
+                        }}
+                        onBlur={commitRate}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") e.currentTarget.blur();
+                        }}
+                      />
+                      <button
+                        className="mqp-round"
+                        type="button"
+                        disabled={p.isFetchingRate}
+                        aria-label={t("profile.ui.refreshRate")}
+                        onClick={p.onFetchRate}
+                      >
+                        <RefreshCw
+                          size={17}
+                          className={p.isFetchingRate ? "animate-spin" : ""}
+                        />
+                      </button>
+                    </div>
+                    {rateError && (
+                      <small
+                        className="mqp-error"
+                        id="profile-rate-error"
+                        role="alert"
+                      >
+                        {t("profile.ui.invalidRate")}
+                      </small>
+                    )}
+                    <small id="profile-rate-help">
+                      {t("profile.ui.rateHelp")}
+                    </small>
                   </div>
                 </div>
               </div>
@@ -540,9 +477,11 @@ export default function ProfileOverview(p: Props) {
             <div className="mqp-sec-head">
               <div>
                 <p className="mqp-kicker">
-                  <i>03</i> Профіль
+                  <i>03</i> {t("profile.ui.profile")}{" "}
                 </p>
-                <h2 id="profile-public-title">Публічний профіль</h2>
+                <h2 id="profile-public-title">
+                  {t("profile.ui.publicProfile")}
+                </h2>
               </div>
             </div>
             <div className="mqp-player is-photo">
@@ -551,14 +490,14 @@ export default function ProfileOverview(p: Props) {
                   Match<span>IQ</span>
                 </span>
                 <span className="mqp-chip-glass">
-                  <i aria-hidden="true" />
-                  Онлайн
+                  <i aria-hidden="true" /> {t("profile.ui.online")}{" "}
                 </span>
               </div>
               <div className="mqp-player-bottom">
                 <strong>@{p.username}</strong>
                 <span>
-                  {total.toLocaleString("uk-UA")} записів · CS2 та Dota 2
+                  {total.toLocaleString(profileLocale())}{" "}
+                  {t("profile.ui.recordSuffix")}{" "}
                 </span>
               </div>
               <div className="mqp-player-actions">
@@ -568,43 +507,43 @@ export default function ProfileOverview(p: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Переглянути
+                  {" "}
+                  {t("profile.ui.view")}{" "}
                   <span className="mqp-pill-arrow" aria-hidden="true">
                     <ArrowUpRight size={16} />
                   </span>
-                  <span className="sr-only"> (нова вкладка)</span>
+                  <span className="sr-only"> {t("profile.ui.newTab")}</span>
                 </a>
                 <button
                   className="mqp-btn-glass is-square"
                   type="button"
-                  title={
-                    copied ? "Посилання скопійовано" : "Копіювати посилання"
-                  }
+                  title={copied ? t("profile.ui.copied") : t("profile.ui.copy")}
                   aria-label={
-                    copied ? "Посилання скопійовано" : "Копіювати посилання"
+                    copied ? t("profile.ui.copied") : t("profile.ui.copy")
                   }
                   onClick={async () => {
                     try {
                       await navigator.clipboard.writeText(publicUrl);
                       setCopied(true);
                       setCopyFailed(false);
-                      toast.success("Посилання скопійовано");
+                      toast.success(t("profile.ui.copied"));
                     } catch {
                       setCopyFailed(true);
-                      toast.error("Скопіюйте посилання з поля під карткою");
+                      toast.error(t("profile.ui.copyFailed"));
                     }
                   }}
                 >
                   {copied ? <Check size={18} /> : <Copy size={18} />}
                 </button>
                 <span className="sr-only" role="status">
-                  {copied ? "Посилання скопійовано" : ""}
+                  {copied ? t("profile.ui.copied") : ""}
                 </span>
               </div>
             </div>
             {copyFailed && (
               <label className="mqp-field">
-                Посилання на профіль
+                {" "}
+                {t("profile.ui.profileLink")}{" "}
                 <input
                   className="mqp-input"
                   readOnly
@@ -620,23 +559,24 @@ export default function ProfileOverview(p: Props) {
             aria-labelledby="profile-backup-title"
           >
             <p className="mqp-kicker">
-              <i>04</i> Резервна копія
+              <i>04</i> {t("profile.ui.backupCopy")}{" "}
             </p>
-            <h2 id="profile-backup-title">Збережіть свій журнал.</h2>
+            <h2 id="profile-backup-title">{t("profile.ui.saveJournal")}</h2>
             <p className="mqp-text">
               {p.lastBackupDate
-                ? `Остання копія: ${profileDate(p.lastBackupDate)}.`
-                : "Копії ще немає."}{" "}
-              Один JSON-файл із журналом і налаштуваннями: про всяк випадок і
-              для перенесення.
+                ? pt("lastBackup", { date: profileDate(p.lastBackupDate) })
+                : t("profile.ui.noBackup")}{" "}
+              {t("profile.ui.backupDescription")}{" "}
             </p>
             {p.needsBackupReminder && p.lastBackupDate && (
               <small className="mqp-note">
-                Рекомендуємо створити актуальну копію.
+                {" "}
+                {t("profile.ui.backupReminder")}{" "}
               </small>
             )}
             <button className="mqp-pill" type="button" onClick={p.onOpenBackup}>
-              Відкрити бекап
+              {" "}
+              {t("profile.ui.openBackup")}{" "}
               <span className="mqp-pill-arrow" aria-hidden="true">
                 <ArrowRight size={16} />
               </span>

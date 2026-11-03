@@ -87,18 +87,15 @@ afterEach(() => {
 describe("profile overview", () => {
   it("uses live counts and correct goal route without decorative settings icons", () => {
     show();
-    expect(screen.getByRole("link", { name: "1 Ваші ставки" })).toHaveAttribute(
-      "href",
-      "/app/my-bets",
-    );
-    expect(screen.getByRole("link", { name: "2 Цілі" })).toHaveAttribute(
-      "href",
-      "/app/goals",
-    );
-    expect(screen.getByRole("link", { name: "0 Стратегії" })).toHaveAttribute(
-      "href",
-      "/app/strategy",
-    );
+    expect(
+      screen.getByRole("link", { name: "Ваші ставки 1 Відкрити" }),
+    ).toHaveAttribute("href", "/app/my-bets");
+    expect(
+      screen.getByRole("link", { name: "Цілі 2 Відкрити" }),
+    ).toHaveAttribute("href", "/app/goals");
+    expect(
+      screen.getByRole("link", { name: "Стратегії 0 Створити" }),
+    ).toHaveAttribute("href", "/app/strategy");
     expect(
       screen.getByRole("heading", { name: "Публічний профіль" }),
     ).toBeInTheDocument();

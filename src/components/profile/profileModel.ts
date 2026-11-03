@@ -1,3 +1,4 @@
+import { pt, profileLocale } from "@/lib/profileTranslations";
 import type { Bet } from "@/types/betting";
 import {
   journalExpress,
@@ -7,13 +8,13 @@ import { parseExpressEvents } from "@/lib/parser/expressParser";
 
 export const profileDate = (date: Date) =>
   Number.isFinite(date.getTime())
-    ? date.toLocaleString("uk-UA", {
+    ? date.toLocaleString(profileLocale(), {
         day: "numeric",
         month: "short",
         hour: "2-digit",
         minute: "2-digit",
       })
-    : "Дата не вказана";
+    : pt("dateMissing");
 
 export function recordDate(bet: Bet) {
   return [bet.createdAt, bet.date].find(
@@ -42,10 +43,12 @@ export function recordSummary(bet: Bet) {
     express,
     team1,
     team2,
-    title: express ? bet.match.split("|")[0].trim() || "Експрес" : bet.match,
+    title: express
+      ? bet.match.split("|")[0].trim() || pt("express")
+      : bet.match,
     description: express
-      ? `${eventCount ? `${eventCount} подій · ` : ""}Коефіцієнт ${bet.odds.toLocaleString("uk-UA")}`
-      : `Одинар · ${selection !== "—" ? selection : bet.betType || "Запис журналу"}`,
+      ? `${eventCount ? pt("events", { count: eventCount }) + " · " : ""}${pt("odds", { odds: bet.odds.toLocaleString(profileLocale()) })}`
+      : `${pt("single")} · ${selection !== "—" ? selection : bet.betType || pt("journalRecord")}`,
     game: /dota|дота/i.test(bet.game || "")
       ? "Dota 2"
       : /cs/i.test(bet.game || "")

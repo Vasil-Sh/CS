@@ -65,13 +65,13 @@ describe("backup screen", () => {
   it("renders the reference hierarchy with real, localized metadata", () => {
     show();
     expect(
-      screen.getByRole("heading", { name: "Бекап даних" }),
+      screen.getByRole("region", { name: "Дані та бекап" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("region", { name: "Огляд локальних даних" }),
     ).toHaveTextContent("55,8 КБ");
     expect(
-      screen.getByText(/Експортуються дані localStorage/),
+      screen.getByText(/Експортуються дані цього браузера/),
     ).toHaveTextContent("не копія серверної бази");
     expect(
       within(
@@ -83,7 +83,7 @@ describe("backup screen", () => {
     "handles a missing or invalid export date",
     (date) => {
       show({ lastBackupDate: date });
-      expect(screen.getByText("Ще не створювали")).toBeInTheDocument();
+      expect(screen.getByText("Ще не було")).toBeInTheDocument();
     },
   );
   it("delegates export and the clear-confirmation request once", () => {
@@ -166,14 +166,13 @@ describe("backup screen", () => {
 describe("profile backup integration", () => {
   it("keeps a single navigation and opens a cancelable, explicit clear warning", () => {
     render(<Profile />);
-    fireEvent.click(screen.getByRole("button", { name: "Бекап" }));
+    fireEvent.click(screen.getByRole("button", { name: "Дані та бекап" }));
     expect(
       screen.getAllByRole("navigation", { name: "Розділи профілю" }),
     ).toHaveLength(1);
-    expect(screen.getByRole("button", { name: "Бекап" })).toHaveAttribute(
-      "aria-current",
-      "page",
-    );
+    expect(
+      screen.getByRole("button", { name: "Дані та бекап" }),
+    ).toHaveAttribute("aria-current", "page");
     fireEvent.click(screen.getByRole("button", { name: "Очистити всі дані" }));
     expect(screen.getByRole("dialog")).toHaveTextContent(
       "Локальний JSON-бекап не відновлює серверні дані",
@@ -192,12 +191,12 @@ describe("profile backup integration", () => {
     );
     vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
     render(<Profile />);
-    fireEvent.click(screen.getByRole("button", { name: "Бекап" }));
-    expect(screen.getByText("Ще не створювали")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Дані та бекап" }));
+    expect(screen.getByText("Ще не було")).toBeInTheDocument();
     fireEvent.click(
       screen.getByRole("button", { name: "Завантажити повний бекап" }),
     );
-    expect(screen.queryByText("Ще не створювали")).not.toBeInTheDocument();
+    expect(screen.queryByText("Ще не було")).not.toBeInTheDocument();
     expect(
       screen
         .getByRole("region", { name: "Огляд локальних даних" })
