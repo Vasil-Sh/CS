@@ -26,6 +26,7 @@
   border: 1px solid #1718191a;
   border-radius: 26px;
   background: #fff;
+  box-shadow: 0 1px 2px #1718190f, 0 16px 40px #17181926;
 }
 .mqp-sheet-section {
   display: flex;
@@ -242,13 +243,71 @@
   font-weight: 600;
 }
 
+/* Language select styled like the Telegram sort combobox */
+.mqp-setrow-field .mqp-select.mqp-select {
+  width: 100%;
+  height: 44px;
+  gap: 10px;
+  padding: 0 14px 0 18px;
+  border: 1px solid #17181926;
+  border-radius: 999px;
+  background: #fff;
+  color: #171819;
+  font: 500 14px Manrope, system-ui, sans-serif;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.mqp-setrow-field .mqp-select.mqp-select:hover,
+.mqp-setrow-field .mqp-select.mqp-select[data-state="open"] {
+  border-color: #17181966;
+}
+.mqp-setrow-field .mqp-select.mqp-select:focus {
+  box-shadow: none;
+}
+.mqp-setrow-field .mqp-select.mqp-select:focus-visible {
+  outline: 2px solid #ff693b;
+  outline-offset: 2px;
+}
+.mqp-setrow-field .mqp-select.mqp-select > svg {
+  opacity: 0.6;
+  transition: transform 0.2s;
+}
+.mqp-setrow-field .mqp-select.mqp-select[data-state="open"] > svg {
+  transform: rotate(180deg);
+}
+.mqp-select-menu.mqp-select-menu {
+  min-width: var(--radix-select-trigger-width);
+  padding: 2px;
+  border: 1px solid #1718191a;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 1px 2px #1718190d, 0 14px 34px #17181924;
+  color: #171819;
+  font-family: Manrope, system-ui, sans-serif;
+}
+.mqp-select-menu [role="option"] {
+  min-height: 40px;
+  padding: 0 12px 0 34px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.mqp-select-menu [role="option"][data-highlighted] {
+  background: #f6f5f1;
+  color: #171819;
+}
+.mqp-select-menu [role="option"][data-state="checked"] {
+  color: #e2501f;
+}
+
 /* 03 / 04 rail cards */
 .mqp-rail .mqp-card {
   gap: 16px;
   padding: 28px;
   border: 1px solid #1718191a;
   border-radius: 26px;
-  box-shadow: none;
+  box-shadow: 0 1px 2px #1718190f, 0 12px 30px #17181921;
 }
 .mqp-rail .mqp-sec-head h2,
 .mqp-backup-card h2 {
@@ -274,13 +333,14 @@
   margin-bottom: -6px;
 }
 
-/* Metric cards match the journal / rail panels: thin grey border, no shadow */
+/* Metric cards match the journal / rail panels: thin grey border, soft shadow */
 .mqp-metric {
   border: 1px solid #1718191a;
-  box-shadow: none;
+  box-shadow: 0 1px 2px #1718190f, 0 12px 30px #17181921;
 }
 .mqp-metric:hover {
   border-color: #17181933;
+  box-shadow: 0 2px 4px #17181914, 0 16px 38px #1718192b;
 }
 
 /* ===== Metric animations ===== */
@@ -384,6 +444,7 @@
   border: 1px solid #1718191a;
   border-radius: 26px;
   background: #fff;
+  box-shadow: 0 1px 2px #1718190f, 0 12px 30px #17181921;
 }
 .mqp-metrics.is-strip .mqp-metric {
   gap: 14px;
@@ -523,11 +584,11 @@
   padding: 16px 14px;
   border-top: 0;
   border-radius: 16px;
-  background: #f3f2ee;
+  background: #eef1f4;
   transition: background-color 0.15s;
 }
 .mqp-sheet .mqp-record:hover {
-  background: #efeee9;
+  background: #e6eaef;
 }
 .mqp-sheet .mqp-records {
   padding-top: 4px;

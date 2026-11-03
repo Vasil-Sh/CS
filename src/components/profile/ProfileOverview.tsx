@@ -19,6 +19,13 @@ import {
 import { useData } from "@/contexts/DataContext";
 import { proxyLogoUrl } from "@/lib/logoProxy";
 import { journalKey } from "@/components/mybets/journalModel";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { ThemePreference } from "@/hooks/useTheme";
 import type { Lang } from "@/lib/i18n";
 import "./ProfileRedesign.css";
@@ -406,17 +413,30 @@ export default function ProfileOverview(p: Props) {
                     <label htmlFor="profile-language">
                       {t("profile.ui.language")}
                     </label>
-                    <select
-                      id="profile-language"
-                      className="mqp-input"
+                    <Select
                       value={p.language}
-                      onChange={(e) =>
-                        p.onLanguageChange(e.target.value as Lang)
+                      onValueChange={(v) =>
+                        p.onLanguageChange(v as Lang)
                       }
                     >
-                      <option value="uk">{t("profile.ui.ukrainian")}</option>
-                      <option value="en">English</option>
-                    </select>
+                      <SelectTrigger
+                        id="profile-language"
+                        className="mqp-select"
+                        aria-label={t("profile.ui.language")}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent
+                        position="popper"
+                        sideOffset={6}
+                        className="mqp-select-menu"
+                      >
+                        <SelectItem value="uk">
+                          {t("profile.ui.ukrainian")}
+                        </SelectItem>
+                        <SelectItem value="en">English</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="mqp-setrow-field">
                     <label htmlFor="profile-rate">{t("profile.ui.rate")}</label>

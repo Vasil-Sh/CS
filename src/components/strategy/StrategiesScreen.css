@@ -506,7 +506,7 @@
 }
 .mqs-table tr.is-none > * {
   border-top: 10px solid #fff;
-  background: #f6f5f1;
+  background: #eef1f4;
   color: #3e3f3a;
 }
 .mqs-table tr.is-none > :first-child {

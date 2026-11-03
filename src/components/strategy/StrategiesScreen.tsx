@@ -20,6 +20,13 @@ import {
   Trash2,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SwapPill } from "@/components/analytics/TelegramDashboard";
 import { MAX_STRATEGIES, useStrategies } from "@/hooks/useStrategies";
 import type { CS2Strategy } from "@/types/strategy";
@@ -289,13 +296,28 @@ export default function StrategiesScreen() {
               <div className="mqs-cmp-tools">
                 <label className="mqs-period">
                   <span>Період</span>
-                  <select value={period} onChange={(e) => setPeriod(e.target.value as Period)}>
-                    {PERIODS.map(([id, label]) => (
-                      <option key={id} value={id}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    value={period}
+                    onValueChange={(v) => setPeriod(v as Period)}
+                  >
+                    <SelectTrigger
+                      className="mqt-select"
+                      aria-label="Період"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent
+                      position="popper"
+                      sideOffset={6}
+                      className="mqt-select-menu"
+                    >
+                      {PERIODS.map(([id, label]) => (
+                        <SelectItem key={id} value={id}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </label>
                 <div className="mqt-seg" role="group" aria-label="Сортувати за">
                   {(

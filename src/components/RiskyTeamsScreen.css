@@ -218,10 +218,10 @@
 .mqt-list li.mqr-row {
   margin-bottom: 6px;
   border-top-color: transparent;
-  background: #f3f2ee;
+  background: #eef1f4;
 }
 .mqt-list li.mqr-row:hover {
-  background: #efeee9;
+  background: #e6eaef;
 }
 .mqt-list li.mqr-row:last-child {
   margin-bottom: 0;
@@ -242,7 +242,7 @@
 .mqr-note {
   display: -webkit-box;
   overflow: hidden;
-  color: #3e3f3a;
+  color: #171819;
   font-size: 13px;
   line-height: 1.5;
   -webkit-box-orient: vertical;

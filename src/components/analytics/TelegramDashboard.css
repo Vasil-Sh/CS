@@ -47,6 +47,7 @@
   border: 1px solid var(--mqt-line);
   border-radius: 26px;
   background: #fff;
+  box-shadow: 0 1px 2px #1718190f, 0 12px 30px #17181921;
 }
 .mqt-metric {
   display: flex;
@@ -209,10 +210,10 @@
 .mqt-list li.mqt-row {
   margin-bottom: 6px;
   border-top-color: transparent;
-  background: #f3f2ee;
+  background: #eef1f4;
 }
 .mqt-list li.mqt-row:hover {
-  background: #efeee9;
+  background: #e6eaef;
 }
 .mqt-list li.mqt-row:last-child {
   margin-bottom: 0;
@@ -465,6 +466,7 @@
   border-radius: 26px;
   background: #171819;
   color: #f3f2ee;
+  box-shadow: 0 1px 2px #17181914, 0 16px 40px #17181933;
 }
 .mqt-guide .mqp-kicker {
   margin: 0;
