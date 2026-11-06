@@ -634,13 +634,20 @@ function HeroPreview() {
             <DemoBadge />
           </div>
           {screen !== "Огляд" ? (
-            <div className="mq-preview-body mq-pv-screen" key={screen} aria-live="polite">
+            <motion.div
+              className="mq-preview-body mq-pv-screen"
+              key={screen}
+              aria-live="polite"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+            >
               {screen === "Матчі" && <PreviewMatches />}
               {screen === "Журнал" && <PreviewJournal />}
               {screen === "Банкрол" && <PreviewBankroll />}
               {screen === "Стратегії" && <PreviewStrategies />}
               {screen === "Ризикові команди" && <PreviewRisky />}
-            </div>
+            </motion.div>
           ) : (
           <div className="mq-preview-body mq-pv-screen" key="Огляд" aria-live="polite">
             <p className="mq-preview-hello">Привіт!</p>
@@ -709,8 +716,71 @@ function HeroPreview() {
     </div>
   );
 }
+const NAV_IDS = ["possibilities", "how-it-works", "compare", "tools", "pricing", "faq"];
+/** Which nav section is on screen now (wayfinding: "where am I?"). */
+function useActiveSection() {
+  const [active, setActive] = useState<string | null>(null);
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const visible = new Map<string, number>();
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) visible.set(e.target.id, e.isIntersecting ? e.intersectionRatio : 0);
+        let best: string | null = null;
+        let ratio = 0;
+        for (const id of NAV_IDS) {
+          const r = visible.get(id) ?? 0;
+          if (r > ratio) {
+            ratio = r;
+            best = id;
+          }
+        }
+        setActive(best);
+      },
+      { rootMargin: "-35% 0px -55% 0px", threshold: [0, 0.01, 0.5, 1] },
+    );
+    for (const id of NAV_IDS) {
+      const el = document.getElementById(id);
+      if (el) io.observe(el);
+    }
+    return () => io.disconnect();
+  }, []);
+  return active;
+}
+const NAV_LINKS: [string, string][] = [
+  ["possibilities", "Можливості"],
+  ["how-it-works", "Як це працює"],
+  ["compare", "Порівняння"],
+  ["tools", "Інструменти"],
+  ["pricing", "Ціни"],
+  ["faq", "FAQ"],
+];
+function NavLinks({
+  active,
+  onNavigate,
+}: {
+  active: string | null;
+  onNavigate?: () => void;
+}) {
+  return (
+    <>
+      {NAV_LINKS.map(([id, label]) => (
+        <a
+          key={id}
+          href={`#${id}`}
+          aria-current={active === id ? "location" : undefined}
+          className={active === id ? "is-current" : undefined}
+          onClick={onNavigate}
+        >
+          {label}
+        </a>
+      ))}
+    </>
+  );
+}
 function StickyBar() {
   const [visible, setVisible] = useState(false);
+  const active = useActiveSection();
   useEffect(() => {
     let lastY = window.scrollY;
     let frame = 0;
@@ -742,12 +812,7 @@ function StickyBar() {
         <Mark />
       </Link>
       <nav aria-label="Швидка навігація">
-        <a href="#possibilities">Можливості</a>
-        <a href="#how-it-works">Як це працює</a>
-        <a href="#compare">Порівняння</a>
-        <a href="#tools">Інструменти</a>
-        <a href="#pricing">Ціни</a>
-        <a href="#faq">FAQ</a>
+        <NavLinks active={active} />
       </nav>
       <div className="mq-sticky-actions">
         <Link
@@ -777,7 +842,30 @@ function StickyBar() {
   );
 }
 function SiteHeader() {
-  const [menu, setMenu] = useState(false);
+  const active = useActiveSection();
+  const [menu, setMenuState] = useState(false);
+  const [closing, setClosing] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // Exit along the same path it entered: fade + slide out, then unmount.
+  const setMenu = (next: boolean) => {
+    clearTimeout(closeTimer.current);
+    if (next) {
+      setClosing(false);
+      setMenuState(true);
+      return;
+    }
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      setMenuState(false);
+      return;
+    }
+    setClosing(true);
+    closeTimer.current = setTimeout(() => {
+      setMenuState(false);
+      setClosing(false);
+    }, 320);
+  };
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
   const menuButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!menu) return;
@@ -797,12 +885,7 @@ function SiteHeader() {
           <Mark />
         </Link>
         <nav aria-label="Основна навігація">
-          <a href="#possibilities">Можливості</a>
-          <a href="#how-it-works">Як це працює</a>
-          <a href="#compare">Порівняння</a>
-          <a href="#tools">Інструменти</a>
-          <a href="#pricing">Ціни</a>
-          <a href="#faq">FAQ</a>
+          <NavLinks active={active} />
         </nav>
 <Link
           to="/login"
@@ -820,12 +903,16 @@ function SiteHeader() {
           ref={menuButton}
           className="mq-menu-button"
           type="button"
-          aria-label={menu ? "Закрити меню" : "Відкрити меню"}
-          aria-expanded={menu}
+          aria-label={menu && !closing ? "Закрити меню" : "Відкрити меню"}
+          aria-expanded={menu && !closing}
           aria-controls="mq-mobile-menu"
-          onClick={() => setMenu(!menu)}
+          onClick={() => setMenu(!(menu && !closing))}
         >
-          <span className="mq-burger" data-open={menu} aria-hidden="true">
+          <span
+            className="mq-burger"
+            data-open={menu && !closing}
+            aria-hidden="true"
+          >
             <i />
             <i />
           </span>
@@ -834,27 +921,10 @@ function SiteHeader() {
       {menu && (
         <nav
           id="mq-mobile-menu"
-          className="mq-mobile-menu"
+          className={`mq-mobile-menu${closing ? " is-closing" : ""}`}
           aria-label="Мобільна навігація"
         >
-          <a href="#possibilities" onClick={() => setMenu(false)}>
-            Можливості
-          </a>
-          <a href="#how-it-works" onClick={() => setMenu(false)}>
-            Як це працює
-          </a>
-          <a href="#compare" onClick={() => setMenu(false)}>
-            Порівняння
-          </a>
-          <a href="#tools" onClick={() => setMenu(false)}>
-            Інструменти
-          </a>
-          <a href="#pricing" onClick={() => setMenu(false)}>
-            Ціни
-          </a>
-          <a href="#faq" onClick={() => setMenu(false)}>
-            FAQ
-          </a>
+          <NavLinks active={active} onNavigate={() => setMenu(false)} />
           <Link to="/login" onClick={() => setMenu(false)}>
             Увійти ↗
           </Link>

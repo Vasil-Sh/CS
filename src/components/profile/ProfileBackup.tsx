@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import "./ProfileBackup.css";
 import "./ProfileRedesign.css";
 import "./ProfileSections.css";
+import HeroFigure from "./HeroFigure";
 
 interface Props {
   header?: ReactNode;
@@ -85,10 +86,11 @@ export default function ProfileBackup({
   return (
     <>
       <section
-        className="mqp-hero is-compact is-photo is-backup"
+        className="mqp-hero is-figure"
         aria-label={t("profile.ui.dataBackup")}
       >
         {header}
+        <HeroFigure kind="vault" />
       </section>
       <div className="mqp-backup" aria-busy={busy}>
         <section

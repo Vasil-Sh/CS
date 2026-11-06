@@ -26,7 +26,9 @@
   border: 1px solid #1718191a;
   border-radius: 26px;
   background: #fff;
-  box-shadow: 0 1px 2px #1718190f, 0 16px 40px #17181926;
+  box-shadow:
+    0 1px 2px #1718190f,
+    0 16px 40px #17181926;
 }
 .mqp-sheet-section {
   display: flex;
@@ -253,7 +255,10 @@
   border-radius: 999px;
   background: #fff;
   color: #171819;
-  font: 500 14px Manrope, system-ui, sans-serif;
+  font:
+    500 14px Manrope,
+    system-ui,
+    sans-serif;
   cursor: pointer;
   transition: border-color 0.15s;
 }
@@ -281,7 +286,9 @@
   border: 1px solid #1718191a;
   border-radius: 18px;
   background: #fff;
-  box-shadow: 0 1px 2px #1718190d, 0 14px 34px #17181924;
+  box-shadow:
+    0 1px 2px #1718190d,
+    0 14px 34px #17181924;
   color: #171819;
   font-family: Manrope, system-ui, sans-serif;
 }
@@ -307,7 +314,9 @@
   padding: 28px;
   border: 1px solid #1718191a;
   border-radius: 26px;
-  box-shadow: 0 1px 2px #1718190f, 0 12px 30px #17181921;
+  box-shadow:
+    0 1px 2px #1718190f,
+    0 12px 30px #17181921;
 }
 .mqp-rail .mqp-sec-head h2,
 .mqp-backup-card h2 {
@@ -336,11 +345,15 @@
 /* Metric cards match the journal / rail panels: thin grey border, soft shadow */
 .mqp-metric {
   border: 1px solid #1718191a;
-  box-shadow: 0 1px 2px #1718190f, 0 12px 30px #17181921;
+  box-shadow:
+    0 1px 2px #1718190f,
+    0 12px 30px #17181921;
 }
 .mqp-metric:hover {
   border-color: #17181933;
-  box-shadow: 0 2px 4px #17181914, 0 16px 38px #1718192b;
+  box-shadow:
+    0 2px 4px #17181914,
+    0 16px 38px #1718192b;
 }
 
 /* ===== Metric animations ===== */
@@ -444,7 +457,9 @@
   border: 1px solid #1718191a;
   border-radius: 26px;
   background: #fff;
-  box-shadow: 0 1px 2px #1718190f, 0 12px 30px #17181921;
+  box-shadow:
+    0 1px 2px #1718190f,
+    0 12px 30px #17181921;
 }
 .mqp-metrics.is-strip .mqp-metric {
   gap: 14px;
@@ -592,4 +607,77 @@
 }
 .mqp-sheet .mqp-records {
   padding-top: 4px;
+}
+
+/* ===== Hero with a Hairline line figure (replaces the photo) ===== */
+.mqp-hero.is-figure {
+  --hero-bg: #ffffff;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 0;
+  padding: clamp(24px, 3vw, 36px) clamp(24px, 3vw, 40px);
+  border: 1px solid #1718191a;
+  background: var(--hero-bg);
+  color: var(--mqp-ink);
+  box-shadow:
+    0 1px 2px #1718190f,
+    0 16px 40px #17181926;
+}
+.mqp-hero.is-figure .mqp-heading {
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 28px;
+}
+.mqp-hero.is-figure .mqp-eyebrow {
+  color: #686960;
+}
+.mqp-hero.is-figure .mqp-eyebrow i {
+  background: var(--mqp-orange);
+}
+.mqp-hero.is-figure .mqp-tabs {
+  border: 1px solid #1718190f;
+  background: #f3f2ee;
+  backdrop-filter: none;
+}
+.mqp-hero.is-figure .mqp-tabs button {
+  color: #4a4b45;
+}
+.mqp-hero.is-figure .mqp-tabs button:hover {
+  color: var(--mqp-ink);
+}
+.mqp-hero.is-figure .mqp-tabs button[aria-current="page"] {
+  background: var(--mqp-ink);
+  color: #fff;
+}
+.mqp-hero-figure {
+  /* Hairline palette, warm like the landing; plate = hero background */
+  --hairline-plate: var(--hero-bg, #fff);
+  --hairline-hi: #e2501f;
+  --hairline-edge: #2a2b2c;
+  --hairline-mid: #9b9383;
+  --hairline-lo: #dcd8cd;
+  --hairline-stroke: 1;
+  flex: 0 0 clamp(220px, 26vw, 300px);
+  align-self: center;
+  margin: -28px -8px -36px 0;
+}
+.mqp-hero-figure > div {
+  width: 100%;
+}
+@media (max-width: 760px) {
+  .mqp-hero-figure {
+    display: none;
+  }
+}
+.mqp-hero-figure.is-desk {
+  flex-basis: clamp(240px, 30vw, 340px);
+  margin: -34px -12px -40px 0;
+}
+.mqp-hero-figure [data-hairline] > div:not(:has(svg)),
+.mqp-hero-figure [data-hairline-read] {
+  display: none;
 }

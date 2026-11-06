@@ -31,6 +31,7 @@ import type { Lang } from "@/lib/i18n";
 import "./ProfileRedesign.css";
 import "./ProfileSections.css";
 import CountUp from "./CountUp";
+import HeroFigure from "./HeroFigure";
 import { toast } from "sonner";
 import {
   profileDate,
@@ -205,10 +206,11 @@ export default function ProfileOverview(p: Props) {
   return (
     <>
       <section
-        className="mqp-hero is-photo is-compact"
+        className="mqp-hero is-figure"
         aria-label={t("profile.ui.yourProfile")}
       >
         {p.header}
+        <HeroFigure kind="desk" />
       </section>
 
       <nav

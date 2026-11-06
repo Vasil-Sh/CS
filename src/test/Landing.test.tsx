@@ -4,6 +4,7 @@ import {
   fireEvent,
   render,
   screen,
+  waitFor,
   within,
 } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
@@ -305,13 +306,19 @@ describe("Lumora landing", () => {
     fireEvent.click(q);
     expect(q.getAttribute("aria-expanded")).toBe("false");
   });
-  it("closes mobile navigation on Escape and toggles motion", () => {
+  it("closes mobile navigation on Escape and toggles motion", async () => {
     const { container } = setup();
     // JSDOM has no mobile layout; target the labelled control directly.
     fireEvent.click(screen.getByLabelText("Відкрити меню"));
     expect(container.querySelector("#mq-mobile-menu")).not.toBeNull();
     fireEvent.keyDown(document, { key: "Escape" });
-    expect(container.querySelector("#mq-mobile-menu")).toBeNull();
+    // The menu animates out along its entry path before it unmounts.
+    expect(
+      container.querySelector("#mq-mobile-menu")?.classList.contains("is-closing"),
+    ).toBe(true);
+    await waitFor(() =>
+      expect(container.querySelector("#mq-mobile-menu")).toBeNull(),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Зупинити анімації" }));
     expect(container.querySelector(".mq-reduced")).not.toBeNull();
   });

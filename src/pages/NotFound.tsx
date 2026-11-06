@@ -1,12 +1,10 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
-import { useReducedMotion } from "framer-motion";
 import { LiquidBackdrop } from "@/components/LiquidBackdrop";
 import "./NotFound.css";
 
 export default function NotFoundPage() {
-  const reducedMotion = Boolean(useReducedMotion());
   useEffect(() => {
     const previous = document.title;
     document.title = "Сторінку не знайдено | MatchIQ";
@@ -21,7 +19,8 @@ export default function NotFoundPage() {
   }, []);
   return (
     <main className="mq-404">
-      <LiquidBackdrop paused={reducedMotion} className="mq-404-liquid" />
+      {/* Full-viewport motion is a vestibular trigger: render one still frame. */}
+      <LiquidBackdrop paused className="mq-404-liquid" />
       <header className="mq-404-top">
         <Link to="/" className="mq-404-brand" aria-label="MatchIQ — головна">
           <img src="/favicon.svg" width="30" height="30" alt="" /> MatchIQ
