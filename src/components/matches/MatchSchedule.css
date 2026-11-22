@@ -982,6 +982,19 @@
   font-size: 11px;
   margin-top: 12px;
 }
+.ms-credit {
+  margin: 6px 0 0;
+  color: #858b83;
+  font-size: 11px;
+}
+.ms-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.ms-credit a:hover {
+  color: #4c514b;
+}
 .ms-error {
   display: flex;
   gap: 10px;

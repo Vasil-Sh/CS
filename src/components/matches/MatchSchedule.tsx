@@ -1151,6 +1151,26 @@ export default function MatchSchedule({
             </button>
           )}
         </footer>
+        {/* Liquipedia's data is CC BY-SA 3.0 — the licence requires crediting the source */}
+        <p className="ms-credit">
+          Дані матчів:{" "}
+          <a
+            href="https://liquipedia.net/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Liquipedia
+          </a>{" "}
+          (
+          <a
+            href="https://creativecommons.org/licenses/by-sa/3.0/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            CC BY-SA 3.0
+          </a>
+          ) · коефіцієнти: OddsPapi
+        </p>
         {m.selectedMatchIds.size > 0 && (
           <aside className="ms-express" aria-label="Вибрані матчі для експресу">
             <div className="ms-express-top">
