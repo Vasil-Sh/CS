@@ -8,7 +8,9 @@ import BetShareModal from "@/components/BetShareModal";
 import ExpressDetailsModal from "@/components/ExpressDetailsModal";
 import BetDetailsModal from "@/components/BetDetailsModal";
 import InitialBankModal from "@/components/InitialBankModal";
-import JournalTable from "@/components/mybets/JournalTable";
+import JournalTable, {
+  type ResultHint,
+} from "@/components/mybets/JournalTable";
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService } from "@/lib/bankrollService";
 import { api } from "@/lib/apiClient";
@@ -111,6 +113,33 @@ export default function MyBets() {
   );
 
   // ── Effects ──
+  // «Підказка результату»: pending bets whose match has finished (backend compares with the Liquipedia score)
+  const [resultHints, setResultHints] = useState<Record<string, ResultHint>>(
+    {},
+  );
+  const pendingKey = recentBets
+    .filter((b) => b.result === "Pending")
+    .map((b) => b.id)
+    .join(",");
+  useEffect(() => {
+    if (!pendingKey) {
+      setResultHints({});
+      return;
+    }
+    let live = true;
+    api
+      .get<{ hints: ResultHint[] }>("/bets/result-hints")
+      .then((r) => {
+        if (live)
+          setResultHints(
+            Object.fromEntries((r.hints || []).map((h) => [h.betId, h])),
+          );
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [pendingKey]);
   const goalBets = recentBets.filter(
     (bet) =>
       (!goalId || String(bet.goalId) === goalId) &&
@@ -514,6 +543,7 @@ export default function MyBets() {
                 </div>
               )}
               <JournalTable
+                resultHints={resultHints}
                 bets={goalBets}
                 activeBets={goalBets.filter((bet) => bet.result === "Pending")}
                 currentUser={currentUser}

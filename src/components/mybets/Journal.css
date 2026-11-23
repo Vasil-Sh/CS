@@ -948,3 +948,63 @@
     transition: none;
   }
 }
+
+/* «Підказка результату» (phone): the match has finished — the series score suggests the result, one tap marks it */
+.journal-hint {
+  display: none;
+}
+@media (max-width: 767px) {
+  .journal-actions:has(.journal-hint) {
+    flex-wrap: wrap;
+  }
+  .journal-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    flex-basis: 100%;
+    order: -1;
+    margin-bottom: 4px;
+    padding: 9px 12px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    text-align: left;
+    white-space: normal;
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    animation: journal-hint-in 0.25s ease-out;
+  }
+  .journal-hint span {
+    font-size: 12px;
+    opacity: 0.8;
+  }
+  .journal-hint b {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .journal-hint.is-win {
+    background: rgba(31, 157, 85, 0.12);
+    border-color: rgba(31, 157, 85, 0.35);
+    color: #16a34a;
+  }
+  .journal-hint.is-loss {
+    background: rgba(229, 72, 77, 0.1);
+    border-color: rgba(229, 72, 77, 0.3);
+    color: #dc2626;
+  }
+  .journal-hint:active {
+    transform: scale(0.98);
+  }
+  @keyframes journal-hint-in {
+    from {
+      opacity: 0;
+      transform: translateY(-3px);
+    }
+  }
+}
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  .journal-hint {
+    animation: none;
+  }
+}

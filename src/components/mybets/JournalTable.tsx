@@ -56,7 +56,17 @@ import {
 } from "./journalModel";
 import "./Journal.css";
 
-type Props = ComponentProps<typeof BetTable>;
+/** «Підказка результату» from the backend: the match has finished, the series score decides this market. */
+export interface ResultHint {
+  betId: string;
+  result: "Win" | "Loss";
+  score: string;
+  match: string;
+  date: string;
+}
+type Props = ComponentProps<typeof BetTable> & {
+  resultHints?: Record<string, ResultHint>;
+};
 const columns = [
   ["date", "Дата"],
   ["match", "Матч і вибір"],
@@ -339,6 +349,26 @@ export default function JournalTable(p: Props) {
       className="journal-actions"
       onClick={(event) => event.stopPropagation()}
     >
+      {/* phone: the match has finished — one tap to confirm the result it suggests */}
+      {bet.result === "Pending" &&
+        p.resultHints?.[String(bet.id)] &&
+        (() => {
+          const h = p.resultHints[String(bet.id)];
+          return (
+            <button
+              type="button"
+              className={`journal-hint is-${h.result === "Win" ? "win" : "loss"}`}
+              onClick={() => p.onUpdateResult(bet, h.result)}
+              aria-label={`Матч завершився ${h.score} — позначити ${h.result === "Win" ? "виграш" : "програш"}`}
+            >
+              <span>Матч завершився {h.score}</span>
+              <b>
+                {h.result === "Win" ? "Схоже на виграш" : "Схоже на програш"} ·
+                Позначити
+              </b>
+            </button>
+          );
+        })()}
       {bet.result === "Pending" && (
         <div className="journal-result-actions">
           <button
