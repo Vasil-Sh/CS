@@ -64,8 +64,15 @@ export interface ResultHint {
   match: string;
   date: string;
 }
+/** The bet's odds against the closing line (last price before the start): + means it beat the close. */
+export interface ClosingLine {
+  betId: string;
+  closing: number;
+  clv: number;
+}
 type Props = ComponentProps<typeof BetTable> & {
   resultHints?: Record<string, ResultHint>;
+  closingLines?: Record<string, ClosingLine>;
 };
 const columns = [
   ["date", "Дата"],
@@ -528,8 +535,23 @@ export default function JournalTable(p: Props) {
             {journalMoney(journalAmount(bet), bet.currency)}
           </strong>
         );
-      case "odds":
-        return Number(bet.odds).toFixed(2);
+      case "odds": {
+        const cl = p.closingLines?.[String(bet.id)];
+        if (!cl) return Number(bet.odds).toFixed(2);
+        // phone only (CSS): «закр. 1.80 · +8,3 %» under the odds
+        return (
+          <span className="journal-odds">
+            {Number(bet.odds).toFixed(2)}
+            <small
+              className={`journal-clv is-${cl.clv > 0 ? "up" : cl.clv < 0 ? "down" : "flat"}`}
+              title="Коефіцієнт закриття — остання ціна перед стартом. Плюс: ставка зроблена за кращим коефіцієнтом."
+            >
+              закр. {cl.closing.toFixed(2)} · {cl.clv > 0 ? "+" : ""}
+              {String(cl.clv).replace(".", ",")}%
+            </small>
+          </span>
+        );
+      }
       case "profit":
         return profit(bet);
       case "goal":

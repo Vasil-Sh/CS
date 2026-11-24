@@ -10,6 +10,7 @@ import BetDetailsModal from "@/components/BetDetailsModal";
 import InitialBankModal from "@/components/InitialBankModal";
 import JournalTable, {
   type ResultHint,
+  type ClosingLine,
 } from "@/components/mybets/JournalTable";
 import { UserDataService } from "@/lib/userDataService";
 import { BankrollService } from "@/lib/bankrollService";
@@ -140,6 +141,26 @@ export default function MyBets() {
       live = false;
     };
   }, [pendingKey]);
+  // closing line per bet («закр. 1.80 · +8 %»), refreshed with the bet list
+  const [closingLines, setClosingLines] = useState<Record<string, ClosingLine>>(
+    {},
+  );
+  const betKey = recentBets.length;
+  useEffect(() => {
+    let live = true;
+    api
+      .get<{ lines: ClosingLine[] }>("/bets/closing-lines")
+      .then((r) => {
+        if (live)
+          setClosingLines(
+            Object.fromEntries((r.lines || []).map((l) => [l.betId, l])),
+          );
+      })
+      .catch(() => {});
+    return () => {
+      live = false;
+    };
+  }, [betKey]);
   const goalBets = recentBets.filter(
     (bet) =>
       (!goalId || String(bet.goalId) === goalId) &&
@@ -544,6 +565,7 @@ export default function MyBets() {
               )}
               <JournalTable
                 resultHints={resultHints}
+                closingLines={closingLines}
                 bets={goalBets}
                 activeBets={goalBets.filter((bet) => bet.result === "Pending")}
                 currentUser={currentUser}
