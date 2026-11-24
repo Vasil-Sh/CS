@@ -90,7 +90,12 @@ describe("Login page", () => {
     fireEvent.submit(screen.getByRole("form", { name: "Вхід до MatchIQ" }));
     expect(screen.getByRole("button", { name: "Входимо…" })).toBeDisabled();
     expect(screen.getByLabelText("Ім’я користувача")).toBeDisabled();
-    expect(screen.getByRole("status")).toHaveTextContent("Перевіряємо");
+    // two live regions now: the Caps Lock note and the login status
+    expect(
+      screen
+        .getAllByRole("status")
+        .some((el) => /Перевіряємо/.test(el.textContent || "")),
+    ).toBe(true);
     await act(async () =>
       finish({ success: false, error: "Невірний логін або пароль" }),
     );

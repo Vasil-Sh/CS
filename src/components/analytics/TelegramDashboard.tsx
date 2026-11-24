@@ -121,7 +121,10 @@ function initialsOf(name: string) {
     .trim()
     .split(/\s+/)
     .filter(Boolean);
-  const letters = words.length > 1 ? words[0][0] + words[1][0] : (words[0] || "?").slice(0, 2);
+  const letters =
+    words.length > 1
+      ? words[0][0] + words[1][0]
+      : (words[0] || "?").slice(0, 2);
   return letters.toUpperCase();
 }
 
@@ -407,7 +410,9 @@ export default function TelegramDashboard({
   const profit = totalProfit(bets);
   const recentProfit = totalProfit(recent);
 
-  const pct = completed.length ? Math.round((wins / completed.length) * 100) : 0;
+  const pct = completed.length
+    ? Math.round((wins / completed.length) * 100)
+    : 0;
   const metrics = [
     {
       label: "Групи",
@@ -501,7 +506,10 @@ export default function TelegramDashboard({
       </section>
 
       <div className="mqt-grid">
-        <section className="mqp-sheet mqt-ledger" aria-labelledby="mqt-groups-title">
+        <section
+          className="mqp-sheet mqt-ledger"
+          aria-labelledby="mqt-groups-title"
+        >
           <div className="mqp-sec-head">
             <div>
               <p className="mqp-kicker">
@@ -582,6 +590,8 @@ export default function TelegramDashboard({
                     .sort((a, b) => b - a)[0];
                   const groupProfit = s?.totalProfit || 0;
                   return (
+                    // the whole row is a mouse shortcut; keyboard and screen readers use the name button inside
+                    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events
                     <li
                       key={group.id}
                       className="mqt-row"
@@ -607,8 +617,14 @@ export default function TelegramDashboard({
                                 className="mqt-lock"
                                 title="Є приватний платний канал"
                               >
-                                <Lock size={13} strokeWidth={2} aria-hidden="true" />
-                                <span className="sr-only">Є приватний канал</span>
+                                <Lock
+                                  size={13}
+                                  strokeWidth={2}
+                                  aria-hidden="true"
+                                />
+                                <span className="sr-only">
+                                  Є приватний канал
+                                </span>
                               </span>
                             )}
                           </span>
@@ -634,11 +650,17 @@ export default function TelegramDashboard({
                       </span>
                       <span className="mqt-col-win mqt-win">
                         <strong>
-                          {done ? `${Math.round(((s?.wins || 0) / done) * 100)}%` : "—"}
+                          {done
+                            ? `${Math.round(((s?.wins || 0) / done) * 100)}%`
+                            : "—"}
                         </strong>
-                        <small>{done ? `${s?.wins || 0} із ${done}` : "немає"}</small>
+                        <small>
+                          {done ? `${s?.wins || 0} із ${done}` : "немає"}
+                        </small>
                       </span>
-                      <strong className={`mqt-col-profit mqt-profit ${tone(groupProfit)}`}>
+                      <strong
+                        className={`mqt-col-profit mqt-profit ${tone(groupProfit)}`}
+                      >
                         {money(groupProfit)}
                       </strong>
                       <span
@@ -656,11 +678,15 @@ export default function TelegramDashboard({
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="mqt-menu">
-                            <DropdownMenuItem onSelect={() => onDetails(group.id)}>
-                              <BarChart3 size={16} aria-hidden="true" /> Статистика групи
+                            <DropdownMenuItem
+                              onSelect={() => onDetails(group.id)}
+                            >
+                              <BarChart3 size={16} aria-hidden="true" />{" "}
+                              Статистика групи
                             </DropdownMenuItem>
                             <DropdownMenuItem onSelect={() => onEdit(group)}>
-                              <Pencil size={16} aria-hidden="true" /> Редагувати групу
+                              <Pencil size={16} aria-hidden="true" /> Редагувати
+                              групу
                             </DropdownMenuItem>
                             {/^https:\/\/t\.me\//i.test(group.link) && (
                               <DropdownMenuItem asChild>
@@ -669,8 +695,8 @@ export default function TelegramDashboard({
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
-                                  <ExternalLink size={16} aria-hidden="true" /> Відкрити в
-                                  Telegram
+                                  <ExternalLink size={16} aria-hidden="true" />{" "}
+                                  Відкрити в Telegram
                                 </a>
                               </DropdownMenuItem>
                             )}
@@ -678,7 +704,8 @@ export default function TelegramDashboard({
                               className="is-danger"
                               onSelect={() => onDelete(group.id)}
                             >
-                              <Trash2 size={16} aria-hidden="true" /> Видалити групу
+                              <Trash2 size={16} aria-hidden="true" /> Видалити
+                              групу
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -736,33 +763,40 @@ export default function TelegramDashboard({
               className="mqt-guide-toggle"
               aria-expanded={!guideCollapsed}
               aria-controls="mqt-guide-body"
-              aria-label={guideCollapsed ? "Розгорнути підказку" : "Згорнути підказку"}
+              aria-label={
+                guideCollapsed ? "Розгорнути підказку" : "Згорнути підказку"
+              }
               title={guideCollapsed ? "Розгорнути" : "Згорнути"}
               onClick={toggleGuide}
             >
               <ChevronRight size={18} strokeWidth={2} aria-hidden="true" />
             </button>
           </div>
-          <div className="mqt-guide-reveal" id="mqt-guide-body" aria-hidden={guideCollapsed} inert={guideCollapsed}>
-          <div className="mqt-guide-body">
-            <ol>
-              {STEPS.map(([title, text], i) => (
-                <li key={title}>
-                  <b className={i === 0 ? "is-accent" : ""}>{i + 1}</b>
-                  <span>
-                    <strong>{title}</strong>
-                    <small>{text}</small>
-                  </span>
-                </li>
-              ))}
-            </ol>
-            <SwapPill
-              className="is-on-dark"
-              label={groups.length ? "Додати групу" : "Додати першу групу"}
-              onClick={onAdd}
-              icon={<Plus size={16} strokeWidth={2.2} />}
-            />
-          </div>
+          <div
+            className="mqt-guide-reveal"
+            id="mqt-guide-body"
+            aria-hidden={guideCollapsed}
+            inert={guideCollapsed}
+          >
+            <div className="mqt-guide-body">
+              <ol>
+                {STEPS.map(([title, text], i) => (
+                  <li key={title}>
+                    <b className={i === 0 ? "is-accent" : ""}>{i + 1}</b>
+                    <span>
+                      <strong>{title}</strong>
+                      <small>{text}</small>
+                    </span>
+                  </li>
+                ))}
+              </ol>
+              <SwapPill
+                className="is-on-dark"
+                label={groups.length ? "Додати групу" : "Додати першу групу"}
+                onClick={onAdd}
+                icon={<Plus size={16} strokeWidth={2.2} />}
+              />
+            </div>
           </div>
         </aside>
       </div>

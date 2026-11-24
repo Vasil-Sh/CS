@@ -11,55 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ── Backend ──
-  backend:
-    name: Backend
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: backend
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: matchiq
-          POSTGRES_PASSWORD: matchiq
-          POSTGRES_DB: matchiq_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: backend/pnpm-lock.yaml
-
-      - run: pnpm install --frozen-lockfile
-
-      - name: TypeScript check
-        run: pnpm typecheck
-
-      - name: ESLint
-        run: pnpm lint
-
-      - name: Tests
-        run: pnpm test
-        env:
-          DATABASE_URL: postgres://matchiq:matchiq@localhost:5432/matchiq_test
-          JWT_SECRET: ci-test-secret
-          NODE_ENV: test
+  # The backend lives in its own repo (Vasil-Sh/cs-backend) with its own CI; here it is only a submodule
+  # pointer that this checkout does not fetch — the old «Backend» job could never find its folder.
 
   # ── Frontend ──
   frontend:
@@ -68,9 +21,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      # pnpm version comes from package.json «packageManager» (giving it here too failed the step)
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -91,29 +43,5 @@ jobs:
       - name: Build
         run: pnpm build
 
-  # ── E2E ──
-  e2e:
-    name: E2E (Playwright)
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: [frontend, backend]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-          cache-dependency-path: pnpm-lock.yaml
-
-      - run: pnpm install --frozen-lockfile
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium firefox webkit
-
-      - name: Run E2E tests
-        run: pnpm test:e2e
-        env:
-          PLAYWRIGHT_BASE_URL: http://localhost:5173
+  # E2E (Playwright) is not run here: @playwright/test is not among the dependencies, so the job could never start.
+  # Add it (pnpm add -D @playwright/test) and bring the job back once the e2e specs match the current screens.

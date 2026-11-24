@@ -51,7 +51,23 @@ export default defineConfig(({ mode }) => ({
             },
             workbox: {
               globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+              // the screen illustrations (~40 MB of PNG, some over 2 MB) are not precached: the over-2-MB ones made
+              // the production build fail, and every install would download all of them. They cache on first view instead.
+              globIgnores: [
+                "assets/{analytics,goals,profile,records,strategies,telegram,share-poster,public-profile,matches}/**",
+                "assets/*.png",
+              ],
               runtimeCaching: [
+                {
+                  urlPattern: ({ url }) =>
+                    url.origin === self.location.origin &&
+                    /^\/assets\/.+\.(png|jpe?g|webp)$/i.test(url.pathname),
+                  handler: "CacheFirst",
+                  options: {
+                    cacheName: "illustrations",
+                    expiration: { maxEntries: 120, maxAgeSeconds: 30 * 86400 },
+                  },
+                },
                 {
                   urlPattern: /^https:\/\/api\.cstest\.pp\.ua\/.*/i,
                   handler: "NetworkFirst",

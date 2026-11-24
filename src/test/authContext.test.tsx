@@ -32,7 +32,8 @@ describe("AuthContext", () => {
       localStorage.setItem("userRole", "admin");
       localStorage.setItem("authToken", "token");
       const { result } = renderHook(() => useAuth(), { wrapper });
-      expect(result.current.user).toEqual({
+      // the stored user now also carries `telegram` (empty when not linked)
+      expect(result.current.user).toMatchObject({
         username: "cached",
         role: "admin",
       });

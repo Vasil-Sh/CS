@@ -51,14 +51,19 @@ const show = () =>
     </MemoryRouter>,
   );
 
+const pickLanguage = (name: string) => {
+  const trigger = screen.getByRole("combobox", { name: /Мова|Language/ });
+  fireEvent.keyDown(trigger, { key: "Enter" });
+  fireEvent.click(screen.getByRole("option", { name }));
+};
+
 it("switches the complete profile and navigation in place, including an existing validation error", async () => {
   show();
   const rate = screen.getByLabelText("Курс USD → UAH");
   fireEvent.change(rate, { target: { value: "0" } });
   fireEvent.blur(rate);
-  fireEvent.change(screen.getByRole("combobox", { name: "Мова" }), {
-    target: { value: "en" },
-  });
+  // the language picker is a Radix select now (not a native <select>): open it and pick English
+  pickLanguage("English");
   expect(
     screen.getByRole("heading", { name: "Your profile", level: 1 }),
   ).toBeInTheDocument();
@@ -75,9 +80,7 @@ it("switches the complete profile and navigation in place, including an existing
   expect(localStorage.getItem("matchiq_lang")).toBe("en");
   fireEvent.click(screen.getByRole("radio", { name: "Dark" }));
   expect(toast.success).toHaveBeenCalledWith("Dark theme enabled");
-  fireEvent.change(screen.getByRole("combobox", { name: "Language" }), {
-    target: { value: "uk" },
-  });
+  pickLanguage("Українська");
   expect(
     screen.getByRole("heading", { name: "Ваш профіль", level: 1 }),
   ).toBeInTheDocument();

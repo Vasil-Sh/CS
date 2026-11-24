@@ -271,7 +271,9 @@ function Switch({
 }
 function LiquidBackdrop() {
   const reduced = useContext(ReducedMotion);
-  return <SharedLiquidBackdrop paused={reduced} className="mq-preview-liquid" />;
+  return (
+    <SharedLiquidBackdrop paused={reduced} className="mq-preview-liquid" />
+  );
 }
 const previewMenu = [
   { icon: BarChart3, label: "Огляд" },
@@ -315,12 +317,7 @@ const previewBets = [
   },
 ];
 type PreviewScreen =
-  | "Огляд"
-  | "Матчі"
-  | "Журнал"
-  | "Банкрол"
-  | "Стратегії"
-  | "Ризикові команди";
+  "Огляд" | "Матчі" | "Журнал" | "Банкрол" | "Стратегії" | "Ризикові команди";
 function PreviewHead({ title, text }: { title: string; text: string }) {
   return (
     <>
@@ -390,15 +387,50 @@ function PreviewMatches() {
 }
 function PreviewJournal() {
   const rows = [
-    ["01.11", "NAVI — Team Spirit", "П1 · CS2", "500 ₴", "1.80", "+400 ₴", "win"],
-    ["31.10", "Vitality — G2 + 1", "Експрес · CS2", "300 ₴", "2.70", "+510 ₴", "win"],
-    ["30.10", "Team Liquid — Tundra", "П1 · Dota 2", "300 ₴", "2.10", "−300 ₴", "loss"],
+    [
+      "01.11",
+      "NAVI — Team Spirit",
+      "П1 · CS2",
+      "500 ₴",
+      "1.80",
+      "+400 ₴",
+      "win",
+    ],
+    [
+      "31.10",
+      "Vitality — G2 + 1",
+      "Експрес · CS2",
+      "300 ₴",
+      "2.70",
+      "+510 ₴",
+      "win",
+    ],
+    [
+      "30.10",
+      "Team Liquid — Tundra",
+      "П1 · Dota 2",
+      "300 ₴",
+      "2.10",
+      "−300 ₴",
+      "loss",
+    ],
     ["30.10", "FaZe — MOUZ", "П1 · CS2", "300 ₴", "1.65", "+195 ₴", "win"],
-    ["29.10", "Falcons — Aurora", "П2 · Dota 2", "250 ₴", "2.45", "Очікує", "wait"],
+    [
+      "29.10",
+      "Falcons — Aurora",
+      "П2 · Dota 2",
+      "250 ₴",
+      "2.45",
+      "Очікує",
+      "wait",
+    ],
   ];
   return (
     <>
-      <PreviewHead title="Журнал записів" text="Кожна ставка з причиною рішення." />
+      <PreviewHead
+        title="Журнал записів"
+        text="Кожна ставка з причиною рішення."
+      />
       <div className="mq-pv-chips">
         <b>Усі · 42</b>
         <span>Очікують · 3</span>
@@ -436,7 +468,9 @@ function PreviewJournal() {
 function PreviewBankroll() {
   const points = [30, 34, 31, 40, 38, 47, 44, 52, 58, 55, 63, 70];
   const path = points
-    .map((v, i) => `${i ? "L" : "M"}${(i / (points.length - 1)) * 300} ${80 - v}`)
+    .map(
+      (v, i) => `${i ? "L" : "M"}${(i / (points.length - 1)) * 300} ${80 - v}`,
+    )
     .join(" ");
   return (
     <>
@@ -489,7 +523,10 @@ function PreviewBankroll() {
 function PreviewStrategies() {
   return (
     <>
-      <PreviewHead title="Стратегії" text="Правила, які перевіряють кожен запис." />
+      <PreviewHead
+        title="Стратегії"
+        text="Правила, які перевіряють кожен запис."
+      />
       <div className="mq-pv-strategy is-main">
         <div className="mq-pv-strategy-top">
           <b>Збалансована стратегія</b>
@@ -534,7 +571,13 @@ function PreviewStrategies() {
 function PreviewRisky() {
   const teams = [
     ["Team X", "CS2", "Ризиковані", "risk", "Не розглядати для ставки."],
-    ["Team Y", "Dota 2", "Нестабільні", "unstable", "Сильно залежить від форми."],
+    [
+      "Team Y",
+      "Dota 2",
+      "Нестабільні",
+      "unstable",
+      "Сильно залежить від форми.",
+    ],
     ["Team Z", "CS2", "Обережно", "careful", "Лише за конкретним сценарієм."],
     ["Team Q", "Dota 2", "Стабільні", "stable", "Передбачуваний результат."],
   ];
@@ -649,74 +692,85 @@ function HeroPreview() {
               {screen === "Ризикові команди" && <PreviewRisky />}
             </motion.div>
           ) : (
-          <div className="mq-preview-body mq-pv-screen" key="Огляд" aria-live="polite">
-            <p className="mq-preview-hello">Привіт!</p>
-            <p className="mq-preview-sub">
-              Ось як змінився твій банкрол цього місяця.
-            </p>
-            <div className="mq-preview-stats">
-              <div>
-                <span>
-                  Банкрол <em>+6.2%</em>
-                </span>
-                <strong>
-                  12 480<small> ₴</small>
-                </strong>
-                <svg viewBox="0 0 80 24" className="mq-preview-spark">
-                  <path d="M1 20 C 12 18, 16 9, 26 13 S 42 20, 52 10 S 68 4, 79 3" />
-                </svg>
+            <div
+              className="mq-preview-body mq-pv-screen"
+              key="Огляд"
+              aria-live="polite"
+            >
+              <p className="mq-preview-hello">Привіт!</p>
+              <p className="mq-preview-sub">
+                Ось як змінився твій банкрол цього місяця.
+              </p>
+              <div className="mq-preview-stats">
+                <div>
+                  <span>
+                    Банкрол <em>+6.2%</em>
+                  </span>
+                  <strong>
+                    12 480<small> ₴</small>
+                  </strong>
+                  <svg viewBox="0 0 80 24" className="mq-preview-spark">
+                    <path d="M1 20 C 12 18, 16 9, 26 13 S 42 20, 52 10 S 68 4, 79 3" />
+                  </svg>
+                </div>
+                <div>
+                  <span>
+                    ROI за місяць <em>+1.1</em>
+                  </span>
+                  <strong>
+                    4.8<small>%</small>
+                  </strong>
+                </div>
               </div>
-              <div>
-                <span>
-                  ROI за місяць <em>+1.1</em>
-                </span>
-                <strong>
-                  4.8<small>%</small>
-                </strong>
+              <div className="mq-preview-chart">
+                <div className="mq-preview-chart-head">
+                  <b>Результат за місяцями</b>
+                  <span>
+                    <i className="is-profit" /> Прибуток
+                  </span>
+                  <span>
+                    <i /> Сума ставок
+                  </span>
+                </div>
+                <div className="mq-preview-bars">
+                  {previewBars.map(({ month, stake, profit }) => (
+                    <div key={month}>
+                      <span style={{ height: `${stake}%` }}>
+                        <i style={{ height: `${(profit / stake) * 100}%` }} />
+                      </span>
+                      <small>{month}</small>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="mq-preview-chart">
-              <div className="mq-preview-chart-head">
-                <b>Результат за місяцями</b>
-                <span>
-                  <i className="is-profit" /> Прибуток
-                </span>
-                <span>
-                  <i /> Сума ставок
-                </span>
-              </div>
-              <div className="mq-preview-bars">
-                {previewBars.map(({ month, stake, profit }) => (
-                  <div key={month}>
-                    <span style={{ height: `${stake}%` }}>
-                      <i style={{ height: `${(profit / stake) * 100}%` }} />
+              <div className="mq-preview-bets">
+                <b>Останні записи</b>
+                {previewBets.map(({ match, meta, result, win }) => (
+                  <div key={match}>
+                    <span className="mq-preview-avatar">{match[0]}</span>
+                    <span>
+                      {match}
+                      <small>{meta}</small>
                     </span>
-                    <small>{month}</small>
+                    <em className={win ? "is-win" : "is-loss"}>{result}</em>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="mq-preview-bets">
-              <b>Останні записи</b>
-              {previewBets.map(({ match, meta, result, win }) => (
-                <div key={match}>
-                  <span className="mq-preview-avatar">{match[0]}</span>
-                  <span>
-                    {match}
-                    <small>{meta}</small>
-                  </span>
-                  <em className={win ? "is-win" : "is-loss"}>{result}</em>
-                </div>
-              ))}
-            </div>
-          </div>
           )}
         </div>
       </div>
     </div>
   );
 }
-const NAV_IDS = ["possibilities", "how-it-works", "compare", "tools", "pricing", "faq"];
+const NAV_IDS = [
+  "possibilities",
+  "how-it-works",
+  "compare",
+  "tools",
+  "pricing",
+  "faq",
+];
 /** Which nav section is on screen now (wayfinding: "where am I?"). */
 function useActiveSection() {
   const [active, setActive] = useState<string | null>(null);
@@ -725,7 +779,8 @@ function useActiveSection() {
     const visible = new Map<string, number>();
     const io = new IntersectionObserver(
       (entries) => {
-        for (const e of entries) visible.set(e.target.id, e.isIntersecting ? e.intersectionRatio : 0);
+        for (const e of entries)
+          visible.set(e.target.id, e.isIntersecting ? e.intersectionRatio : 0);
         let best: string | null = null;
         let ratio = 0;
         for (const id of NAV_IDS) {
@@ -784,8 +839,9 @@ function StickyBar() {
   useEffect(() => {
     let lastY = window.scrollY;
     let frame = 0;
+    let pending = false; // a flag, not `frame`: a frame that runs at once must not block the next scroll
     const update = () => {
-      frame = 0;
+      pending = false;
       const y = window.scrollY;
       const delta = y - lastY;
       if (y < 700) setVisible(false);
@@ -794,7 +850,9 @@ function StickyBar() {
       if (Math.abs(delta) > 6) lastY = y;
     };
     const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
+      if (pending) return;
+      pending = true;
+      frame = requestAnimationFrame(update);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
@@ -835,7 +893,9 @@ function StickyBar() {
             <ArrowUpRight size={14} />
           </span>
           <span className="mqt-pill-label">Отримати доступ</span>
-          <span className="mqt-pill-out" aria-hidden="true"><ArrowUpRight size={14} /></span>
+          <span className="mqt-pill-out" aria-hidden="true">
+            <ArrowUpRight size={14} />
+          </span>
         </a>
       </div>
     </div>
@@ -845,7 +905,9 @@ function SiteHeader() {
   const active = useActiveSection();
   const [menu, setMenuState] = useState(false);
   const [closing, setClosing] = useState(false);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   // Exit along the same path it entered: fade + slide out, then unmount.
   const setMenu = (next: boolean) => {
     clearTimeout(closeTimer.current);
@@ -854,7 +916,9 @@ function SiteHeader() {
       setMenuState(true);
       return;
     }
-    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const reduced = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (reduced) {
       setMenuState(false);
       return;
@@ -887,17 +951,19 @@ function SiteHeader() {
         <nav aria-label="Основна навігація">
           <NavLinks active={active} />
         </nav>
-<Link
+        <Link
           to="/login"
           className="mqt-pill mq-header-login"
           data-track="cta_login"
           data-track-place="header"
         >
           <span className="mqt-pill-in" aria-hidden="true">
-                <ArrowUpRight size={16} />
-              </span>
-              <span className="mqt-pill-label">Увійти</span>{" "}
-              <span className="mqt-pill-out" aria-hidden="true"><ArrowUpRight size={16} /></span>
+            <ArrowUpRight size={16} />
+          </span>
+          <span className="mqt-pill-label">Увійти</span>{" "}
+          <span className="mqt-pill-out" aria-hidden="true">
+            <ArrowUpRight size={16} />
+          </span>
         </Link>
         <button
           ref={menuButton}
@@ -966,7 +1032,9 @@ function Hero() {
                 <ArrowUpRight size={18} />
               </span>
               <span className="mqt-pill-label">Отримати доступ</span>
-              <span className="mqt-pill-out" aria-hidden="true"><ArrowUpRight size={18} /></span>
+              <span className="mqt-pill-out" aria-hidden="true">
+                <ArrowUpRight size={18} />
+              </span>
             </a>
             <a
               className="mq-text-link"
@@ -989,8 +1057,8 @@ function Hero() {
             </li>
           </ul>
           <p className="mq-legal-note">
-            Доступ через Telegram @cs2beet. 18+. MatchIQ не приймає ставки та
-            не зберігає кошти.
+            Доступ через Telegram @cs2beet. 18+. MatchIQ не приймає ставки та не
+            зберігає кошти.
           </p>
         </div>
         <HeroPreview />
@@ -1303,10 +1371,7 @@ function CountUp({ value }: { value: string }) {
 }
 function SocialProofPlaceholder() {
   return (
-    <section
-      className="mq-section mq-proof"
-      aria-labelledby="mq-proof-title"
-    >
+    <section className="mq-section mq-proof" aria-labelledby="mq-proof-title">
       <div className="mq-proof-heading">
         <p className="mq-kicker">
           ВІДГУКИ <span className="mq-ph-badge">Тестові дані</span>
@@ -1329,26 +1394,26 @@ function SocialProofPlaceholder() {
       </div>
       <div className="mq-marquee">
         <div className="mq-marquee-track">
-        {[0, 1, 2, 3].flatMap((copy) =>
-          testReviews.map((review) => (
-          <figure
-            key={`${copy}-${review.name}`}
-            className="mq-quote"
-            aria-hidden={copy > 0 ? true : undefined}
-          >
-            <blockquote>«{review.text}»</blockquote>
-            <figcaption>
-              <span className="mq-quote-avatar" aria-hidden="true">
-                {review.name[0]}
-              </span>
-              <span>
-                <b>{review.name}</b>
-                <small>{review.meta}</small>
-              </span>
-            </figcaption>
-          </figure>
-          )),
-        )}
+          {[0, 1, 2, 3].flatMap((copy) =>
+            testReviews.map((review) => (
+              <figure
+                key={`${copy}-${review.name}`}
+                className="mq-quote"
+                aria-hidden={copy > 0 ? true : undefined}
+              >
+                <blockquote>«{review.text}»</blockquote>
+                <figcaption>
+                  <span className="mq-quote-avatar" aria-hidden="true">
+                    {review.name[0]}
+                  </span>
+                  <span>
+                    <b>{review.name}</b>
+                    <small>{review.meta}</small>
+                  </span>
+                </figcaption>
+              </figure>
+            )),
+          )}
         </div>
       </div>
     </section>
@@ -1419,7 +1484,11 @@ function Comparison() {
       >
         Якщо твій журнал зараз — Google-таблиця, ось що зміниться.
       </SectionHeading>
-      <div className="mq-vs" role="list" aria-label="Таблиця та MatchIQ по пунктах">
+      <div
+        className="mq-vs"
+        role="list"
+        aria-label="Таблиця та MatchIQ по пунктах"
+      >
         <article className="mq-vs-card mq-vs-sheet" aria-label="Google-таблиця">
           <header className="mq-vs-head">
             <div className="mq-vs-sheet-icon" aria-hidden="true">
@@ -1443,9 +1512,9 @@ function Comparison() {
               </div>
             </div>
           ))}
-          <footer className="mq-vs-foot">
+          <div className="mq-vs-foot">
             Структуру обліку та розрахунки налаштовуєш самостійно.
-          </footer>
+          </div>
         </article>
         <span className="mq-vs-badge" aria-hidden="true">
           vs
@@ -1470,7 +1539,7 @@ function Comparison() {
               </div>
             </div>
           ))}
-          <footer className="mq-vs-foot">
+          <div className="mq-vs-foot">
             <a
               href="#possibilities"
               data-track="cta_demo"
@@ -1478,7 +1547,7 @@ function Comparison() {
             >
               Подивитися на прикладі <ArrowUpRight size={14} />
             </a>
-          </footer>
+          </div>
         </article>
       </div>
     </section>
@@ -1585,7 +1654,12 @@ function Journey() {
                   <ArrowUpRight size={20} />
                 </button>
               </h3>
-              <div className="mq-process-reveal" id={`mq-step-${i}`} aria-hidden={active !== i} inert={active !== i}>
+              <div
+                className="mq-process-reveal"
+                id={`mq-step-${i}`}
+                aria-hidden={active !== i}
+                inert={active !== i}
+              >
                 <div className="mq-process-reveal-inner">
                   <p>{step.body}</p>
                 </div>
@@ -1776,7 +1850,9 @@ function Pricing() {
               {plan.featured && <LiquidBackdrop />}
               <div className="mq-plan-top">
                 <h3 id={`mq-plan-${plan.id}`}>{plan.name}</h3>
-                {plan.badge && <span className="mq-plan-badge">{plan.badge}</span>}
+                {plan.badge && (
+                  <span className="mq-plan-badge">{plan.badge}</span>
+                )}
               </div>
               <p className="mq-plan-price">
                 <strong>{plan.price}</strong> <span>{plan.period}</span>
@@ -1789,7 +1865,7 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-<a
+              <a
                 className="mqt-pill"
                 href={telegramLink(plan.message)}
                 data-track="plan_select"
@@ -1799,10 +1875,12 @@ function Pricing() {
                 aria-label={`Оформити підписку «${plan.name}» через Telegram`}
               >
                 <span className="mqt-pill-in" aria-hidden="true">
-                <ArrowUpRight size={18} />
-              </span>
-              <span className="mqt-pill-label">Оформити підписку</span>{" "}
-              <span className="mqt-pill-out" aria-hidden="true"><ArrowUpRight size={18} /></span>
+                  <ArrowUpRight size={18} />
+                </span>
+                <span className="mqt-pill-label">Оформити підписку</span>{" "}
+                <span className="mqt-pill-out" aria-hidden="true">
+                  <ArrowUpRight size={18} />
+                </span>
               </a>
             </article>
           </Reveal>
@@ -1810,8 +1888,8 @@ function Pricing() {
       </div>
       <ul className="mq-risk mq-risk-pricing" aria-label="Без ризику">
         <li>
-          <Check size={14} aria-hidden="true" /> Без автосписань: кожен
-          період оплачуєш сам
+          <Check size={14} aria-hidden="true" /> Без автосписань: кожен період
+          оплачуєш сам
         </li>
         <li>
           <Check size={14} aria-hidden="true" /> Спершу спробуй приклади без
@@ -1857,7 +1935,10 @@ function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
   const [showAll, setShowAll] = useState(false);
   const renderItem = (item: (typeof faq)[number], i: number) => (
-    <div key={item.question} className={`mq-faq-item${open === i ? " is-open" : ""}`}>
+    <div
+      key={item.question}
+      className={`mq-faq-item${open === i ? " is-open" : ""}`}
+    >
       <h3>
         <button
           type="button"
@@ -1869,7 +1950,12 @@ function FAQ() {
           <ChevronDown size={18} aria-hidden="true" />
         </button>
       </h3>
-      <div id={`mq-faq-${i}`} className="mq-process-reveal" aria-hidden={open !== i} inert={open !== i}>
+      <div
+        id={`mq-faq-${i}`}
+        className="mq-process-reveal"
+        aria-hidden={open !== i}
+        inert={open !== i}
+      >
         <div className="mq-process-reveal-inner">
           <p>{item.answer}</p>
         </div>
@@ -1971,9 +2057,12 @@ export default function Landing() {
                 <div className="mq-about-bottom">
                   <HairlineFigure kind="settle" />
                   <p>
-                    Для тих, хто вже робить ставки на кіберспорт і веде облік
-                    у таблицях чи нотатках. <strong>MatchIQ збирає матчі,
-                    записи та статистику в одному робочому просторі.</strong>
+                    Для тих, хто вже робить ставки на кіберспорт і веде облік у
+                    таблицях чи нотатках.{" "}
+                    <strong>
+                      MatchIQ збирає матчі, записи та статистику в одному
+                      робочому просторі.
+                    </strong>
                   </p>
                 </div>
               </Reveal>
@@ -1991,14 +2080,15 @@ export default function Landing() {
                   Повернись до причини.
                 </h2>
                 <p>
-                  Результат показує, що сталося. Нотатка зберігає, чому ти
-                  обрав цей матч і коефіцієнт.
+                  Результат показує, що сталося. Нотатка зберігає, чому ти обрав
+                  цей матч і коефіцієнт.
                 </p>
                 <p>
                   Повернися до своїх аргументів після матчу й додай висновок.
-                  Так ти зможеш відрізнити рішення за стратегією від імпульсивного.
+                  Так ти зможеш відрізнити рішення за стратегією від
+                  імпульсивного.
                 </p>
-<a
+                <a
                   className="mqt-pill"
                   href="#journal"
                   data-track="cta_demo"
@@ -2007,8 +2097,12 @@ export default function Landing() {
                   <span className="mqt-pill-in" aria-hidden="true">
                     <ArrowUpRight size={18} />
                   </span>
-                  <span className="mqt-pill-label">Дослідити приклад запису</span>{" "}
-                  <span className="mqt-pill-out" aria-hidden="true"><ArrowUpRight size={18} /></span>
+                  <span className="mqt-pill-label">
+                    Дослідити приклад запису
+                  </span>{" "}
+                  <span className="mqt-pill-out" aria-hidden="true">
+                    <ArrowUpRight size={18} />
+                  </span>
                 </a>
               </Reveal>
             </section>
@@ -2023,8 +2117,8 @@ export default function Landing() {
                   </>
                 }
               >
-                Перемикай ігри й типи записів, змінюй коефіцієнт.
-                Усі приклади працюють на демо-даних без реєстрації.
+                Перемикай ігри й типи записів, змінюй коефіцієнт. Усі приклади
+                працюють на демо-даних без реєстрації.
               </SectionHeading>
               <div className="mq-work-grid">
                 <WorkCard
@@ -2174,12 +2268,12 @@ export default function Landing() {
               </span>
               <p>
                 <b>Відповідальна гра.</b> Став лише ті гроші, які готовий
-                втратити. MatchIQ допомагає бачити результати та тримати
-                власні ліміти, але не робить ставки безпечними. Якщо гра
-                виходить з-під контролю, оформи самообмеження чи отримай
-                допомогу на сайті державного регулятора.
+                втратити. MatchIQ допомагає бачити результати та тримати власні
+                ліміти, але не робить ставки безпечними. Якщо гра виходить з-під
+                контролю, оформи самообмеження чи отримай допомогу на сайті
+                державного регулятора.
               </p>
-<a
+              <a
                 className="mqt-pill "
                 href="https://playcity.gov.ua/borotba-z-ihrovoiu-zalezhnistiu"
                 target="_blank"
@@ -2191,11 +2285,16 @@ export default function Landing() {
                 <span className="mqt-pill-label">
                   Допомога при ігровій залежності
                 </span>{" "}
-                <span className="mqt-pill-out" aria-hidden="true"><ArrowUpRight size={14} /></span>
+                <span className="mqt-pill-out" aria-hidden="true">
+                  <ArrowUpRight size={14} />
+                </span>
               </a>
             </div>
             <div className="mq-fbottom">
-              <span>© {new Date().getFullYear()} MatchIQ. Облік і аналітика, без приймання ставок.</span>
+              <span>
+                © {new Date().getFullYear()} MatchIQ. Облік і аналітика, без
+                приймання ставок.
+              </span>
               <span>
                 <Link to="/privacy">Конфіденційність</Link>
                 <span aria-hidden="true">·</span>
