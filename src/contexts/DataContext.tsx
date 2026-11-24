@@ -187,8 +187,11 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   /** Initial load */
   useEffect(() => {
+    // after unmount (logout, or a test that has already finished) a late failure must not touch state
+    let alive = true;
     if (currentUser) {
       refresh().catch((e) => {
+        if (!alive) return;
         console.error("[DataContext] Initial refresh failed:", e);
         // Fallback to localStorage on any error
         try {
@@ -205,6 +208,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setIsLoading(false);
       });
     }
+    return () => {
+      alive = false;
+    };
   }, [currentUser, refresh]);
 
   /** Add bet optimistically + sync to backend */
